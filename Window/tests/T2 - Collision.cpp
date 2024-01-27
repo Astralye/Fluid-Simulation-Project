@@ -9,11 +9,6 @@
 #include <chrono>
 #include <array>
 
-struct Vertex {
-	glm::vec2 Position;
-	glm::vec4 Colour;
-};
-
 namespace test {
 
 	T2_Collision::T2_Collision()
@@ -21,11 +16,11 @@ namespace test {
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
 		m_ClearColour{ 0.2f, 0.4f, 0.8f, 1.0f },
 
-		m_ParticleA(glm::vec3( 50.0f, 30.0f, 0.0f), 1.0f, 1.0f,
+		m_ParticleA(glm::vec3( 50.0f, 30.0f, 0.0f), 1.0f, 1.0f, 1.0f,
 					glm::vec3( 20.0f, 15.0f, 0.0f),
 					glm::vec3(  0.0f,  0.0f, 0.0f)),
 
-		m_ParticleB(glm::vec3( 30.0f, 20.0f, 0.0f), 1.0f, 5.0f,
+		m_ParticleB(glm::vec3( 30.0f, 20.0f, 0.0f), 1.0f, 5.0f, 1.0f,
 					glm::vec3(  2.0f,  5.0f, 0.0f),
 					glm::vec3(  0.0f,  0.0f, 0.0f)),
 

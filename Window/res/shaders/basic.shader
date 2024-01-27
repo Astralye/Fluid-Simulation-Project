@@ -36,5 +36,5 @@ void main()
 {
 	//int index = int(v_TexIndex);
 	//vec4 texColour = texture(u_Texture, v_TexCoord);
-	o_Colour = vec4(1.0, 1.0, 1.0, 1.0);
+	o_Colour = v_Colour;
 };

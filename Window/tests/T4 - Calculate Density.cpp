@@ -1,4 +1,4 @@
-#include "T3 - Dynamic Particles.h"
+#include "T4 - Calculate Density.h"
 
 #include "Renderer.h"
 #include <imgui/imgui.h>
@@ -14,11 +14,12 @@ static const size_t MaxQuadCount = 10000;
 static const size_t MaxVertexCount = MaxQuadCount * 4;
 static const size_t MaxIndexCount = MaxQuadCount * 6;
 
-static const int MAX_PARTICLES = 10000;
+static const int MAX_PARTICLES = 50;
+
 
 namespace test {
 
-	T3_Dynamic_Particles::T3_Dynamic_Particles()
+	T4_Calculate_Density::T4_Calculate_Density()
 		: m_Proj(glm::ortho(0.0f, 100.0f, 0.0f, 100.0f, -1.0f, 1.0f)),
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
 		m_ClearColour{ 0.2f, 0.4f, 0.8f, 1.0f },
@@ -27,22 +28,58 @@ namespace test {
 
 		m_ParticleArray.reserve(MAX_PARTICLES);
 
-		int n = 25;
+
+		// ALGORITHM FOR CREATING EVENLY SPACED SQAURES IN A LARGER SQUARE
+
+		int n = 5;
 		int mult;
+		
+		int column, row, max_Column, max_Row;
+		float radius = 2.0f;
+		float spacing = 1.0f;
+
+		float xOffset = m_RectContainer.m_Position.x / 2;
+		float yOffset = m_RectContainer.m_Position.y / 2;
+
+		float squareDimention = sqrt(MAX_PARTICLES);
+
+		max_Row = ceil(squareDimention);
+		max_Column = floor(squareDimention);
+
+		float xPos ,yPos;
+
+		// Set base values
+		column = 0;
+		row = 0;
 
 		for (int i = 0; i < MAX_PARTICLES; i++) {
-			mult = 1;
 
-			if (i % 2 == 0) {
-				mult = -1;
+			xPos = row * (2 * radius + spacing);
+			yPos = column * (2 * radius + spacing);
+
+			std::cout << column << " " << row << std::endl;
+
+			row++;
+
+			if (row == max_Row) {
+				column++;
+				row = 0;
 			}
 
-			m_ParticleArray.emplace_back(glm::vec3(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f), 1.0f, .25f, 1.0f,
-				glm::vec3((rand() % n) * mult, (rand() % n), 0.0f),
+			m_ParticleArray.emplace_back(
+				glm::vec3(xPos + xOffset,yPos + yOffset ,0.0f), 1.0f, radius, 10.0f,
+
+				//Random values, Commented out for Testing purposes.
+				//glm::vec3(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f), 1.0f, 2.0f,
+				//glm::vec3((rand() % n) * mult, (rand() % n), 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
 				glm::vec3(0.0f, 0.0f, 0.0f)
 			);
 		}
 
+		float kernel = PhysicsEq::SmoothingKernel(m_ParticleArray[0].m_Position, m_ParticleArray[1].m_Position, 2.0f, m_ParticleArray[0].m_KernelRadius);
+
+		std::cout << kernel << std::endl;
 		/*
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -94,11 +131,11 @@ namespace test {
 	}
 
 	//Destructor
-	T3_Dynamic_Particles::~T3_Dynamic_Particles()
+	T4_Calculate_Density::~T4_Calculate_Density()
 	{
 	}
 
-	void T3_Dynamic_Particles::OnUpdate(float deltaTime){
+	void T4_Calculate_Density::OnUpdate(float deltaTime){
 	
 		// Update Particles movement vectors
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
@@ -121,11 +158,11 @@ namespace test {
 		timeStep();
 	}
 
-	void T3_Dynamic_Particles::BeginBatch() {
+	void T4_Calculate_Density::BeginBatch() {
 		m_QuadBufferPtr = m_QuadBuffer;
 	}
 	
-	void T3_Dynamic_Particles::CreateQuad(Particle &p) {
+	void T4_Calculate_Density::CreateQuad(Particle &p) {
 
 		if (IndexCount >= MaxIndexCount) {
 			EndBatch();
@@ -153,7 +190,7 @@ namespace test {
 		IndexCount += 6;
 	}
 
-	void T3_Dynamic_Particles::CreateQuad(Rectangle &r) {
+	void T4_Calculate_Density::CreateQuad(Rectangle &r) {
 
 		if (IndexCount >= MaxIndexCount) {
 			EndBatch();
@@ -180,21 +217,21 @@ namespace test {
 		IndexCount += 6;
 	}
 
-	void T3_Dynamic_Particles::CreateContainer(RectangleContainer &rc) {
+	void T4_Calculate_Density::CreateContainer(RectangleContainer &rc) {
 		CreateQuad(rc.m_SideA);
 		CreateQuad(rc.m_SideB);
 		CreateQuad(rc.m_SideC);
 		CreateQuad(rc.m_SideD);
 	}
 
-	void T3_Dynamic_Particles::EndBatch() {
+	void T4_Calculate_Density::EndBatch() {
 		GLsizeiptr size = (uint8_t*)m_QuadBufferPtr - (uint8_t*)m_QuadBuffer;
 		m_VertexBuffer->Bind();
 
 		GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, m_QuadBuffer));
 	}
 
-	void T3_Dynamic_Particles::Flush() {
+	void T4_Calculate_Density::Flush() {
 
 		Renderer renderer;
 
@@ -213,7 +250,7 @@ namespace test {
 		IndexCount = 0;
 	}
 
-	void T3_Dynamic_Particles::OnRender()
+	void T4_Calculate_Density::OnRender()
 	{
 		// Set dynamic vertex buffer
 
@@ -233,7 +270,7 @@ namespace test {
 		Flush();
 	}
 
-	void T3_Dynamic_Particles::OnImGuiRender()
+	void T4_Calculate_Density::OnImGuiRender()
 	{
 		ImGui::Text("Move {W,A,S,D}");
 		ImGui::Text("Zoom {-,+}");
@@ -244,12 +281,12 @@ namespace test {
 		ImGui::Text("Time: %.3f", time);
 	}
 
-	inline void T3_Dynamic_Particles::timeStep()
+	inline void T4_Calculate_Density::timeStep()
 	{
 		time += SIMSTEP;
 	}
 
-	void T3_Dynamic_Particles::movementData(Camera cam) {
+	void T4_Calculate_Density::movementData(Camera cam) {
 
 		float camZoom = cam.zoom / 2;
 
@@ -257,7 +294,7 @@ namespace test {
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(cam.position.x, cam.position.y, 0));
 	}
 	
-	void T3_Dynamic_Particles::Shutdown() {
+	void T4_Calculate_Density::Shutdown() {
 		delete[] m_QuadBuffer;
 	}
 }

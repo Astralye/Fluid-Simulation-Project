@@ -25,6 +25,10 @@ public:
 	static float fmaGetAccel(float mass, float force);
 
 	static float clamp(float value, float min, float max);
+
+	static float calcDensity();
+
+	static float SmoothingKernel(const glm::vec3 &particleA, const glm::vec3 &particleB, float height, float radius);
 };
 
 #endif

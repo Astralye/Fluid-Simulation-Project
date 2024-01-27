@@ -163,6 +163,7 @@
     <ClCompile Include="tests\FreeFallSim.cpp" />
     <ClCompile Include="tests\T2 - Collision.cpp" />
     <ClCompile Include="tests\T3 - Dynamic Particles.cpp" />
+    <ClCompile Include="tests\T4 - Calculate Density.cpp" />
     <ClCompile Include="tests\Test.cpp" />
     <ClCompile Include="tests\TestClearColour.cpp" />
     <ClCompile Include="tests\TestTexture2D.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="..\vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Data_Structures.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
@@ -192,6 +194,7 @@
     <ClInclude Include="tests\FreeFallSim.h" />
     <ClInclude Include="tests\T2 - Collision.h" />
     <ClInclude Include="tests\T3 - Dynamic Particles.h" />
+    <ClInclude Include="tests\T4 - Calculate Density.h" />
     <ClInclude Include="tests\Test.h" />
     <ClInclude Include="tests\TestClearColour.h" />
     <ClInclude Include="tests\TestTexture2D.h" />

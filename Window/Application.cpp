@@ -29,6 +29,7 @@
 #include "tests/FreeFallSim.h"
 #include "tests/T2 - Collision.h"
 #include "tests/T3 - Dynamic Particles.h"
+#include "tests/T4 - Calculate Density.h"
 
 Camera camera;
 
@@ -94,6 +95,7 @@ int main(void){
 	testMenu->RegisterTest<test::FreeFallSim>("T1 - Free Fall");
 	testMenu->RegisterTest<test::T2_Collision>("T2 - Collision");
 	testMenu->RegisterTest<test::T3_Dynamic_Particles>("T3 - Dynamic Particles");
+	testMenu->RegisterTest<test::T4_Calculate_Density>("T4 - Calculate Density");
 
 	while (!glfwWindowShouldClose(window))
 	{

@@ -13,11 +13,6 @@
 #include <chrono>
 #include <array>
 
-struct Vertex {
-	glm::vec2 Position;
-	glm::vec4 Colour;
-};
-
 namespace test {
 
 	FreeFallSim::FreeFallSim()

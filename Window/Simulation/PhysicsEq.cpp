@@ -1,6 +1,6 @@
 // Standard libraries
 #include <cmath>
-#include <algorithm>
+#include <iostream>
 
 // Self made
 #include "PhysicsEq.h"
@@ -14,6 +14,26 @@ float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
 
 
 float PhysicsEq::clamp(float value, float min, float max) { return std::max(min, std::min(max, value)); }
+
+float PhysicsEq::calcDensity()
+{
+	return 0.0f;
+}
+
+// Possibly refactor code.
+float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &positionB, float height, float radius)
+{
+	// Finds the length between two points within a 3 dimensional space.
+	float distance = euclid_Distance(positionA, positionB);
+
+	// This is currently a linear function
+	float value = std::max(0.0f, radius - distance);
+	
+	// Cubic function
+	value = pow(value, 3);
+
+	return value;
+}
 
 // f = ma
 float PhysicsEq::fmaGetForce(float mass, float acceleration) { return (mass * acceleration); }

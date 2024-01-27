@@ -2,6 +2,8 @@
 
 #include "Test.h"
 
+#include "Data_Structures.h"
+
 #include "Simulation/Collision.h"
 #include "Simulation/Particle.h"
 #include "Simulation/PhysicsEq.h"
@@ -14,11 +16,6 @@
 #include "Camera.h"
 
 #include <memory>
-
-struct Vertex {
-	glm::vec2 Position;
-	glm::vec4 Colour;
-};
 
 namespace test {
 
