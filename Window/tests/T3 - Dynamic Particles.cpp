@@ -89,7 +89,7 @@ namespace test {
 		// Number of indices in a SINGLE buffer READJUST CODE
 		//m_IndexBuffer = std::make_unique<IndexBuffer>(indices);
 
-		m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
+		m_Shader = std::make_unique<Shader>("res/shaders/quad.shader");
 		m_Shader->Bind();
 	}
 

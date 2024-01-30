@@ -6,12 +6,25 @@
 #include "Shader.h"
 #include "Renderer.h"
 
-Shader::Shader(const std::string& filepath)
-	: m_FilePath(filepath), m_RendererID(0)
-{
+// I NEED TO MODIFY ALL OF THIS TO ALLOW MULTIPLE SHADERS TO BE UTILIZED
+// MAKE SMALL ADJUSTMENTS AND MAKE SURE THEY WORK BEFORE MAKING ANY SUBSTANTIAL CHANGES
 
-    ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
-    m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
+Shader::Shader(const std::string& fragmentfilepath,
+    ShaderType type,
+    std::string vertexfilepath)
+	: m_VertexPath(vertexfilepath), shaderType(type), m_FragmentPath(fragmentfilepath), m_RendererID(0)
+{
+    // REFACTOR CODE
+
+    // Default, Contains both shaders
+    ShaderProgramSource source = ParseShader(m_VertexPath, m_FragmentPath);
+    
+    if (type == ShaderType::NONE) {
+        m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
+    }
+    if (type == ShaderType::FRAGMENT) {
+        m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
+    }
 }
 
 Shader::~Shader()
@@ -19,33 +32,36 @@ Shader::~Shader()
     GLCall(glDeleteProgram(m_RendererID));
 }
 
-// Retrieves shader and converts to string
-ShaderProgramSource Shader::ParseShader(const std::string& filePath) {
+// Contains two inputs. Need one that contains a single input
+ShaderProgramSource Shader::ParseShader(const std::string& vertexPath, const std::string& fragmentPath) {
 
-    std::ifstream stream(filePath);
-
-    enum class ShaderType {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
+    std::ifstream Vert_Stream(vertexPath);
+    std::ifstream Frag_Stream(fragmentPath);
 
     std::string line;
     std::stringstream ss[2];
-    ShaderType type = ShaderType::NONE;
 
-    while (getline(stream, line)) {
+
+    while (getline(Vert_Stream, line)) {
         if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos) {
-                type = ShaderType::VERTEX;
-            }
-            else if (line.find("fragment") != std::string::npos) {
-                type = ShaderType::FRAGMENT;
-            }
+                shaderType = ShaderType::VERTEX;
         }
         else {
-
-            ss[(int)type] << line << '\n';
+            // Copies the line onto the stream
+            ss[(int)shaderType] << line << '\n';
         }
     }
+
+    while (getline(Frag_Stream, line)) {
+        if (line.find("#shader") != std::string::npos) {
+            shaderType = ShaderType::FRAGMENT;
+        }
+        else {
+            // Copies the line onto the stream
+            ss[(int)shaderType] << line << '\n';
+        }
+    }
+
     return { ss[0].str(),ss[1].str() };
 }
 
@@ -79,9 +95,11 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 }
 
 // Takes shader code and creates a program
+// This needs to be modified such that it can be parameterized
 unsigned int Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
     GLCall(unsigned int program = glCreateProgram());
 
+    // The location of the shader program
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -100,12 +118,23 @@ unsigned int Shader::CreateShader(const std::string& vertexShader, const std::st
 
 void Shader::Bind() const
 {
+    // m_RendererID is just an integer, used to find the location of the program.
     GLCall(glUseProgram(m_RendererID));
 }
 
 void Shader::Unbind() const
 {
     GLCall(glUseProgram(0));
+}
+
+void Shader::SetUniform1f(const std::string& name, float v0)
+{
+    GLCall(glUniform1f(GetUniformLocation(name), v0));
+}
+
+void Shader::SetUniform2f(const std::string& name, float v0, float v1)
+{
+    GLCall(glUniform2f(GetUniformLocation(name), v0, v1));
 }
 
 void Shader::SetUniform1i(const std::string& name, int value){
@@ -127,10 +156,10 @@ int Shader::GetUniformLocation(const std::string& name) const{
         return m_UniformLocationCache[name];
 
     GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
-    //int samplers[2] = { 0,1 };
-    if (location == -1)
-        std::cout << "Warning: uniform '" << name << "' doesn't exist." << std::endl;
+    
+    /*if (location == -1)
+        std::cout << "Warning: uniform '" << name << "' doesn't exist." << std::endl;*/
     m_UniformLocationCache[name] = location;
-    //glUniform1iv(location, 2, samplers);
+
     return location;
 }

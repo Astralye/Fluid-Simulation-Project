@@ -8,6 +8,7 @@
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Sim.h"
 #include "Simulation/Rectangle.h"
+#include "Shader.h"
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -19,6 +20,13 @@
 namespace test {
 
 	class T4_Calculate_Density : public Test {
+
+	private:
+		enum ShaderProgram {
+			CircleShader,
+			QuadShader
+		};
+
 	public:
 		T4_Calculate_Density();
 		~T4_Calculate_Density();
@@ -31,7 +39,7 @@ namespace test {
 
 		void BeginBatch();
 		void EndBatch();
-		void Flush();
+		void Flush(ShaderProgram shaderProg);
 
 		void CreateQuad(Particle& p);
 		void CreateQuad(Rectangle& r);
@@ -43,9 +51,11 @@ namespace test {
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
 		std::unique_ptr<IndexBuffer> m_IndexBuffer;
-		std::unique_ptr<Shader> m_Shader;
 		std::vector<Particle> m_ParticleArray;
 		float m_ClearColour[4];
+
+		std::unique_ptr<Shader> m_QuadShader;
+		std::unique_ptr<Shader> m_CircleShader;
 
 		Vertex* m_QuadBuffer = nullptr;
 		Vertex* m_QuadBufferPtr = nullptr;
@@ -60,6 +70,7 @@ namespace test {
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
 		constexpr static float SIMSTEP = 0.016; // An integer is one second.
+		int m_DrawCalls;
 
 		// 30 FPS = 1/30 = 0.03
 		// 60 FPS = 1/60 = 0.016
