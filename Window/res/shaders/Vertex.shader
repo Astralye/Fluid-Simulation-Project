@@ -20,21 +20,3 @@ void main()
 	//v_TexCoord = a_TexCoord;
 	//v_TexIndex = a_TexIndex;
 };
-
-#shader fragment
-#version 330 core
-
-layout(location = 0) out vec4 o_Colour;
-
-in vec4 v_Colour;
-//in vec2 v_TexCoord;
-//in float v_TexIndex;
-
-uniform sampler2D u_Texture;
-
-void main()
-{
-	//int index = int(v_TexIndex);
-	//vec4 texColour = texture(u_Texture, v_TexCoord);
-	o_Colour = v_Colour;
-};

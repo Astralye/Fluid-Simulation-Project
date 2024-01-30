@@ -56,7 +56,7 @@ namespace test {
 		// Number of indices in a SINGLE buffer
 		m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 12);
 
-		m_Shader = std::make_unique<Shader>("res/shaders/BasicShader.h");
+		m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
 		m_Shader->Bind();
 
 

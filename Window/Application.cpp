@@ -163,19 +163,19 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (action == GLFW_PRESS || action == GLFW_REPEAT){
 		switch (key) {
 		case GLFW_KEY_A:
-			camera.position.x += 1;
+			camera.position.x += 10;
 			break;
 
 		case GLFW_KEY_D:
-			camera.position.x -= 1;
+			camera.position.x -= 10;
 			break;
 
 		case GLFW_KEY_W:
-			camera.position.y -= 1;
+			camera.position.y -= 10;
 			break;
 
 		case GLFW_KEY_S:
-			camera.position.y += 1;
+			camera.position.y += 10;
 			break;
 
 		case GLFW_KEY_MINUS:
