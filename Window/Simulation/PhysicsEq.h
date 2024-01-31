@@ -29,6 +29,12 @@ public:
 	static float calcDensity();
 
 	static float SmoothingKernel(const glm::vec3 &particleA, const glm::vec3 &particleB, float height, float radius);
+
+	// Always returns Negative value
+	static inline float toNegative(float value) { return -toPositive(value); }
+
+	// Always returns positive value
+	static inline float toPositive(float value) { return abs(value); }
 };
 
 #endif

@@ -1,53 +1,66 @@
 #shader fragment
 #version 330 core
 
-in vec4 v_Position;
+// HAVE TO REWRITE ENTIRE CODE
+// DELETE EVERYTHING
 
-out vec4 o_Colour;
+layout(location = 0) out vec4 o_Colour;
+
+in Data{
+	// This is relative
+	vec4 Position;
+	vec4 Colour;
+} v_Data;
 
 //in vec2 v_TexCoord;
 //in float v_TexIndex;
 
 // Window Resolution
-uniform vec2 iResolution;
+uniform mat4 u_MVP;
+uniform vec2 windowResolution;
+uniform float worldCoordinate;
 uniform float radius;
 
 void main()
 {
-	// This value is in respect to screen resolution
+	// X, Y, Z
+	// 1, 1, 0
 
-	// NONE OF THIS IS RELATIVE TO A PARTICLE.
-	// THIS IS ALL RELATIVE TO THE WINDOW.
+	o_Colour = v_Data.Colour;
 
-	// let radius = 1;
-	float ProjToWindow = iResolution.x / 800.0f;
+	//o_Colour.r = v_Data.Position.x;
 
-	float circleDiameter = 2 * radius * ProjToWindow;
+	// Change from world coordinates to window coordinates
 
-	float ratio = iResolution.x / circleDiameter;
+	//float ProjToWindow = windowResolution.x / worldCoordinate;
+	//
+	//float circleDiameter = 2 * radius * ProjToWindow;
+	//float ratio = windowResolution.x / circleDiameter;
 
-	float scale = 2 * ratio; // Scale should change depending on zoom
-	float offset = -scale / 2 ; // Offset should change depending on location
+	//float scale = 2 * ratio; // Scale should change depending on zoom
+	//float offset = 0; // Offset should change depending on location
+
+	// offset value should be in terms of (x,y)
 
 	// This creates a normalized value, uv is the world space
-	vec2 uv = gl_FragCoord.xy / iResolution.xy * scale + offset;
-	float aspect = iResolution.x / iResolution.y;
-	uv.x *= aspect;
+	//vec2 uv = gl_FragCoord.xy / windowResolution.xy * 2 ;
+	//float aspect = windowResolution.x / windowResolution.y;
+	//uv.x *= aspect;
 
 
 	//o_Colour = vec4(vec3(1.0), 1.0);
 
-	bool alpha;
-	float distance = 1.0 - length(uv);
+	//bool alpha;
+	//float distance = 1.0 - length(uv);
 
-	// We need to scale this.
-	o_Colour.rg = uv;
+	//// We need to scale this.
+	//o_Colour = vec4(1.0);
 
-	if (distance > 0.0) {
-		distance = 1.0;
-	}
+	//if (distance > 0.0) {
+	//	distance = 1.0;
+	//}
 
-	o_Colour.rgb = vec3(distance);
+	//o_Colour.rgb = vec3(distance);
 	//o_Colour.a = 0.0;
 
 

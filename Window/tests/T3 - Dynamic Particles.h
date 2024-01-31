@@ -27,7 +27,6 @@ namespace test {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
-		void movementData(Camera cam) override;
 		void Shutdown() override;
 
 		void BeginBatch();

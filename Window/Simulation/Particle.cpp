@@ -24,11 +24,11 @@ void Particle::update_Accel(float x, float y, float z) {
 	// Change of m_Acceleration is in proportion to simulation step.
 
 	if (m_Velocity.x > 0 && m_Acceleration.x > 0) {
-		x_Jerk = toNegative(x_Jerk);
+		x_Jerk = PhysicsEq::toNegative(x_Jerk);
 	}
 
 	if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
-		y_Jerk = toNegative(y_Jerk);
+		y_Jerk = PhysicsEq::toNegative(y_Jerk);
 	}
 
 	// Gravity
@@ -212,14 +212,4 @@ void Particle::invert(glm::vec3 type)
 		m_Velocity.y = -m_Velocity.y;
 		m_Acceleration.y = -m_Acceleration.y;
 	}
-}
-
-// Always returns Negative value
-inline float Particle::toNegative(float value) {
-	return -toPositive(value);
-}
-
-// Always returns positive value
-inline float Particle::toPositive(float value) {
-	return abs(value);
 }
