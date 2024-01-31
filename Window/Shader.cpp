@@ -11,20 +11,14 @@
 
 Shader::Shader(const std::string& fragmentfilepath,
     ShaderType type,
-    std::string vertexfilepath)
+    const std::string vertexfilepath)
 	: m_VertexPath(vertexfilepath), shaderType(type), m_FragmentPath(fragmentfilepath), m_RendererID(0)
 {
     // REFACTOR CODE
 
     // Default, Contains both shaders
     ShaderProgramSource source = ParseShader(m_VertexPath, m_FragmentPath);
-    
-    if (type == ShaderType::NONE) {
-        m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
-    }
-    if (type == ShaderType::FRAGMENT) {
-        m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
-    }
+    m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 }
 
 Shader::~Shader()

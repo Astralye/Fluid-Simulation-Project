@@ -101,9 +101,6 @@ public:
 	void invert(Vector type);
 	void invert(glm::vec3 type);
 
-	inline float toPositive(float value);
-	inline float toNegative(float value);
-
 	bool isMoving(float time);
 	bool notMoving(float time);
 

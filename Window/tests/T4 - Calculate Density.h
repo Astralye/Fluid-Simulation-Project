@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Test.h"
+#include "Settings.h"
 #include "Data_Structures.h"
 
 #include "Simulation/Collision.h"
@@ -34,7 +35,6 @@ namespace test {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
-		void movementData(Camera cam) override;
 		void Shutdown() override;
 
 		void BeginBatch();

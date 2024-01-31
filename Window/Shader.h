@@ -27,7 +27,7 @@ public:
 
 	Shader(const std::string &fragmentfilepath, 
 		ShaderType type = ShaderType::NONE,
-		std::string vertexfilepath = "res/shaders/Vertex.shader");
+		const std::string vertexfilepath = "res/shaders/Vertex.shader");
 	~Shader();
 
 	void Bind() const;
