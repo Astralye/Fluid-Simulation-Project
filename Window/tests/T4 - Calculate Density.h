@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Test.h"
+#include "Settings.h"
 #include "Data_Structures.h"
 
 #include "Simulation/Collision.h"
@@ -8,6 +9,7 @@
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Sim.h"
 #include "Simulation/Rectangle.h"
+#include "Shader.h"
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -16,9 +18,17 @@
 
 #include <memory>
 
+#define BatchRender(x) BeginBatch();\
+					   x;\
+				       EndBatch();\
+					   Flush();
+
 namespace test {
 
 	class T4_Calculate_Density : public Test {
+
+	private:
+
 	public:
 		T4_Calculate_Density();
 		~T4_Calculate_Density();
@@ -26,40 +36,68 @@ namespace test {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
-		void movementData(Camera cam) override;
 		void Shutdown() override;
 
 		void BeginBatch();
 		void EndBatch();
 		void Flush();
 
-		void CreateQuad(Particle& p);
-		void CreateQuad(Rectangle& r);
+		void DrawCircle(Particle& p);
+		void DrawQuad(Rectangle& r);
 		void CreateContainer(RectangleContainer& rc);
 		inline void timeStep();
 
 	private:
-		// Data sent to GPU
-		std::unique_ptr<VertexArray> m_VAO;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
-		std::unique_ptr<Shader> m_Shader;
+
 		std::vector<Particle> m_ParticleArray;
 		float m_ClearColour[4];
 
-		Vertex* m_QuadBuffer = nullptr;
-		Vertex* m_QuadBufferPtr = nullptr;
-		uint32_t IndexCount = 0;
+		glm::mat4 QuadVertexPositions = {
+			//  X	  Y		Z	  W
+			{ -0.5, -0.5f, 0.0f, 1.0f},
+			{  0.5, -0.5f, 0.0f, 1.0f},
+			{  0.5,  0.5f, 0.0f, 1.0f},
+			{ -0.5,  0.5f, 0.0f, 1.0f}
+		};
 
+		// QUAD Data
+		// ------------------------------------
+
+		std::unique_ptr<VertexArray> m_QuadVAO;
+		std::unique_ptr<VertexBuffer> m_QuadVertexBuffer;
 		GLuint QuadIB = 0;
 
-		//Rectangle m_Rect1;
+		Vertex* m_QuadBuffer = nullptr;
+		Vertex* m_QuadBufferPtr = nullptr;
+
+		uint32_t IndexCount = 0;
+
+		std::unique_ptr<Shader> m_QuadShader;
+
+		// Circle Data
+		// ------------------------------------
+
+		std::unique_ptr<VertexArray> m_CircleVAO;
+		std::unique_ptr<VertexBuffer> m_CircleVertexBuffer;
+		GLuint CircleIB = 0;
+
+		CircleVertex* m_CircleBuffer = nullptr;
+		CircleVertex* m_CircleBufferPtr = nullptr;
+
+		uint32_t CircleIndexCount = 0;
+
+		std::unique_ptr<Shader> m_CircleShader;
+
+		// ------------------------------------
+
+		VertexType drawType;
 		RectangleContainer m_RectContainer;
 
-		glm::mat4 m_Proj, m_View;
+		glm::mat4 m_Proj, m_View, m_Model, m_MVP;
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
 		constexpr static float SIMSTEP = 0.016; // An integer is one second.
+		int m_DrawCalls;
 
 		// 30 FPS = 1/30 = 0.03
 		// 60 FPS = 1/60 = 0.016

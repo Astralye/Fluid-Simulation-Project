@@ -10,6 +10,8 @@
 
 #include "Renderer.h"
 
+#include "Camera.h"
+#include "Settings.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
@@ -31,8 +33,6 @@
 #include "tests/T3 - Dynamic Particles.h"
 #include "tests/T4 - Calculate Density.h"
 
-Camera camera;
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int main(void){
@@ -43,15 +43,19 @@ int main(void){
     if (!glfwInit()) // Initialize GLFW
         return -1; 
 
-	// GL 3.0 + GLSL 130
+	// MAKE SURE TO CHANGE IMGUI TO LATEST FILES.
+	// DO THIS AFTER I HAVE FIXED ALL THE BUGS
+	// DO NOT FORGET
+	// 
+	// GL 4.6 + GLSL 130
 	const char* glsl_version = "#version 130";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
     // GLFW window
-	GLFWwindow* window = glfwCreateWindow(800, 800, "Hello World", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WINDOW_RESOLUTION.x, WINDOW_RESOLUTION.y, "Hello World", nullptr, nullptr);
     if (!window){
         glfwTerminate();
         return -1;
@@ -110,7 +114,6 @@ int main(void){
 		// If currentTest exists
 		if (currentTest)
 		{
-			currentTest->movementData(camera);
 			currentTest->OnUpdate(Sim::SIMSTEP);
 			currentTest->OnRender();
 			ImGui::Begin("Test");
@@ -163,27 +166,27 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (action == GLFW_PRESS || action == GLFW_REPEAT){
 		switch (key) {
 		case GLFW_KEY_A:
-			camera.position.x += 1;
+			camera.move(camera.x, true);
 			break;
 
 		case GLFW_KEY_D:
-			camera.position.x -= 1;
+			camera.move(camera.x, false);
 			break;
 
 		case GLFW_KEY_W:
-			camera.position.y -= 1;
+			camera.move(camera.y, false);
 			break;
 
 		case GLFW_KEY_S:
-			camera.position.y += 1;
+			camera.move(camera.y, true);
 			break;
 
 		case GLFW_KEY_MINUS:
-			camera.zoom -= 10;
+			camera.zoom(false);
 			break;
 
 		case GLFW_KEY_EQUAL:
-			camera.zoom += 10;
+			camera.zoom(true);
 			break;
 		}
 	}

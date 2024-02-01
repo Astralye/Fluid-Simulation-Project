@@ -20,20 +20,20 @@ namespace test {
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 1, 0))),
 		m_ClearColour{ 0.2f, 0.4f, 0.8f, 1.0f },
 
-		m_ParticleA(glm::vec3(22.0f, 10.0f,0.0f)),
-		m_ParticleB(glm::vec3(25.0f, 43.0f, 0.0f)),
+		m_ParticleA(glm::vec4(22.0f, 10.0f,0.0f,0.0f)),
+		m_ParticleB(glm::vec4(25.0f, 43.0f, 0.0f, 0.0f)),
 
-		m_ParticleC(glm::vec3(19.0f, 45.0f, 0.0f)),
-		m_ParticleD(glm::vec3(41.0f, 23.0f, 0.0f)),
+		m_ParticleC(glm::vec4(19.0f, 45.0f, 0.0f, 0.0f)),
+		m_ParticleD(glm::vec4(41.0f, 23.0f, 0.0f, 0.0f)),
 
-		m_ParticleE(glm::vec3(5.0f, 33.0f, 0.0f)),
-		m_ParticleF(glm::vec3(26.0f, 46.0f, 0.0f)),
+		m_ParticleE(glm::vec4(5.0f, 33.0f, 0.0f, 0.0f)),
+		m_ParticleF(glm::vec4(26.0f, 46.0f, 0.0f, 0.0f)),
 
-		m_ParticleG(glm::vec3(46.0f, 25.0f, 0.0f)),
-		m_ParticleH(glm::vec3(33.0f, 18.0f, 0.0f)),
+		m_ParticleG(glm::vec4(46.0f, 25.0f, 0.0f, 0.0f)),
+		m_ParticleH(glm::vec4(33.0f, 18.0f, 0.0f, 0.0f)),
 
-		m_ParticleI(glm::vec3(20.0f, 24.0f, 0.0f)),
-		m_ParticleJ(glm::vec3(11.0f, 51.0f, 0.0f))
+		m_ParticleI(glm::vec4(20.0f, 24.0f, 0.0f, 0.0f)),
+		m_ParticleJ(glm::vec4(11.0f, 51.0f, 0.0f, 0.0f))
 	{
 		/*
 		GLCall(glEnable(GL_BLEND));
@@ -49,7 +49,7 @@ namespace test {
 		m_VAO = std::make_unique<VertexArray>();
 
 		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(MaxQuadCount);
+		m_VertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD,MaxQuadCount);
 		VertexBufferLayout layout;
 
 
@@ -61,7 +61,7 @@ namespace test {
 
 
 		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
+		m_VAO->AddBuffer(VertexType::QUAD,*m_VertexBuffer, layout);
 		
 		uint32_t indices[MaxIndexCount];
 		uint32_t offset = 0;
@@ -82,7 +82,9 @@ namespace test {
 		// Number of indices in a SINGLE buffer
 		m_IndexBuffer = std::make_unique<IndexBuffer>(indices, MaxIndexCount);
 
+
 		m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
+
 		m_Shader->Bind();
 	}
 
@@ -151,19 +153,19 @@ namespace test {
 	static std::array<Vertex, 4> CreateQuad(Particle p) {
 
 		Vertex v0;
-		v0.Position = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y };
+		v0.WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y, 0.0f, 0.0f};
 		v0.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v1;
-		v1.Position = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y};
+		v1.WorldPosition = { p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y,0.0f, 0.0f};
 		v1.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v2;
-		v2.Position = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y };
+		v2.WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y, 0.0f, 0.0f};
 		v2.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v3;
-		v3.Position = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y };
+		v3.WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y, 0.0f, 0.0f};
 		v3.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		return { v0,v1,v2,v3 };

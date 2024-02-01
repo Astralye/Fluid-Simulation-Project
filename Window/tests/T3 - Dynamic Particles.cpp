@@ -37,7 +37,7 @@ namespace test {
 				mult = -1;
 			}
 
-			m_ParticleArray.emplace_back(glm::vec3(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f), 1.0f, .25f, 1.0f,
+			m_ParticleArray.emplace_back(glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f, 0.0f), 1.0f, .25f, 1.0f,
 				glm::vec3((rand() % n) * mult, (rand() % n), 0.0f),
 				glm::vec3(0.0f, 0.0f, 0.0f)
 			);
@@ -54,7 +54,7 @@ namespace test {
 		m_VAO = std::make_unique<VertexArray>();
 
 		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(MaxVertexCount);
+		m_VertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD,MaxVertexCount);
 		VertexBufferLayout layout;
 
 		// Layout per positional point
@@ -65,7 +65,7 @@ namespace test {
 
 
 		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
+		m_VAO->AddBuffer(VertexType::QUAD, *m_VertexBuffer, layout);
 		
 		uint32_t indices[MaxIndexCount];
 		uint32_t offset = 0;
@@ -89,7 +89,7 @@ namespace test {
 		// Number of indices in a SINGLE buffer READJUST CODE
 		//m_IndexBuffer = std::make_unique<IndexBuffer>(indices);
 
-		m_Shader = std::make_unique<Shader>("res/shaders/basic.shader");
+		m_Shader = std::make_unique<Shader>("res/shaders/quad.shader");
 		m_Shader->Bind();
 	}
 
@@ -100,6 +100,11 @@ namespace test {
 
 	void T3_Dynamic_Particles::OnUpdate(float deltaTime){
 	
+		float camZoom = camera.getZoom() / 2;
+
+		m_Proj = glm::ortho(0.0f + camZoom, 100.0f - camZoom, 0.0f + camZoom, 100.0f - camZoom, -1.0f, 1.0f);
+		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
+
 		// Update Particles movement vectors
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
 			m_ParticleArray[i].update_Accel();
@@ -134,20 +139,20 @@ namespace test {
 		}
 
 		// Copies data to pointer location
-		m_QuadBufferPtr->Position = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y, 0.0f, 0.0f };
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y};
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y, 0.0f, 0.0f };
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
 		IndexCount += 6;
@@ -161,20 +166,20 @@ namespace test {
 			BeginBatch();
 		}
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[0].x , r.m_Vertices[0].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[1].x, r.m_Vertices[1].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[2].x, r.m_Vertices[2].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[3].x, r.m_Vertices[3].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
 		IndexCount += 6;
@@ -247,14 +252,6 @@ namespace test {
 	inline void T3_Dynamic_Particles::timeStep()
 	{
 		time += SIMSTEP;
-	}
-
-	void T3_Dynamic_Particles::movementData(Camera cam) {
-
-		float camZoom = cam.zoom / 2;
-
-		m_Proj = glm::ortho(0.0f + camZoom, 100.0f - camZoom, 0.0f + camZoom, 100.0f - camZoom, -1.0f, 1.0f);
-		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(cam.position.x, cam.position.y, 0));
 	}
 	
 	void T3_Dynamic_Particles::Shutdown() {

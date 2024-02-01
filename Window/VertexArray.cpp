@@ -3,72 +3,78 @@
 #include "VertexBufferLayout.h"
 #include "Renderer.h"
 
-// Data sent to GPU
-struct Vertex {
-	glm::vec2 Position;
-	glm::vec4 Colour;
-};
+// Class unspecific
+VertexArray::VertexArray() { GLCall(glGenVertexArrays(1, &m_RendererID)); }
+VertexArray::~VertexArray() { GLCall(glDeleteVertexArrays(1, &m_RendererID)); }
+void VertexArray::Bind() const { GLCall(glBindVertexArray(m_RendererID)); }
+void VertexArray::Unbind() const { GLCall(glBindVertexArray(0)); }
 
-VertexArray::VertexArray()
-{
-	GLCall(glGenVertexArrays(1, &m_RendererID));
-}
+// Add buffers
+// -------------------------
+void VertexArray::AddCircleBuffer(const VertexBufferLayout& layout) {
+	// Buffer for Circles
 
-VertexArray::~VertexArray()
-{
-	GLCall(glDeleteVertexArrays(1, &m_RendererID));
-}
+	const auto& elements = layout.GetElements();
+	int noElements = 3;
 
-void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
-{
-	Bind();
-	vb.Bind();
-	const auto &elements = layout.GetElements();
-	
-	// Change interval when needed
-	for (unsigned int i = 0; i < elements.size(); i+=2)
+	for (unsigned int i = 0; i < elements.size(); i += noElements)
 	{
-		// Each element stores 2 data types, x,y in [0], R,G,B,A in [1], TexX,TexY in [2]
-		// This code is automatic from layout.
-
-		// Positional Vertex
+		// WorldPosition
 		const auto& element = elements[i];
 		GLCall(glEnableVertexAttribArray(i));
-		GLCall(glVertexAttribPointer(i,	 element.count, element.type,
-			element.normalized, sizeof(Vertex), (const void*)offsetof(Vertex, Position)));
+		GLCall(glVertexAttribPointer(i, element.count, element.type,
+			element.normalized, sizeof(CircleVertex), (const void*)offsetof(CircleVertex, WorldPosition)));
+
+		// LocalPosition
+		const auto& element1 = elements[i + 1];
+		GLCall(glEnableVertexAttribArray(i + 1));
+		GLCall(glVertexAttribPointer(i + 1, element1.count, element1.type,
+			element1.normalized, sizeof(CircleVertex), (const void*)offsetof(CircleVertex, LocalPosition)));
 
 		// RGBA Vertex
-		const auto& element2 = elements[i+1];
-		GLCall(glEnableVertexAttribArray(i+1));
-		GLCall(glVertexAttribPointer(i+1, element2.count, element2.type,
-			element2.normalized, sizeof(Vertex), (const void*)offsetof(Vertex, Colour)));
-
-		/*
-		// Texture Coords Vertex
-		const auto& element3 = elements[i + 2];
+		const auto& element2 = elements[i + 2];
 		GLCall(glEnableVertexAttribArray(i + 2));
-		GLCall(glVertexAttribPointer(i + 2, element3.count, element3.type,
-			element3.normalized, layout.GetStride(), (const void*)offset));
-
-		offset += element3.count * VertexBufferElement::GetSizeOfType(element3.type);
-
-		// Texture Coords Vertex
-		const auto& element4 = elements[i + 3];
-		GLCall(glEnableVertexAttribArray(i + 3));
-		GLCall(glVertexAttribPointer(i + 3, element4.count, element4.type,
-			element4.normalized, layout.GetStride(), (const void*)offset));
-
-		offset += element4.count * VertexBufferElement::GetSizeOfType(element4.type);
-		*/
+		GLCall(glVertexAttribPointer(i + 2, element2.count, element2.type,
+			element2.normalized, sizeof(CircleVertex), (const void*)offsetof(CircleVertex, Colour)));
 	}
 }
 
-void VertexArray::Bind() const
-{
-	GLCall(glBindVertexArray(m_RendererID));
+void VertexArray::AddQuadBuffer(const VertexBufferLayout &layout) {
+	
+	const auto& elements = layout.GetElements();
+	int noElements = 2;
+
+	for (unsigned int i = 0; i < elements.size(); i += noElements)
+	{
+		// WorldPosition
+		const auto& element = elements[i];
+		GLCall(glEnableVertexAttribArray(i));
+		GLCall(glVertexAttribPointer(i, element.count, element.type,
+			element.normalized, sizeof(Vertex), (const void*)offsetof(Vertex, WorldPosition)));
+
+		// RGBA Vertex
+		const auto& element2 = elements[i + 1];
+		GLCall(glEnableVertexAttribArray(i + 1));
+		GLCall(glVertexAttribPointer(i + 1, element2.count, element2.type,
+			element2.normalized, sizeof(Vertex), (const void*)offsetof(Vertex, Colour)));
+	}
 }
 
-void VertexArray::Unbind() const
+void VertexArray::AddBuffer(VertexType type, const VertexBuffer& vb, const VertexBufferLayout& layout)
 {
-	GLCall(glBindVertexArray(0));
+	Bind();
+	vb.Bind();
+	
+	switch (type) {
+
+		case VertexType::QUAD: {
+			AddQuadBuffer(layout);
+			break;
+		}
+
+		case VertexType::CIRCLE: {
+			AddCircleBuffer(layout);
+			break;
+		}
+	}
 }

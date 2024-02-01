@@ -90,6 +90,12 @@
     <ClCompile Include="tests\T4 - Calculate Density.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexBuffer.h">
@@ -182,9 +188,13 @@
     <ClInclude Include="Data_Structures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\basic.shader">
+    <None Include="res\shaders\quad.shader" />
+    <None Include="res\shaders\Circle.shader">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

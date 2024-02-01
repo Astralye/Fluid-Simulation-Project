@@ -1,12 +1,14 @@
 #pragma once
 
+#include "Data_Structures.h"
+
 // Create a buffer for positions to be rendered
 class VertexBuffer
 {
 private:
 	unsigned int m_RendererID;
 public:
-	VertexBuffer(unsigned int size);
+	VertexBuffer(VertexType type, unsigned int size);
 	~VertexBuffer();
 
 	void Bind() const;

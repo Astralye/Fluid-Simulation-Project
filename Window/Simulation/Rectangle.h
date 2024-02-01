@@ -2,24 +2,11 @@
 
 #include "glm/glm.hpp"
 
-// UL, upper left, UR, upper right etc
-struct RectCoords {
-	glm::vec2 m_TopLeft;
-	glm::vec2 m_TopRight;
-	glm::vec2 m_BottomLeft;
-	glm::vec2 m_BottomRight;
-
-	// Constructor for struct
-	RectCoords(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d)
-		: m_TopLeft(a), m_TopRight(b), m_BottomLeft(c), m_BottomRight(d)
-	{
-	}
-};
-
+// Possibly change the name to quad
 class Rectangle {
 public:
 	glm::vec3 m_Position;
-	RectCoords m_Coords;
+	glm::vec2 m_Vertices[4];
 
 	float length;
 	float height;
@@ -30,14 +17,19 @@ public:
 	)
 		: m_Position(pos),
 		length(length),
-		height(height),
-		m_Coords(
-			glm::vec2(m_Position.x - (length / 2), m_Position.y + (height / 2)), // TL
-			glm::vec2(m_Position.x + (length / 2), m_Position.y + (height / 2)), // TR
-			glm::vec2(m_Position.x - (length / 2), m_Position.y - (height / 2)), // BL
-			glm::vec2(m_Position.x + (length / 2), m_Position.y - (height / 2))  // BR
-		)
+		height(height)
 	{
+		m_Vertices[0] =
+			{ m_Position.x - (length / 2), m_Position.y + (height / 2) }; // TL
+
+		m_Vertices[1] =
+			{ m_Position.x + (length / 2), m_Position.y + (height / 2) }; // TR
+			
+		m_Vertices[2] =
+			{ m_Position.x + (length / 2), m_Position.y - (height / 2) }; // BR
+
+		m_Vertices[3] =
+			{ m_Position.x - (length / 2), m_Position.y - (height / 2) }; // BL
 	}
 };
 

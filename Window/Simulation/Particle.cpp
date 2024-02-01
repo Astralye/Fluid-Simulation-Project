@@ -24,11 +24,11 @@ void Particle::update_Accel(float x, float y, float z) {
 	// Change of m_Acceleration is in proportion to simulation step.
 
 	if (m_Velocity.x > 0 && m_Acceleration.x > 0) {
-		x_Jerk = toNegative(x_Jerk);
+		x_Jerk = PhysicsEq::toNegative(x_Jerk);
 	}
 
 	if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
-		y_Jerk = toNegative(y_Jerk);
+		y_Jerk = PhysicsEq::toNegative(y_Jerk);
 	}
 
 	// Gravity
@@ -145,13 +145,25 @@ void Particle::update_Pos(float time) {
 		//z = z + ((m_Velocity.getZ() * t) + (m_Acceleration.getZ() / 2) * pow(t, 2)) * Sim::SIMSTEP;
 	}
 
-	m_Position = glm::vec3(x, y, z);
-	m_Coords.update(m_Position,m_Radius);
+	m_Position = glm::vec4(x, y, z, 0.0);
 
-	// update square coordinate pointss
+	update();
+}
 
-	//std::cout << "X a:" << m_Acceleration.x << "  " << "V: " << m_Velocity.x;
-	//std::cout << ", Y a:" << m_Acceleration.y << "  " << "V: " << m_Velocity.y << std::endl;
+void Particle::update()
+{
+		m_Vertices[0] =
+		{ m_Position.x - m_Radius, m_Position.y + m_Radius }; // TL
+
+		m_Vertices[1] =
+		{ m_Position.x + m_Radius, m_Position.y + m_Radius }; // TR
+
+		m_Vertices[2] =
+		{ m_Position.x + m_Radius, m_Position.y - m_Radius }; // BR
+
+		m_Vertices[3] =
+		{ m_Position.x - m_Radius, m_Position.y - m_Radius }; // BL
+
 }
 
 void Particle::bounce() {
@@ -212,14 +224,4 @@ void Particle::invert(glm::vec3 type)
 		m_Velocity.y = -m_Velocity.y;
 		m_Acceleration.y = -m_Acceleration.y;
 	}
-}
-
-// Always returns Negative value
-inline float Particle::toNegative(float value) {
-	return -toPositive(value);
-}
-
-// Always returns positive value
-inline float Particle::toPositive(float value) {
-	return abs(value);
 }
