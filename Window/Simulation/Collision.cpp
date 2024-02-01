@@ -77,12 +77,12 @@ bool Collision::collisionDetection(Particle& A, Particle& B) {
 
 bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 
-	glm::vec3 clamp;
+	glm::vec4 clamp;
 
 	clamp.x = PhysicsEq::clamp(B.m_Position.x, A.m_Position.x - (A.length / 2), A.m_Position.x + (A.length / 2));
 	clamp.y = PhysicsEq::clamp(B.m_Position.y, A.m_Position.y - (A.height / 2), A.m_Position.y + (A.height/ 2));
 	
-	glm::vec3 difference = clamp - B.m_Position;
+	glm::vec4 difference = clamp - B.m_Position;
 
 	float overlap = B.getRadius() - PhysicsEq::pythagoras(difference.x, difference.y);
 

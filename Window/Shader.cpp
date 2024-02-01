@@ -13,10 +13,7 @@ Shader::Shader(const std::string& filepath)
     m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 }
 
-Shader::~Shader()
-{
-    GLCall(glDeleteProgram(m_RendererID));
-}
+Shader::~Shader() { GLCall(glDeleteProgram(m_RendererID)); }
 
 // Retrieves shader and converts to string
 ShaderProgramSource Shader::ParseShader(const std::string& filePath) {
@@ -32,7 +29,6 @@ ShaderProgramSource Shader::ParseShader(const std::string& filePath) {
     ShaderType type = ShaderType::NONE;
 
     while (getline(stream, line)) {
-        std::cout << line << std::endl;
 
         if (line.find("#shader") != std::string::npos) {
 
@@ -42,14 +38,13 @@ ShaderProgramSource Shader::ParseShader(const std::string& filePath) {
             else if (line.find("fragment") != std::string::npos) {
                 type = ShaderType::FRAGMENT;
             }
+
         }
         else {
             ss[(int)type] << line << '\n';
         }
     }
 
-    std::cout << ss[0].str() << "\n" << std::endl;
-    std::cout << ss[1].str() << std::endl;
     return { ss[0].str(),ss[1].str() };
 }
 

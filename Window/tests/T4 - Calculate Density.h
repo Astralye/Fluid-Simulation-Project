@@ -18,6 +18,11 @@
 
 #include <memory>
 
+#define BatchRender(x) BeginBatch();\
+					   x;\
+				       EndBatch();\
+					   Flush();
+
 namespace test {
 
 	class T4_Calculate_Density : public Test {
@@ -37,8 +42,8 @@ namespace test {
 		void EndBatch();
 		void Flush();
 
-		void DrawCircle(Particle& p, glm::mat4 MVP);
-		void CreateQuad(Rectangle& r);
+		void DrawCircle(Particle& p);
+		void DrawQuad(Rectangle& r);
 		void CreateContainer(RectangleContainer& rc);
 		inline void timeStep();
 
@@ -88,7 +93,7 @@ namespace test {
 		VertexType drawType;
 		RectangleContainer m_RectContainer;
 
-		glm::mat4 m_Proj, m_View;
+		glm::mat4 m_Proj, m_View, m_Model, m_MVP;
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
 		constexpr static float SIMSTEP = 0.016; // An integer is one second.

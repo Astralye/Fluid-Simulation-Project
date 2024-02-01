@@ -16,11 +16,11 @@ namespace test {
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
 		m_ClearColour{ 0.2f, 0.4f, 0.8f, 1.0f },
 
-		m_ParticleA(glm::vec3( 50.0f, 30.0f, 0.0f), 1.0f, 1.0f, 1.0f,
+		m_ParticleA(glm::vec4( 50.0f, 30.0f, 0.0f, 0.0f), 1.0f, 1.0f, 1.0f,
 					glm::vec3( 20.0f, 15.0f, 0.0f),
 					glm::vec3(  0.0f,  0.0f, 0.0f)),
 
-		m_ParticleB(glm::vec3( 30.0f, 20.0f, 0.0f), 1.0f, 5.0f, 1.0f,
+		m_ParticleB(glm::vec4( 30.0f, 20.0f, 0.0f, 0.0f), 1.0f, 5.0f, 1.0f,
 					glm::vec3(  2.0f,  5.0f, 0.0f),
 					glm::vec3(  0.0f,  0.0f, 0.0f)),
 
@@ -136,19 +136,19 @@ namespace test {
 	static std::array<Vertex, 4> CreateQuad(Particle &p) {
 
 		Vertex v0;
-		v0.WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y,0.0f };
+		v0.WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y,0.0f,0.0f };
 		v0.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v1;
-		v1.WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y,0.0f };
+		v1.WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y,0.0f,0.0f };
 		v1.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v2;
-		v2.WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y,0.0f };
+		v2.WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y,0.0f,0.0f };
 		v2.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v3;
-		v3.WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y ,0.0f };
+		v3.WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y ,0.0f,0.0f };
 		v3.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		return { v0,v1,v2,v3 };
@@ -157,19 +157,19 @@ namespace test {
 	static std::array<Vertex, 4> CreateQuad(Rectangle &r) {
 
 		Vertex v0;
-		v0.WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
+		v0.WorldPosition = { r.m_Vertices[0].x , r.m_Vertices[0].y, 0.0f,0.0f};
 		v0.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v1;
-		v1.WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y, 0.0f };
+		v1.WorldPosition = { r.m_Vertices[1].x, r.m_Vertices[1].y, 0.0f,0.0f};
 		v1.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v2;
-		v2.WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
+		v2.WorldPosition = { r.m_Vertices[2].x, r.m_Vertices[2].y, 0.0f,0.0f};
 		v2.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v3;
-		v3.WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
+		v3.WorldPosition = { r.m_Vertices[3].x, r.m_Vertices[3].y, 0.0f,0.0f};
 		v3.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		return { v0,v1,v2,v3 };

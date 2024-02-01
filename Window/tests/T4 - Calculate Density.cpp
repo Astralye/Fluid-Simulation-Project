@@ -12,11 +12,11 @@
 #include <array>
 #include <cstdlib>
 
-static const size_t MaxQuadCount = 100;
+static const size_t MaxQuadCount = 10000;
 static const size_t MaxVertexCount = MaxQuadCount * 4;
 static const size_t MaxIndexCount = MaxQuadCount * 6;
 
-static const int MAX_PARTICLES = 10;
+static const int MAX_PARTICLES = 300;
 
 namespace test {
 
@@ -24,13 +24,13 @@ namespace test {
 		: m_Proj(glm::ortho(camera.getProjection().left, camera.getProjection().right,
 			camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f)),
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
-		m_ClearColour{ 0.2f, 0.4f, 0.8f, 1.0f },
+		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
 		m_RectContainer(glm::vec3(50.0f, 50.0f, 0.0f), 90.0f, 80.0f)
 	{
 		m_ParticleArray.reserve(MAX_PARTICLES);
 
 		// ALGORITHM FOR CREATING EVENLY SPACED SQAURES IN A LARGER SQUARE
-		float radius = 1.0f;
+		float radius = 2.0f;
 		{
 			int n = 5;
 			int mult;
@@ -63,18 +63,19 @@ namespace test {
 					row = 0;
 				}
 				m_ParticleArray.emplace_back(
-					glm::vec3(xPos + xOffset, yPos + yOffset, 0.0f), 1.0f, radius, 5.0f,
-					glm::vec3(0.0f, 0.0f, 0.0f),
+					//glm::vec4(xPos + xOffset, yPos + yOffset, 0.0f, 0.0f), 1.0f, radius, 5.0f,
+					//glm::vec3(0.0f, 0.0f, 0.0f),
 
-					//Random values, Commented out for Testing purposes.
-					//glm::vec3(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f), 1.0f, radius, 2.0f,
-					//glm::vec3((rand() % n), (rand() % n), 0.0f),
+					////Random values, Commented out for Testing purposes.
+					glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f,0.0f), 1.0f, radius, 2.0f,
+					glm::vec3((rand() % n), (rand() % n), 0.0f),
 
 					glm::vec3(0.0f, 0.0f, 0.0f)
 				);
 			}
 		}
-
+		
+		// Need to optimize better
 		float kernel = PhysicsEq::SmoothingKernel(m_ParticleArray[0].m_Position, m_ParticleArray[1].m_Position, 2.0f, m_ParticleArray[0].m_KernelRadius);
 		//std::cout << kernel << std::endl;
 		
@@ -86,7 +87,7 @@ namespace test {
 			VertexBufferLayout layout;
 
 			// Layout should be the same with Data_Structure.h
-			layout.Push<float>(3); // WorldPosition
+			layout.Push<float>(4); // WorldPosition
 			layout.Push<float>(4); // (R, G, B, A)
 			m_QuadVAO->AddBuffer(VertexType::QUAD,*m_QuadVertexBuffer, layout);
 		}
@@ -112,6 +113,9 @@ namespace test {
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, QuadIB));
 		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Quadindices), Quadindices, GL_STATIC_DRAW));
 
+		m_QuadShader = std::make_unique<Shader>("res/shaders/quad.shader");
+		m_QuadShader->Bind();
+
 		// New buffer types *HAVE* to be AFTER the index buffers
 		// REFACTOR CODE
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -124,8 +128,8 @@ namespace test {
 			VertexBufferLayout layout;
 
 			// Layout should be the same with Data_Structure.h
-			layout.Push<float>(3); // WorldPosition
-			layout.Push<float>(3); // LocalPosition
+			layout.Push<float>(4); // WorldPosition
+			layout.Push<float>(4); // LocalPosition
 			layout.Push<float>(4); // RGBA
 			m_CircleVAO->AddBuffer(VertexType::CIRCLE, *m_CircleVertexBuffer, layout);
 		}
@@ -154,19 +158,9 @@ namespace test {
 
 
 		// Can be put in their own function and be refactored
-		{
-			std::cout << "ABC" << std::endl;
-			m_QuadShader = std::make_unique<Shader>("res/shaders/quad.shader");
-			std::cout << "hello" << std::endl;
-			m_QuadShader->Bind();
-
-			std::cout << "ABCD" << std::endl;
-			m_CircleShader = std::make_unique<Shader>("res/shaders/Circle.shader");
-			m_CircleShader->Bind();
-			//m_CircleShader->SetUniform1f("radius", radius);
-
-			std::cout << "ABCDE" << std::endl;
-		}
+		m_CircleShader = std::make_unique<Shader>("res/shaders/Circle.shader");
+		m_CircleShader->Bind();
+		//m_CircleShader->SetUniform1f("radius", radius);
 	}
 
 	//Destructor
@@ -176,11 +170,16 @@ namespace test {
 
 	void T4_Calculate_Density::OnUpdate(float deltaTime){
 
+		// Updates positions, projections and models.
 		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().right, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
+		m_Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+
+		m_MVP = m_Proj * m_View * m_Model;
 
 		// Update Particles movement vectors
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
+
 			m_ParticleArray[i].update_Accel();
 			m_ParticleArray[i].update_Vel();
 			m_ParticleArray[i].update_Pos(time);
@@ -213,16 +212,14 @@ namespace test {
 			}
 
 			case VertexType::CIRCLE: {
-				m_CircleBufferPtr = m_CircleBuffer;
+ 				m_CircleBufferPtr = m_CircleBuffer;
 				break;
 			}
 		}
 
 	}
 	
-	void T4_Calculate_Density::DrawCircle(Particle &p, glm::mat4 MVP) {
-
-		// RESTRUCTURE CODE
+	void T4_Calculate_Density::DrawCircle(Particle &p) {
 
 		if (CircleIndexCount >= MaxIndexCount) {
 			EndBatch();
@@ -230,48 +227,41 @@ namespace test {
 			BeginBatch();
 		}
 
+		glm::vec4 vertex;
 		for (int i = 0; i < 4; i++) {
-			m_CircleBufferPtr->WorldPosition = MVP * QuadVertexPositions[i]; // Transform * vertex position;
-			m_CircleBufferPtr->LocalPosition = QuadVertexPositions[i] * 2.0f; // Transform * vertex position;
-			m_CircleBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+			vertex = m_MVP * glm::vec4(p.m_Vertices[i],0.0,1.0);
+
+			m_CircleBufferPtr->WorldPosition = vertex;
+			m_CircleBufferPtr->LocalPosition = QuadVertexPositions[i] * 2.0f;
+			m_CircleBufferPtr->Colour = { 0.2f, 0.6f, 1.0f, 1.0f };
 			m_CircleBufferPtr++;
 		}
-
 		CircleIndexCount += 6;
 	}
 
-	void T4_Calculate_Density::CreateQuad(Rectangle &r) {
+	void T4_Calculate_Density::DrawQuad(Rectangle &r) {
 
 		if (IndexCount >= MaxIndexCount) {
 			EndBatch();
 			Flush();
 			BeginBatch();
 		}
+		
+		for(int i = 0; i < 4; i++){
+			glm::vec4 vertex = m_MVP * glm::vec4(r.m_Vertices[i],0.0,1.0);
 
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y , 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
+			m_QuadBufferPtr->WorldPosition = vertex;
+			m_QuadBufferPtr->Colour = { 0.2f, 0.2f, 0.2f, 1.0f };
+			m_QuadBufferPtr++;
+		}
 		IndexCount += 6;
 	}
 
 	void T4_Calculate_Density::CreateContainer(RectangleContainer &rc) {
-		CreateQuad(rc.m_SideA);
-		CreateQuad(rc.m_SideB);
-		CreateQuad(rc.m_SideC);
-		CreateQuad(rc.m_SideD);
+		DrawQuad(rc.m_SideA);
+		DrawQuad(rc.m_SideB);
+		DrawQuad(rc.m_SideC);
+		DrawQuad(rc.m_SideD);
 	}
 
 	void T4_Calculate_Density::EndBatch() {
@@ -296,9 +286,8 @@ namespace test {
 		// We can try use pointers here, but currently I dont know how to do so.
 		//Shader *shader;
 		switch (drawType) {
-			case (CIRCLE):
+			case (VertexType::CIRCLE):
 			{
-
 				float value = camera.getProjection().right - camera.getProjection().left;
 
 				m_CircleShader->Bind();
@@ -306,20 +295,14 @@ namespace test {
 
 				m_CircleVAO->Bind();
 
-
 				GLCall(glDrawElements(GL_TRIANGLES, CircleIndexCount, GL_UNSIGNED_INT, nullptr));
+				CircleIndexCount = 0;
 
 				break;
 			}
-			case (QUAD):
+			case (VertexType::QUAD):
 			{
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-				glm::mat4 mvp = m_Proj * m_View * model;
-
-
 				m_QuadShader->Bind();
-				//m_QuadShader->SetUniformMat4f("u_MVP", mvp);
-
 				m_QuadVAO->Bind();
 
 				GLCall(glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr));
@@ -341,27 +324,16 @@ namespace test {
 		GLCall(glClearColor(m_ClearColour[0], m_ClearColour[1], m_ClearColour[2], m_ClearColour[3]));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
+		GLCall(glEnable(GL_BLEND));
+		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		
 		drawType = VertexType::QUAD;
-
-
-		std::cout << "Before Container" << std::endl;
-		BeginBatch();
-			CreateContainer(m_RectContainer);
-		EndBatch();
-		Flush();
-
-
-		std::cout << "After Container" << std::endl;
-		//// All particles are under their own batch.
+		BatchRender(CreateContainer(m_RectContainer));
 
 		drawType = VertexType::CIRCLE;
-		
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-		glm::mat4 mvp = m_Proj * m_View * model;
-
 		BeginBatch();
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
-			DrawCircle(m_ParticleArray[i], mvp);
+			DrawCircle(m_ParticleArray[i]);
 		}
 		EndBatch();
 		Flush();
@@ -374,7 +346,7 @@ namespace test {
 		ImGui::Text("Particles: %i", MAX_PARTICLES);
 		ImGui::Text("Draw calls: %i", m_DrawCalls);
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
 
 		ImGui::Text("Time: %.3f", time);
 	}
