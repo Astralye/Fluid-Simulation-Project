@@ -44,7 +44,7 @@ namespace test {
 		m_VAO = std::make_unique<VertexArray>();
 
 		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(MaxQuadCount);
+		m_VertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD,MaxQuadCount);
 		VertexBufferLayout layout;
 		// [ X, Y , R , G , B ,A ]
 
@@ -56,7 +56,7 @@ namespace test {
 
 
 		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
+		m_VAO->AddBuffer(VertexType::QUAD,*m_VertexBuffer, layout);
 		
 		uint32_t indices[MaxIndexCount];
 		uint32_t offset = 0;
@@ -136,19 +136,19 @@ namespace test {
 	static std::array<Vertex, 4> CreateQuad(Particle &p) {
 
 		Vertex v0;
-		v0.Position = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y };
+		v0.WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y,0.0f };
 		v0.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v1;
-		v1.Position = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y};
+		v1.WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y,0.0f };
 		v1.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v2;
-		v2.Position = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y };
+		v2.WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y,0.0f };
 		v2.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v3;
-		v3.Position = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y };
+		v3.WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y ,0.0f };
 		v3.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		return { v0,v1,v2,v3 };
@@ -157,19 +157,19 @@ namespace test {
 	static std::array<Vertex, 4> CreateQuad(Rectangle &r) {
 
 		Vertex v0;
-		v0.Position = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y };
+		v0.WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
 		v0.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v1;
-		v1.Position = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y };
+		v1.WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y, 0.0f };
 		v1.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v2;
-		v2.Position = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y };
+		v2.WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
 		v2.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		Vertex v3;
-		v3.Position = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y };
+		v3.WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
 		v3.Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 		return { v0,v1,v2,v3 };

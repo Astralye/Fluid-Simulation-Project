@@ -194,8 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\quad.shader" />
-    <None Include="res\shaders\circle.shader" />
-    <None Include="res\shaders\Vertex.shader">
+    <None Include="res\shaders\Circle.shader">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

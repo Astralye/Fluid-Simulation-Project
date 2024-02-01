@@ -54,7 +54,7 @@ namespace test {
 		m_VAO = std::make_unique<VertexArray>();
 
 		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(MaxVertexCount);
+		m_VertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD,MaxVertexCount);
 		VertexBufferLayout layout;
 
 		// Layout per positional point
@@ -65,7 +65,7 @@ namespace test {
 
 
 		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
+		m_VAO->AddBuffer(VertexType::QUAD, *m_VertexBuffer, layout);
 		
 		uint32_t indices[MaxIndexCount];
 		uint32_t offset = 0;
@@ -139,19 +139,19 @@ namespace test {
 		}
 
 		// Copies data to pointer location
-		m_QuadBufferPtr->Position = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y};
+		m_QuadBufferPtr->WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y, 0.0f};
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
@@ -166,19 +166,19 @@ namespace test {
 			BeginBatch();
 		}
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
