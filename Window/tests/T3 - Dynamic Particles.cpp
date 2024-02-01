@@ -37,7 +37,7 @@ namespace test {
 				mult = -1;
 			}
 
-			m_ParticleArray.emplace_back(glm::vec3(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f), 1.0f, .25f, 1.0f,
+			m_ParticleArray.emplace_back(glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f, 0.0f), 1.0f, .25f, 1.0f,
 				glm::vec3((rand() % n) * mult, (rand() % n), 0.0f),
 				glm::vec3(0.0f, 0.0f, 0.0f)
 			);
@@ -139,20 +139,20 @@ namespace test {
 		}
 
 		// Copies data to pointer location
-		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y, 0.0f, 0.0f };
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y, 0.0f};
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y, 0.0f, 0.0f };
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
 		IndexCount += 6;
@@ -166,20 +166,20 @@ namespace test {
 			BeginBatch();
 		}
 
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[0].x , r.m_Vertices[0].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[1].x, r.m_Vertices[1].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[2].x, r.m_Vertices[2].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+		m_QuadBufferPtr->WorldPosition = { r.m_Vertices[3].x, r.m_Vertices[3].y, 0.0f, 0.0f};
+		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		m_QuadBufferPtr++;
 
 		IndexCount += 6;

@@ -145,13 +145,25 @@ void Particle::update_Pos(float time) {
 		//z = z + ((m_Velocity.getZ() * t) + (m_Acceleration.getZ() / 2) * pow(t, 2)) * Sim::SIMSTEP;
 	}
 
-	m_Position = glm::vec3(x, y, z);
-	m_Coords.update(m_Position,m_Radius);
+	m_Position = glm::vec4(x, y, z, 0.0);
 
-	// update square coordinate pointss
+	update();
+}
 
-	//std::cout << "X a:" << m_Acceleration.x << "  " << "V: " << m_Velocity.x;
-	//std::cout << ", Y a:" << m_Acceleration.y << "  " << "V: " << m_Velocity.y << std::endl;
+void Particle::update()
+{
+		m_Vertices[0] =
+		{ m_Position.x - m_Radius, m_Position.y + m_Radius }; // TL
+
+		m_Vertices[1] =
+		{ m_Position.x + m_Radius, m_Position.y + m_Radius }; // TR
+
+		m_Vertices[2] =
+		{ m_Position.x + m_Radius, m_Position.y - m_Radius }; // BR
+
+		m_Vertices[3] =
+		{ m_Position.x - m_Radius, m_Position.y - m_Radius }; // BL
+
 }
 
 void Particle::bounce() {

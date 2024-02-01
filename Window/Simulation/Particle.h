@@ -44,14 +44,16 @@ public:
 		Velocity = 2,
 	};
 
-	glm::vec3 m_Position;
+	glm::vec4 m_Position;
 	SquareCoords m_Coords;
+
+	glm::vec2 m_Vertices[4];
 
 	float m_KernelRadius;
 
 	// Default constructor
 	Particle(
-		glm::vec3 pos = { 0.0f, 0.0f, 0.0f },
+		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
 		float mass = 1,
 		float radius = 1,
 		float kernelRadius = 5,
@@ -71,6 +73,17 @@ public:
 			glm::vec2(m_Position.x + radius, m_Position.y - radius)  // BR
 		)
 	{
+		m_Vertices[0] =
+		{ m_Position.x - (radius / 2), m_Position.y + (radius / 2) }; // TL
+
+		m_Vertices[1] =
+		{ m_Position.x + (radius / 2), m_Position.y + (radius / 2) }; // TR
+
+		m_Vertices[2] =
+		{ m_Position.x + (radius / 2), m_Position.y - (radius / 2) }; // BR
+
+		m_Vertices[3] =
+		{ m_Position.x - (radius / 2), m_Position.y - (radius / 2) }; // BL
 	};
 	
 	// Copy constructor
@@ -94,6 +107,8 @@ public:
 	void update_Accel(float x = 0, float y = 0, float z = 0);
 	void update_Vel();
 	void update_Pos(float time);
+
+	void update();
 
 	void bounce();
 	

@@ -43,10 +43,14 @@ int main(void){
     if (!glfwInit()) // Initialize GLFW
         return -1; 
 
-	// GL 3.0 + GLSL 130
+	// MAKE SURE TO CHANGE IMGUI TO LATEST FILES.
+	// DO THIS AFTER I HAVE FIXED ALL THE BUGS
+	// DO NOT FORGET
+	// 
+	// GL 4.6 + GLSL 130
 	const char* glsl_version = "#version 130";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
