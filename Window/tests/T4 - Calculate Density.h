@@ -23,10 +23,6 @@ namespace test {
 	class T4_Calculate_Density : public Test {
 
 	private:
-		enum ShaderProgram {
-			CircleShader,
-			QuadShader
-		};
 
 	public:
 		T4_Calculate_Density();
@@ -39,31 +35,57 @@ namespace test {
 
 		void BeginBatch();
 		void EndBatch();
-		void Flush(ShaderProgram shaderProg);
+		void Flush();
 
-		void CreateQuad(Particle& p);
+		void DrawCircle(Particle& p, glm::mat4 MVP);
 		void CreateQuad(Rectangle& r);
 		void CreateContainer(RectangleContainer& rc);
 		inline void timeStep();
 
 	private:
-		// Data sent to GPU
-		std::unique_ptr<VertexArray> m_VAO;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+
 		std::vector<Particle> m_ParticleArray;
 		float m_ClearColour[4];
 
-		std::unique_ptr<Shader> m_QuadShader;
-		std::unique_ptr<Shader> m_CircleShader;
+		glm::mat4 QuadVertexPositions = {
+			//  X	  Y		Z	  W
+			{ -0.5, -0.5f, 0.0f, 1.0f},
+			{  0.5, -0.5f, 0.0f, 1.0f},
+			{  0.5,  0.5f, 0.0f, 1.0f},
+			{ -0.5,  0.5f, 0.0f, 1.0f}
+		};
+
+		// QUAD Data
+		// ------------------------------------
+
+		std::unique_ptr<VertexArray> m_QuadVAO;
+		std::unique_ptr<VertexBuffer> m_QuadVertexBuffer;
+		GLuint QuadIB = 0;
 
 		Vertex* m_QuadBuffer = nullptr;
 		Vertex* m_QuadBufferPtr = nullptr;
+
 		uint32_t IndexCount = 0;
 
-		GLuint QuadIB = 0;
+		std::unique_ptr<Shader> m_QuadShader;
 
-		//Rectangle m_Rect1;
+		// Circle Data
+		// ------------------------------------
+
+		std::unique_ptr<VertexArray> m_CircleVAO;
+		std::unique_ptr<VertexBuffer> m_CircleVertexBuffer;
+		GLuint CircleIB = 0;
+
+		CircleVertex* m_CircleBuffer = nullptr;
+		CircleVertex* m_CircleBufferPtr = nullptr;
+
+		uint32_t CircleIndexCount = 0;
+
+		std::unique_ptr<Shader> m_CircleShader;
+
+		// ------------------------------------
+
+		VertexType drawType;
 		RectangleContainer m_RectContainer;
 
 		glm::mat4 m_Proj, m_View;

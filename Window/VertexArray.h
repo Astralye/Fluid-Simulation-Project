@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data_Structures.h"
 #include "VertexBuffer.h"
 
 class VertexBufferLayout;
@@ -12,7 +13,10 @@ public:
 	VertexArray();
 	~VertexArray();
 
-	void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
+	void AddCircleBuffer(const VertexBufferLayout& layout);
+	void AddQuadBuffer(const VertexBufferLayout &layout);
+
+	void AddBuffer(VertexType type,const VertexBuffer& vb, const VertexBufferLayout &layout);
 
 	void Bind() const;
 	void Unbind() const;

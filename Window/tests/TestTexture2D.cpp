@@ -41,7 +41,7 @@ namespace test {
 		m_VAO = std::make_unique<VertexArray>();
 
 		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(6 * 4 * 2);
+		m_VertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD,6 * 4 * 2);
 		VertexBufferLayout layout;
 
 		// Layout per positional point
@@ -51,7 +51,7 @@ namespace test {
 		//layout.Push<float>(1); // (TexID)
 
 		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
+		m_VAO->AddBuffer(VertexType::QUAD, *m_VertexBuffer, layout);
 		
 		// Number of indices in a SINGLE buffer
 		m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 12);

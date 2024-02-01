@@ -16,7 +16,7 @@ static const size_t MaxQuadCount = 100;
 static const size_t MaxVertexCount = MaxQuadCount * 4;
 static const size_t MaxIndexCount = MaxQuadCount * 6;
 
-static const int MAX_PARTICLES = 2;
+static const int MAX_PARTICLES = 10;
 
 namespace test {
 
@@ -77,56 +77,96 @@ namespace test {
 
 		float kernel = PhysicsEq::SmoothingKernel(m_ParticleArray[0].m_Position, m_ParticleArray[1].m_Position, 2.0f, m_ParticleArray[0].m_KernelRadius);
 		//std::cout << kernel << std::endl;
-
-		m_QuadBuffer = new Vertex[MaxVertexCount];
-
-		// Create vertex array
-		m_VAO = std::make_unique<VertexArray>();
-
-		// Vertex Buffer, This is the layout of all points
-		m_VertexBuffer = std::make_unique<VertexBuffer>(MaxVertexCount);
-		VertexBufferLayout layout;
-
-		// Layout per positional point
-		layout.Push<float>(2); // (X, Y)
-		layout.Push<float>(4); // (R, G, B, A)
-		//layout.Push<float>(2); // (TexX, TexY)
-		//layout.Push<float>(1); // (TexID)
-
-
-		// Adds the VB to the VA
-		m_VAO->AddBuffer(*m_VertexBuffer, layout);
 		
-		uint32_t indices[MaxIndexCount];
+		// Quad Buffer Data
+		{
+			m_QuadVAO = std::make_unique<VertexArray>();
+			m_QuadBuffer = new Vertex[MaxVertexCount];
+			m_QuadVertexBuffer = std::make_unique<VertexBuffer>(VertexType::QUAD, MaxVertexCount);
+			VertexBufferLayout layout;
+
+			// Layout should be the same with Data_Structure.h
+			layout.Push<float>(3); // WorldPosition
+			layout.Push<float>(4); // (R, G, B, A)
+			m_QuadVAO->AddBuffer(VertexType::QUAD,*m_QuadVertexBuffer, layout);
+		}
+
+		uint32_t Quadindices[MaxIndexCount];
 		uint32_t offset = 0;
 
 		for (size_t i = 0; i < MaxIndexCount; i += 6)
 		{
-			indices[i + 0] = 0 + offset;
-			indices[i + 1] = 1 + offset;
-			indices[i + 2] = 2 + offset;
+			Quadindices[i + 0] = 0 + offset;
+			Quadindices[i + 1] = 1 + offset;
+			Quadindices[i + 2] = 2 + offset;
 
-			indices[i + 3] = 2 + offset;
-			indices[i + 4] = 3 + offset;
-			indices[i + 5] = 0 + offset;
+			Quadindices[i + 3] = 2 + offset;
+			Quadindices[i + 4] = 3 + offset;
+			Quadindices[i + 5] = 0 + offset;
 
 			offset += 4;
 		}
 
+		// Index Buffer 
 		GLCall(glGenBuffers(1, &QuadIB));
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, QuadIB));
-		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
-		// Number of indices in a SINGLE buffer READJUST CODE
-		//m_IndexBuffer = std::make_unique<IndexBuffer>(indices);
+		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Quadindices), Quadindices, GL_STATIC_DRAW));
+
+		// New buffer types *HAVE* to be AFTER the index buffers
+		// REFACTOR CODE
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		// Circle Buffer Data
+		{
+			m_CircleVAO = std::make_unique<VertexArray>();
+			m_CircleBuffer = new CircleVertex[MaxVertexCount];
+			m_CircleVertexBuffer = std::make_unique<VertexBuffer>(VertexType::CIRCLE, MaxVertexCount);
+			VertexBufferLayout layout;
+
+			// Layout should be the same with Data_Structure.h
+			layout.Push<float>(3); // WorldPosition
+			layout.Push<float>(3); // LocalPosition
+			layout.Push<float>(4); // RGBA
+			m_CircleVAO->AddBuffer(VertexType::CIRCLE, *m_CircleVertexBuffer, layout);
+		}
+
+		// Circle, Copying for now
+
+		uint32_t Circleindices[MaxIndexCount];
+		offset = 0;
+
+		for (size_t i = 0; i < MaxIndexCount; i += 6)
+		{
+			Circleindices[i + 0] = 0 + offset;
+			Circleindices[i + 1] = 1 + offset;
+			Circleindices[i + 2] = 2 + offset;
+
+			Circleindices[i + 3] = 2 + offset;
+			Circleindices[i + 4] = 3 + offset;
+			Circleindices[i + 5] = 0 + offset;
+
+			offset += 4;
+		}
+
+		GLCall(glGenBuffers(1, &CircleIB));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CircleIB));
+		GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Circleindices), Circleindices, GL_STATIC_DRAW));
+
 
 		// Can be put in their own function and be refactored
-		m_QuadShader = std::make_unique<Shader>("res/shaders/quad.shader");
-		m_QuadShader->Bind();
+		{
+			std::cout << "ABC" << std::endl;
+			m_QuadShader = std::make_unique<Shader>("res/shaders/quad.shader");
+			std::cout << "hello" << std::endl;
+			m_QuadShader->Bind();
 
-		m_CircleShader = std::make_unique<Shader>("res/shaders/circle.shader");
-		m_CircleShader->Bind();
-		m_CircleShader->SetUniform2f("windowResolution", WINDOW_RESOLUTION.x, WINDOW_RESOLUTION.y);
-		m_CircleShader->SetUniform1f("radius", radius);
+			std::cout << "ABCD" << std::endl;
+			m_CircleShader = std::make_unique<Shader>("res/shaders/Circle.shader");
+			m_CircleShader->Bind();
+			//m_CircleShader->SetUniform1f("radius", radius);
+
+			std::cout << "ABCDE" << std::endl;
+		}
 	}
 
 	//Destructor
@@ -165,58 +205,62 @@ namespace test {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	void T4_Calculate_Density::BeginBatch() {
-		m_QuadBufferPtr = m_QuadBuffer;
+
+		switch (drawType) {
+			case VertexType::QUAD: {
+				m_QuadBufferPtr = m_QuadBuffer;
+				break;
+			}
+
+			case VertexType::CIRCLE: {
+				m_CircleBufferPtr = m_CircleBuffer;
+				break;
+			}
+		}
+
 	}
 	
-	void T4_Calculate_Density::CreateQuad(Particle &p) {
+	void T4_Calculate_Density::DrawCircle(Particle &p, glm::mat4 MVP) {
 
-		if (IndexCount >= MaxIndexCount) {
+		// RESTRUCTURE CODE
+
+		if (CircleIndexCount >= MaxIndexCount) {
 			EndBatch();
-			Flush(CircleShader);
+			Flush();
 			BeginBatch();
 		}
 
-		// Copies data to pointer location
-		m_QuadBufferPtr->Position = { p.m_Coords.m_TopLeft.x , p.m_Coords.m_TopLeft.y };
-		m_QuadBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
-		m_QuadBufferPtr++;
+		for (int i = 0; i < 4; i++) {
+			m_CircleBufferPtr->WorldPosition = MVP * QuadVertexPositions[i]; // Transform * vertex position;
+			m_CircleBufferPtr->LocalPosition = QuadVertexPositions[i] * 2.0f; // Transform * vertex position;
+			m_CircleBufferPtr->Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+			m_CircleBufferPtr++;
+		}
 
-		m_QuadBufferPtr->Position = {p.m_Coords.m_TopRight.x,p.m_Coords.m_TopRight.y};
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomRight.x, p.m_Coords.m_BottomRight.y };
-		m_QuadBufferPtr->Colour = { 0.0f, 0.0f, 0.0f, 1.0f };
-		m_QuadBufferPtr++;
-
-		m_QuadBufferPtr->Position = { p.m_Coords.m_BottomLeft.x, p.m_Coords.m_BottomLeft.y };
-		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-		m_QuadBufferPtr++;
-
-		IndexCount += 6;
+		CircleIndexCount += 6;
 	}
 
 	void T4_Calculate_Density::CreateQuad(Rectangle &r) {
 
 		if (IndexCount >= MaxIndexCount) {
 			EndBatch();
-			Flush(QuadShader);
+			Flush();
 			BeginBatch();
 		}
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopLeft.x , r.m_Coords.m_TopLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_TopRight.x, r.m_Coords.m_TopRight.y , 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomRight.x, r.m_Coords.m_BottomRight.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
-		m_QuadBufferPtr->Position = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y };
+		m_QuadBufferPtr->WorldPosition = { r.m_Coords.m_BottomLeft.x, r.m_Coords.m_BottomLeft.y, 0.0f };
 		m_QuadBufferPtr->Colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 		m_QuadBufferPtr++;
 
@@ -231,44 +275,60 @@ namespace test {
 	}
 
 	void T4_Calculate_Density::EndBatch() {
-		GLsizeiptr size = (uint8_t*)m_QuadBufferPtr - (uint8_t*)m_QuadBuffer;
-		m_VertexBuffer->Bind();
 
-		GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, m_QuadBuffer));
+		if (drawType == VertexType::QUAD) {
+			GLsizeiptr size = (uint8_t*)m_QuadBufferPtr - (uint8_t*)m_QuadBuffer;
+			m_QuadVertexBuffer->Bind();
+
+			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, m_QuadBuffer));
+		}
+
+		if(drawType == VertexType::CIRCLE){
+			GLsizeiptr size = (uint8_t*)m_CircleBufferPtr - (uint8_t*)m_CircleBuffer;
+			m_CircleVertexBuffer->Bind();
+
+			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, m_CircleBuffer));
+		}
 	}
 
-	void T4_Calculate_Density::Flush(ShaderProgram shaderProg) {
-
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-		glm::mat4 mvp = m_Proj * m_View * model;
+	void T4_Calculate_Density::Flush(){
 
 		// We can try use pointers here, but currently I dont know how to do so.
 		//Shader *shader;
-		switch (shaderProg) {
-			case (CircleShader):
+		switch (drawType) {
+			case (CIRCLE):
 			{
+
 				float value = camera.getProjection().right - camera.getProjection().left;
 
 				m_CircleShader->Bind();
-				m_CircleShader->SetUniformMat4f("u_MVP", mvp);
-				m_CircleShader->SetUniform1f("worldCoordinate", value);
+				//m_CircleShader->SetUniform1f("worldCoordinate", value);
+
+				m_CircleVAO->Bind();
+
+
+				GLCall(glDrawElements(GL_TRIANGLES, CircleIndexCount, GL_UNSIGNED_INT, nullptr));
 
 				break;
 			}
-			case (QuadShader):
+			case (QUAD):
 			{
-				m_QuadShader->Bind();
-				m_QuadShader->SetUniformMat4f("u_MVP", mvp);
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+				glm::mat4 mvp = m_Proj * m_View * model;
 
+
+				m_QuadShader->Bind();
+				//m_QuadShader->SetUniformMat4f("u_MVP", mvp);
+
+				m_QuadVAO->Bind();
+
+				GLCall(glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr));
+				IndexCount = 0;
 				break;
 			}
 		}
-
-		m_VAO->Bind();
-		GLCall(glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr));
-
+		
 		m_DrawCalls++;
-		IndexCount = 0;
 	}
 
 	// CODE REFACTOR SHOULD ENDER HERE
@@ -281,22 +341,30 @@ namespace test {
 		GLCall(glClearColor(m_ClearColour[0], m_ClearColour[1], m_ClearColour[2], m_ClearColour[3]));
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-		// PROBLEM CODE
-		// 
-	
+		drawType = VertexType::QUAD;
+
+
+		std::cout << "Before Container" << std::endl;
 		BeginBatch();
 			CreateContainer(m_RectContainer);
 		EndBatch();
-		Flush(QuadShader);
+		Flush();
 
+
+		std::cout << "After Container" << std::endl;
 		//// All particles are under their own batch.
+
+		drawType = VertexType::CIRCLE;
+		
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		glm::mat4 mvp = m_Proj * m_View * model;
 
 		BeginBatch();
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
-			CreateQuad(m_ParticleArray[i]);
+			DrawCircle(m_ParticleArray[i], mvp);
 		}
 		EndBatch();
-		Flush(CircleShader);
+		Flush();
 	}
 
 	void T4_Calculate_Density::OnImGuiRender()
@@ -318,5 +386,6 @@ namespace test {
 	
 	void T4_Calculate_Density::Shutdown() {
 		delete[] m_QuadBuffer;
+		delete[] m_CircleBuffer;
 	}
 }
