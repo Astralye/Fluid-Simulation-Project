@@ -1,20 +1,72 @@
-#include <iostream>"
+#include <iostream>
 
+#include "Settings.h"
 #include "Particle.h"
 #include "Sim.h"
 
-const bool ENABLE_GRAVITY = false;
+// Creates a cube of particles
+void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, float spacing)
+{
+	// 8 bit -> 256^2 = max 65k particles
+	uint16_t column, row;
+	float squareDimension;
 
-// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
+	glm::vec2 offset, max_Size, position;
+	glm::vec2 containerCenter = { 50.0f, 50.0f };
 
+	squareDimension = (float)sqrt(MAX_PARTICLES);
+
+	offset = { containerCenter.x / 2, containerCenter.y / 2 };
+	max_Size = { (int)ceil(squareDimension), (int)floor(squareDimension) };
+
+	// Set base values
+	column = 0;
+	row = 0;
+
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+		position = { row * (2 * radius + spacing),
+					column * (2 * radius + spacing)};
+
+		row++;
+
+		if (row == max_Size.x) {
+			column++;
+			row = 0;
+		}
+
+		particleArray.emplace_back(
+			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius, 5.0f,
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f)
+		);
+	}
+}
+
+// Creates a particles with random positions and velocities
+void Particle::init_Random(std::vector<Particle>& particleArray, float radius) {
+
+	int maxVelocity = 20;
+
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+
+		particleArray.emplace_back(
+			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f,0.0f), 1.0f, radius, 2.0f,
+			glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f)
+		);
+
+	}
+}
+
+// Updates the acceleration
 void Particle::update_Accel(float x, float y, float z) {
 
 	// Do some calculations
 
 	float a_X, a_Y, a_Z;
 
-	float x_Jerk = 30;
-	float y_Jerk = 30;
+	float x_Jerk = 30.0;
+	float y_Jerk = 30.0;
 
 	a_X = m_Acceleration.x;
 	a_Y = m_Acceleration.y;
@@ -43,8 +95,8 @@ void Particle::update_Accel(float x, float y, float z) {
 	}
 
 	// Remove values close to zero
-	if (abs(a_X) <= 0.5) { a_X = 0; }
-	if (abs(a_Y) <= 0.1) { a_Y = 0; }
+	if (abs(a_X) <= 0.5f) { a_X = 0; }
+	if (abs(a_Y) <= 0.1f) { a_Y = 0; }
 
 	m_Acceleration = glm::vec3(a_X, a_Y, a_Z);
 }
@@ -89,8 +141,8 @@ void Particle::update_Vel() {
 	u_Z = u_Z + (m_Acceleration.y * Sim::SIMSTEP);
 	
 	// Remove values close to zero
-	if (abs(u_X) < 0.1 && abs(m_Acceleration.x) == 0) { u_X = 0; }
-	if (abs(u_Y) < 0.1 && abs(m_Acceleration.y) == 0) { u_Y = 0; }
+	if (abs(u_X) < 0.1f && abs(m_Acceleration.x) == 0) { u_X = 0; }
+	if (abs(u_Y) < 0.1f && abs(m_Acceleration.y) == 0) { u_Y = 0; }
 
 	m_Velocity = glm::vec3(u_X, u_Y, u_Z);
 
@@ -167,12 +219,12 @@ void Particle::update()
 }
 
 void Particle::bounce() {
-	float bounceCoEff = 0.7;
+	float bounceCoEff = 0.7f;
 
-	m_Acceleration.y = invert(m_Acceleration.y);
-	m_Velocity.y = bounceCoEff * invert(m_Velocity.y);
+	m_Acceleration.y = invert(m_Acceleration.y) * ((double)rand()) / RAND_MAX;
+	m_Velocity.y = bounceCoEff * invert(m_Velocity.y) * (((double)rand()) / RAND_MAX) ;
 
-	m_Velocity.x = m_Velocity.x * 0.7;
+	m_Velocity.x = m_Velocity.x * 0.7f;
 }
 
 bool Particle::isMoving(float time) {

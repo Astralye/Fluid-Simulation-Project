@@ -46,15 +46,21 @@ void Collision::collisionResponse(Particle* A, collisionType::Type type) {
 
 	switch (type) {
 	case collisionType::Horizontal:
-		flip.y = true;
-		//if (A->getVelocity().x == 0) {
-		//	A->setVelocity(0);
-		//}
-		//else {
-		//	A->m_Position.y += 0.1;
-		//}
 
-		//A->bounce();
+		if (ENABLE_GRAVITY) {
+
+			if (A->getVelocity().x == 0) {
+				A->setVelocity(0);
+			}
+			else {
+				A->m_Position.y += 0.1;
+			}
+
+			A->bounce();
+		}
+		else {
+			flip.y = true;
+		}
 		break;
 
 	case collisionType::Vertical:

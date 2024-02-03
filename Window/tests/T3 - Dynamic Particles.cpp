@@ -10,12 +10,6 @@
 #include <array>
 #include <cstdlib>
 
-static const size_t MaxQuadCount = 10000;
-static const size_t MaxVertexCount = MaxQuadCount * 4;
-static const size_t MaxIndexCount = MaxQuadCount * 6;
-
-static const int MAX_PARTICLES = 10000;
-
 namespace test {
 
 	T3_Dynamic_Particles::T3_Dynamic_Particles()
@@ -200,8 +194,6 @@ namespace test {
 	}
 
 	void T3_Dynamic_Particles::Flush() {
-
-		Renderer renderer;
 
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 		glm::mat4 mvp = m_Proj * m_View * model;

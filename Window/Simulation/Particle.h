@@ -3,7 +3,9 @@
 
 #include "PhysicsEq.h"
 #include "glm/glm.hpp"
-#include <iostream>
+#include <vector>
+
+// REMOVE SQUARECOORDS
 
 // UL, upper left, UR, upper right etc
 struct SquareCoords {
@@ -66,6 +68,8 @@ public:
 		m_Mass(mass),
 		m_Radius(radius),
 		m_KernelRadius(kernelRadius),
+
+		// Remove m_Coords
 		m_Coords(
 			glm::vec2(m_Position.x - radius, m_Position.y + radius), // TL
 			glm::vec2(m_Position.x + radius, m_Position.y + radius), // TR
@@ -94,6 +98,8 @@ public:
 		m_Mass(particle.m_Mass),
 		m_Radius(particle.m_Radius),
 		m_KernelRadius(particle.m_KernelRadius),
+
+		// Remove m_Coords
 		m_Coords(
 			glm::vec2(m_Position.x - particle.m_Radius, m_Position.y + particle.m_Radius), // TL
 			glm::vec2(m_Position.x + particle.m_Radius, m_Position.y + particle.m_Radius), // TR
@@ -101,13 +107,16 @@ public:
 			glm::vec2(m_Position.x + particle.m_Radius, m_Position.y - particle.m_Radius)  // BR
 		)
 	{
-		std::cout << "Copied!" << std::endl;
+		//std::cout << "Copied!" << std::endl;
 	}
 
+	static void init_Cube(std::vector<Particle> &particleArray, float radius, float spacing);
+	static void init_Random(std::vector<Particle>& particleArray, float radius);
+
+	// Update values
 	void update_Accel(float x = 0, float y = 0, float z = 0);
 	void update_Vel();
 	void update_Pos(float time);
-
 	void update();
 
 	void bounce();
@@ -119,13 +128,15 @@ public:
 	bool isMoving(float time);
 	bool notMoving(float time);
 
-	inline float calcKineticEnergy();
 
+
+	// Getters
 	inline float getRadius() { return m_Radius; }
 	inline float getMass() { return m_Mass; }
 	glm::vec3 getAcceleration() { return m_Acceleration; }
 	glm::vec3 getVelocity() { return m_Velocity; };
 
+	// Setters
 	void setVelocity(float v);
 };
 

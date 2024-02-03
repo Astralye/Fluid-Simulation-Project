@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Settings.h"
 #include "Particle.h"
 #include "Simulation/Rectangle.h"
 

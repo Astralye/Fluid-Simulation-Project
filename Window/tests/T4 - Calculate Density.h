@@ -11,6 +11,8 @@
 #include "Simulation/Rectangle.h"
 #include "Shader.h"
 
+#include "BufferData.h"
+
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
@@ -18,7 +20,7 @@
 
 #include <memory>
 
-#define BatchRender(x) BeginBatch();\
+#define HBatchRender(x) BeginBatch();\
 					   x;\
 				       EndBatch();\
 					   Flush();
@@ -26,8 +28,6 @@
 namespace test {
 
 	class T4_Calculate_Density : public Test {
-
-	private:
 
 	public:
 		T4_Calculate_Density();
@@ -38,12 +38,7 @@ namespace test {
 		void OnImGuiRender() override;
 		void Shutdown() override;
 
-		void BeginBatch();
-		void EndBatch();
-		void Flush();
-
-		void DrawCircle(Particle& p);
-		void DrawQuad(Rectangle& r);
+		void DrawCircle();
 		void CreateContainer(RectangleContainer& rc);
 		inline void timeStep();
 
@@ -52,41 +47,8 @@ namespace test {
 		std::vector<Particle> m_ParticleArray;
 		float m_ClearColour[4];
 
-		glm::mat4 QuadVertexPositions = {
-			//  X	  Y		Z	  W
-			{ -0.5, -0.5f, 0.0f, 1.0f},
-			{  0.5, -0.5f, 0.0f, 1.0f},
-			{  0.5,  0.5f, 0.0f, 1.0f},
-			{ -0.5,  0.5f, 0.0f, 1.0f}
-		};
-
-		// QUAD Data
-		// ------------------------------------
-
-		std::unique_ptr<VertexArray> m_QuadVAO;
-		std::unique_ptr<VertexBuffer> m_QuadVertexBuffer;
-		GLuint QuadIB = 0;
-
-		Vertex* m_QuadBuffer = nullptr;
-		Vertex* m_QuadBufferPtr = nullptr;
-
-		uint32_t IndexCount = 0;
-
-		std::unique_ptr<Shader> m_QuadShader;
-
-		// Circle Data
-		// ------------------------------------
-
-		std::unique_ptr<VertexArray> m_CircleVAO;
-		std::unique_ptr<VertexBuffer> m_CircleVertexBuffer;
-		GLuint CircleIB = 0;
-
-		CircleVertex* m_CircleBuffer = nullptr;
-		CircleVertex* m_CircleBufferPtr = nullptr;
-
-		uint32_t CircleIndexCount = 0;
-
-		std::unique_ptr<Shader> m_CircleShader;
+		BufferData<Vertex> QuadBuffer;
+		BufferData<CircleVertex> CircleBuffer;
 
 		// ------------------------------------
 
@@ -96,7 +58,7 @@ namespace test {
 		glm::mat4 m_Proj, m_View, m_Model, m_MVP;
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
-		constexpr static float SIMSTEP = 0.016; // An integer is one second.
+		constexpr static float SIMSTEP = 0.016f; // An integer is one second.
 		int m_DrawCalls;
 
 		// 30 FPS = 1/30 = 0.03

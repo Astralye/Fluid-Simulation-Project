@@ -30,7 +30,7 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 	float value = std::max(0.0f, radius - distance);
 	
 	// Cubic function
-	value = pow(value, 3);
+	value = (float)pow(value, 3);
 
 	return value;
 }
@@ -45,10 +45,10 @@ float PhysicsEq::fmaGetAccel(float mass, float force) { return (force / mass); }
 
 
 // Equation for kinetic energy
-float PhysicsEq::kineticEnergy(float mass, float velocity) { return (mass * pow(velocity, 2)) / 2; }
+float PhysicsEq::kineticEnergy(float mass, float velocity) { return (float)(mass * pow(velocity, 2)) / 2; }
 
 // Magnitude for 2D space
-float PhysicsEq::pythagoras(float a, float b) { return sqrt(pow(a, 2) + pow(b, 2)); }
+float PhysicsEq::pythagoras(float a, float b) { return (float)sqrt(pow(a, 2) + pow(b, 2)); }
 // Magnitude for 3D space
-float PhysicsEq::pythagoras(float a, float b, float c) { return sqrt(pow(a, 2) + pow(b, 2) + pow(c,2)); }
+float PhysicsEq::pythagoras(float a, float b, float c) { return (float)sqrt(pow(a, 2) + pow(b, 2) + pow(c,2)); }
 

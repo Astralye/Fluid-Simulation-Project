@@ -5,7 +5,7 @@
 void Camera::move(axis type, bool positive) {
 
 	// movement is relative to zoom
-	float moveIncrement = 0.02 * m_Projection.right;
+	float moveIncrement = 0.02f * m_Projection.right;
 
 	moveIncrement = (positive) ? moveIncrement : -moveIncrement;
 	
@@ -21,7 +21,7 @@ void Camera::move(axis type, bool positive) {
 
 void Camera::zoom(bool pos) {
 
-	int increment = 10;
+	float increment = 10.0f;
 	m_Zoom = (pos) ? increment : -increment;
 
 	float projZoom = m_Zoom / 2;

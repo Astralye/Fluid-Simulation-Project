@@ -51,7 +51,7 @@ namespace test {
 
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
-		constexpr static float SIMSTEP = 0.016; // An integer is one second.
+		constexpr static float SIMSTEP = 0.016f; // An integer is one second.
 
 		// 30 FPS = 1/30 = 0.03
 		// 60 FPS = 1/60 = 0.016

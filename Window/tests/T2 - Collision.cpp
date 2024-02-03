@@ -36,9 +36,9 @@ namespace test {
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		*/
 
-		const size_t MaxQuadCount = 100;
-		const size_t MaxVertexCount = MaxQuadCount * 4;
-		const size_t MaxIndexCount = MaxQuadCount * 6;
+		const int MaxQuadCount = 100;
+		const int MaxVertexCount = MaxQuadCount * 4;
+		const int MaxIndexCount = MaxQuadCount * 6;
 
 		// Create vertex array
 		m_VAO = std::make_unique<VertexArray>();

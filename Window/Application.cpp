@@ -55,7 +55,7 @@ int main(void){
 
 
     // GLFW window
-	GLFWwindow* window = glfwCreateWindow(WINDOW_RESOLUTION.x, WINDOW_RESOLUTION.y, "Hello World", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)WINDOW_RESOLUTION.x, (int)WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
     if (!window){
         glfwTerminate();
         return -1;
@@ -67,9 +67,6 @@ int main(void){
 
     glfwMakeContextCurrent(window);
 
-    // Vsync
-
-	// Uncomment to uncap framerate
     glfwSwapInterval(0);
 
 // End --------------------------------------------------------------------------
