@@ -1,4 +1,4 @@
-#include <iostream>"
+#include <iostream>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -300,17 +300,15 @@ void Particle::update(){
 	m_Vertices[3] =
 		{ m_Position.x - m_Radius, m_Position.y - m_Radius }; // BL
 
-	//std::cout << "X a:" << m_Acceleration.x << "  " << "V: " << m_Velocity.x;
-	//std::cout << ", Y a:" << m_Acceleration.y << "  " << "V: " << m_Velocity.y << std::endl;
 }
 
 void Particle::bounce() {
-	float bounceCoEff = 0.7;
+	float bounceCoEff = 0.7f;
 
 	m_Acceleration.y = invert(m_Acceleration.y) * ((float)rand()) / RAND_MAX;
 	m_Velocity.y = bounceCoEff * invert(m_Velocity.y) * (((float)rand()) / RAND_MAX) ;
 
-	m_Velocity.x = m_Velocity.x * 0.7;
+	m_Velocity.x = m_Velocity.x * 0.7f;
 }
 
 // Inverts value

@@ -20,7 +20,6 @@ namespace test {
 		virtual void OnUpdate(float deltaTime){}
 		virtual void OnRender() {}
 		virtual void OnImGuiRender() {}
-		virtual void movementData(Camera cam) {}
 		virtual void Shutdown() {}
 	};
 

@@ -33,6 +33,7 @@ namespace test {
 		* of particles, then we have to change it.
 		* 
 		*/
+
 		m_ParticleArray.reserve(MAX_PARTICLES);
 
 		// ------------------------------------------------------------
@@ -75,6 +76,7 @@ namespace test {
 		for (int i = 0; i < m_ParticleArray.size(); i++) {
 			m_ParticleArray[i].update();
 
+			// Check for collision detection for each particle against the container.
 			auto collide = Collision::collisionDetection(m_RectContainer, m_ParticleArray[i]);
 
 			if (collide.m_isCollision) {
@@ -114,6 +116,7 @@ namespace test {
 	*/
 	void T4_Calculate_Density::OnRender()
 	{
+		// Set dynamic vertex buffer
 		m_DrawCalls = 0;
 
 		// Set Background
@@ -132,6 +135,7 @@ namespace test {
 			QuadBuffer.Flush();
 		}
 
+
 		// Circle Batch Render
 		{
 			CircleBuffer.BeginBatch();
@@ -148,6 +152,7 @@ namespace test {
 		ImGui::Text("Zoom {-,+}");
 		ImGui::Text("Particles: %i", MAX_PARTICLES);
 		ImGui::Text("Draw calls: %i", m_DrawCalls);
+
 		ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
 
 		ImGui::Text("Time: %.3f", time);

@@ -16,5 +16,6 @@ static const uint16_t MAX_PARTICLES = 50;
 
 static const bool ENABLE_GRAVITY = false;
 
+static const bool ENABLE_GRAVITY = true;
 
 #endif

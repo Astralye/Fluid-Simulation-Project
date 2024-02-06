@@ -6,10 +6,9 @@
 
 #include "PhysicsEq.h"
 #include "glm/glm.hpp"
-#include <iostream>
+#include <vector>
 
 class Particle{
-class Particle
 {
 private:
 
@@ -36,9 +35,10 @@ public:
 
 	// Default constructor
 	Particle(
-		glm::vec3 pos = { 0.0f, 0.0f, 0.0f },
+		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
 		float mass = 1,
 		float radius = 1,
+		float kernelRadius = 5,
 		glm::vec3 vel = { 0.0f, 0.0f, 0.0f },
 		glm::vec3 acc = { 0.0f, 0.0f, 0.0f }
 		m_Density(0)
@@ -84,7 +84,7 @@ public:
 	void update_Pos();
 	void update();
 	{
-		std::cout << "Copied!" << std::endl;
+		//std::cout << "Copied!" << std::endl;
 	}
 
 	static void init_Cube(std::vector<Particle> &particleArray, float radius, float spacing);
@@ -119,4 +119,6 @@ public:
 	// Setters
 	void setVelocity(float v);
 };
+
+#endif
 

@@ -27,7 +27,11 @@ void main()
 	Output.LocalPosition = a_LocalPosition;
 	Output.Colour = a_Colour;
 
+	// Output variables
+	//v_Colour = a_Colour;
 	gl_Position = a_WorldPosition;
+	//v_TexCoord = a_TexCoord;
+	//v_TexIndex = a_TexIndex;
 };
 
 
