@@ -5,18 +5,11 @@
 struct collisionType {
 	bool m_isCollision;
 
-	enum Type {
-		N_A = 0,
-		Vertical = 1,
-		Horizontal = 2
-	};
-
+	enum Type { N_A, Vertical, Horizontal };
 	Type type;
 
-	collisionType(bool collision,Type value = Type::N_A)
-		: m_isCollision(collision), type(value)
-	{
-	}
+	collisionType(bool collision, Type value = Type::N_A)
+		: m_isCollision(collision), type(value){}
 
 };
 

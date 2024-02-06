@@ -54,7 +54,20 @@ void Collision::collisionResponse(Particle* A, collisionType::Type type) {
 		//	A->m_Position.y += 0.1;
 		//}
 
-		//A->bounce();
+		if (ENABLE_GRAVITY) {
+
+			if (A->getVelocity().x == 0) {
+				A->setVelocity(0);
+			}
+			else {
+				A->m_Position.y += 0.1f;
+			}
+
+			A->bounce();
+		}
+		else {
+			flip.y = true;
+		}
 		break;
 
 	case collisionType::Vertical:
@@ -96,6 +109,7 @@ bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 	return false;
 }
 
+// Collision between a Rectangle and Particle
 collisionType Collision::collisionDetection(RectangleContainer& A, Particle& B) {
 	if (collisionDetection(A.m_SideA, B) || collisionDetection(A.m_SideC, B)) {
 		return { true, collisionType::Horizontal };

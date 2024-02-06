@@ -24,11 +24,9 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_glfw.h>
 
-#include "tests/TestClearColour.h"
-#include "tests/TestTexture2D.h"
-#include "tests/FreeFallSim.h"
-#include "tests/T2 - Collision.h"
-#include "tests/T3 - Dynamic Particles.h"
+#include "tests/Test.h"
+#include "tests/T4 - Calculate Density.h"
+#include "tests/T4 - Calculate Density.h"
 
 Camera camera;
 
@@ -88,12 +86,7 @@ int main(void){
 	test::Test* currentTest = nullptr;
 	test::TestMenu* testMenu = new test::TestMenu(currentTest);
 	currentTest = testMenu;
-
-	testMenu->RegisterTest<test::TestClearColour>("Clear Colour");
-	testMenu->RegisterTest<test::TestTexture2D>("Test Texture");
-	testMenu->RegisterTest<test::FreeFallSim>("T1 - Free Fall");
-	testMenu->RegisterTest<test::T2_Collision>("T2 - Collision");
-	testMenu->RegisterTest<test::T3_Dynamic_Particles>("T3 - Dynamic Particles");
+	testMenu->RegisterTest<test::T4_Calculate_Density>("T4 - Calculate Density");
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -107,8 +100,7 @@ int main(void){
 
 		// If currentTest exists
 		if (currentTest)
-		{
-			currentTest->movementData(camera);
+			currentTest->OnUpdate(SIMSTEP);
 			currentTest->OnUpdate(Sim::SIMSTEP);
 			currentTest->OnRender();
 			ImGui::Begin("Test");

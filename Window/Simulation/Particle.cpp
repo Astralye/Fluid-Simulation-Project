@@ -1,154 +1,304 @@
 #include <iostream>"
 
-#include "Particle.h"
-#include "Sim.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
-const bool ENABLE_GRAVITY = false;
+#include "Settings.h"
+#include "Particle.h"
+
+float Particle::KERNEL_RADIUS = 5.0f;
+float Particle::particleProperties[MAX_PARTICLES] = {0};
+
+// Particle Initializers
+
+void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, float spacing)
+{
+	// 8 bit -> 256^2 = max 65k particles
+	uint16_t column, row;
+	float squareDimension;
 
 // MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
 
-void Particle::update_Accel(float x, float y, float z) {
+	squareDimension = (float)sqrt(MAX_PARTICLES);
 
-	// Do some calculations
+	offset = { containerCenter.x / 2, containerCenter.y / 2 };
+	max_Size = { (int)ceil(squareDimension), (int)floor(squareDimension) };
 
-	float a_X, a_Y, a_Z;
+	// Set base values
+	column = 0;
+	row = 0;
 
-	float x_Jerk = 30;
-	float y_Jerk = 30;
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+		position = { row * (2 * radius + spacing),
+					column * (2 * radius + spacing)};
 
-	a_X = m_Acceleration.x;
-	a_Y = m_Acceleration.y;
-	a_Z = m_Acceleration.z;
+		row++;
 
-	// Jerk is the change of m_Acceleration, derivative of m_Acceleration.
-	// Change of m_Acceleration is in proportion to simulation step.
+		if (row == max_Size.x) {
+			column++;
+			row = 0;
+		}
+
+		particleArray.emplace_back(
+			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
+
+		Particle::particleProperties[i] = Particle::ExampleFunction(particleArray[i].m_Position);
+	}
+}
+void Particle::init_Random(std::vector<Particle>& particleArray, float radius) {
+
+	int maxVelocity = 25;
+
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+
+		particleArray.emplace_back(
+			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f,0.0f), 1.0f, radius,
+			glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f)
+		);
+	}
+}
+
+// If the positions are the same. This doesn't exactly work if two
+// particles are in the exact same spot, but the likelihood of that
+// happening are close to zero
+bool Particle::operator==(const Particle& comp) const {
+	return (this->m_Position == comp.m_Position);
+}
+
+// Example function
+float Particle::ExampleFunction(glm::vec2 pos) {
+	return cos(pos.y - 3 + sin(pos.x));
+}
+
+/* 
+*	Calculate the density for a specified particle
+*	
+*	======================================================
+*
+*	   p	= SIGMA [ mass * W(r - r',h) ]
+*	--------------------------------------
+*	Density	   SUM			   Kernel
+* 
+*	To maintain densities at any kernel radius, the value 
+*	before added is divided by the volume, turning it into:
+*
+*	p ( Density ) = SIGMA ( SUM ) of [ [mass * W(r - r',h)] / volume ]
+*
+*	=======================================================
+*/
+float Particle::CalculateDensity(std::vector<Particle>& arr, Particle &chosenParticle) {
+
+	float density = 0;
+
+	// This current function is O(n^2), need to improve upon it.
+
+	float volume = ( M_PI * pow(Particle::KERNEL_RADIUS, 8) ) / 4;
+
+	// SUM
+	for (int i = 0; i < arr.size(); i++) {
+		if (arr[i] == chosenParticle) { continue; }
+		density += arr[i].getMass() * PhysicsEq::SmoothingKernel(arr[i].m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / volume;
+	}
+
+	return density;
+}
+
+/*
+*	Calculate the density for a specified particle
+*
+*	========================================================
+*
+*	  A(x)	 = SIGMA,i [ A * mass /	p	* W(r - r',h) ]
+*	---------------------------------------------------
+*	Property    SUM_i	 A_i	Density_i	Kernel
+* 
+*	Where A is the particle Property
+* 
+*	When substituting the A to find density, with p,
+*	this cancels out and giving us the equation from
+* 
+*	- CalculateDensity()
+*
+*	=========================================================
+* 
+*/
+float Particle::CalculateProperty(std::vector<Particle>& arr, Particle& chosenParticle) {
+
+	float property = 0;
+
+	for (int i = 0; i < arr.size(); i++) {
+		if (arr[i] == chosenParticle) { continue; }
+
+		float influence = PhysicsEq::SmoothingKernel(arr[i].m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS);
+		float density = CalculateDensity(arr, arr[i]);
+		property += Particle::particleProperties[i] * ( arr[i].getMass() / density ) * influence;
+	}
+
+	return property;
+}
+
+/* 
+*	Calculate the density for a specified particle
+* 
+*	==============================================
+* 
+*	A(x) = SIGMA,i [ Ai * m/p * W()
+* 
+*/
+glm::vec2 Particle::CalculatePropertyGradient(std::vector<Particle>& arr, Particle& chosenParticle) {
+
+	glm::vec2 propertyGrad = {0,0};
+
+	for (int i = 0; i < arr.size(); i++) {
+		if (arr[i] == chosenParticle) { continue; }
+
+		float dst = PhysicsEq::euclid_Distance(arr[i].m_Position, chosenParticle.m_Position);
+
+		glm::vec2 dir = (arr[i].m_Position - chosenParticle.m_Position) / dst;
+		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
+		float density = CalculateDensity(arr, arr[i]);
+		propertyGrad += -Particle::particleProperties[i] * slope * arr[i].getMass() / density;
+	}
+
+	return propertyGrad;
+}
+
+
+
+/*
+*	Updates the acceleration of a particle
+* 
+*	Jerk is the derivative of acceleration.
+*	Change of acceleration is in proportion to simulation step.
+*/
+void Particle::update_Accel() {
+
+	glm::vec3 accel{ m_Acceleration.x, m_Acceleration.y, m_Acceleration.z };
+	glm::vec3 jerk{ 30.0f, 30.0f, 0.0f };
 
 	if (m_Velocity.x > 0 && m_Acceleration.x > 0) {
-		x_Jerk = toNegative(x_Jerk);
+		jerk.x = PhysicsEq::toNegative(jerk.x);
 	}
 
 	if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
-		y_Jerk = toNegative(y_Jerk);
+		jerk.y = PhysicsEq::toNegative(jerk.y);
 	}
 
 	// Gravity
-
 	if (ENABLE_GRAVITY) {
-		if (abs(a_Y) < abs(PhysicsEq::GRAVITY) && m_Position.y > 0) {
-			a_Y = a_Y + (-y_Jerk * Sim::SIMSTEP);
+		if (abs(accel.y) < abs(PhysicsEq::GRAVITY) && m_Position.y > 0) {
+			accel.y = accel.y + (-jerk.y * SIMSTEP);
 		}
 		else {
-			a_Y = PhysicsEq::GRAVITY;
+			accel.y = PhysicsEq::GRAVITY;
 		}
 	}
 
 	// Remove values close to zero
-	if (abs(a_X) <= 0.5) { a_X = 0; }
-	if (abs(a_Y) <= 0.1) { a_Y = 0; }
+	if (abs(accel.x) <= 0.5f) { accel.x = 0; }
+	if (abs(accel.y) <= 0.1f) { accel.y = 0; }
 
-	m_Acceleration = glm::vec3(a_X, a_Y, a_Z);
+	m_Acceleration = accel;
 }
 
-// New m_Velocity = old m_Velocity + new m_Acceleration over t period
-// V = u + at
+/*
+*	Updates velocity of a particle
+* 
+*	=====================================================
+* 
+*	if there is an acceleration, use the SUVAT equation
+*
+*	   V	=	u	  +		a * t
+*	-------------------------------------
+*	New Vel  Old Vel	Acceleration Time
+*	
+* 
+*	if not, slow down particle via friction
+*	   V	=   u	 *	 friction
+* 
+*	======================================================
+* 
+*/
 void Particle::update_Vel() {
 
-	// Initial Velocities
-	float u_X, u_Y, u_Z, friction;
+	glm::vec3 vel{ m_Velocity.x,m_Velocity.y,m_Velocity.z };
+	
+	float friction = 1;
+	//float friction = 0.9999;
 
-	u_X = m_Velocity.x;
-	u_Y = m_Velocity.y;
-	u_Z = m_Velocity.z;
-	//friction = 0.9999;
-	friction = 1;
+	if (m_Acceleration.x != 0) { vel.x += (m_Acceleration.x * SIMSTEP); }
+	else { vel.x *= friction; }
 
+	if (m_Acceleration.y != 0) { vel.y += (m_Acceleration.y * SIMSTEP); }
+	else { vel.y *= friction; }
 
-	// if there is an acceleration, use it. If not , slow down by a fraction.
-
-	if (m_Acceleration.x != 0) {
-		u_X = u_X + (m_Acceleration.x * Sim::SIMSTEP);
-	}
-	else {
-		u_X = u_X * friction;
-	}
-
-	if (m_Acceleration.y != 0) {
-		u_Y = u_Y + (m_Acceleration.y * Sim::SIMSTEP);
-	}
-	else {
-		u_Y = u_Y * friction;
-	}
-
-	//if (abs(u_Y) > abs(PhysicsEq::GRAVITY * m_Mass)) {
-	//	if (u_Y > 0) {
-	//		u_Y = PhysicsEq::GRAVITY * m_Mass;
-	//	}
-	//	u_Y = - PhysicsEq::GRAVITY * m_Mass;
-	//}
-
-	u_Z = u_Z + (m_Acceleration.y * Sim::SIMSTEP);
+	if (m_Acceleration.z != 0) { vel.z += +(m_Acceleration.z * SIMSTEP); }
+	else { vel.z *= friction; }
 	
 	// Remove values close to zero
-	if (abs(u_X) < 0.1 && abs(m_Acceleration.x) == 0) { u_X = 0; }
-	if (abs(u_Y) < 0.1 && abs(m_Acceleration.y) == 0) { u_Y = 0; }
+	if (abs(vel.x) < 0.1f && abs(m_Acceleration.x) == 0) { vel.x = 0; }
+	if (abs(vel.y) < 0.1f && abs(m_Acceleration.y) == 0) { vel.y = 0; }
+	if (abs(vel.z) < 0.1f && abs(m_Acceleration.z) == 0) { vel.z = 0; }
 
-	m_Velocity = glm::vec3(u_X, u_Y, u_Z);
-
+	m_Velocity = vel;
 }
 
 // S = ut + 1/2(at)^2
 // If m_Acceleration is negative, maintain distance, remove 1/2(at)^2
-void Particle::update_Pos(float time) {
-	// Retrieve velocities
-	float x, y, z;
 
-	x = m_Position.x;
-	y = m_Position.y;
-	z = m_Position.z;
+/*
+*	Updates position of a particle
+*
+*	=====================================================
+* 
+*	SUVAT equation relating time and movement:
+* 
+*	   S	=	 u	  *	 t    +  1/2 ( a  *	  t )^2
+*	----------------------------------------------
+*	  Pos	 Velocity	Time	Acceleration Time
+* 
+* 
+* 
+*	There is a problem with using acceleration and time,
+*	such that it assumes a body is moving from point A to B
+*	However, we cannot predict where point B will be after collisions,
+*	and as such, it has to be omitted, leaving us instead with
+*	
+*	   S	=	 u	  *	 t 
+*	-------------------------
+*	  Pos	 Velocity	Time	
+* 
+*	======================================================
+*
+*/
+void Particle::update_Pos() {
+	glm::vec3 pos{ m_Position.x, m_Position.y, m_Position.z };
 
+	pos.x += m_Velocity.x * SIMSTEP;
+	pos.y += m_Velocity.y * SIMSTEP;
+	pos.z += m_Velocity.z * SIMSTEP;
 
-	// CLEAN UP CODE THIS LOOKS VERY MESSY
-	//
-	//
+	m_Position = glm::vec4(pos, 0.0f);
+}
 
-	x = x + m_Velocity.x * Sim::SIMSTEP;
+// Updates all the accelerations, velocities and positions before changing the vertex positions.
+void Particle::update(){
+	update_Accel();
+	update_Vel();
+	update_Pos();
 
-	//if (m_Acceleration.x <= 0) {
-	//	// If negative m_Acceleration/ decceleration, distance moves back instead
-	//	if (m_Velocity.x > 0){
-	//		x += m_Velocity.x * Sim::SIMSTEP;
-	//	}
-	//}
-	//else
-	//{
-	//	//x = x + ((m_Velocity.getX() * t) + (m_Acceleration.getX() / 2) * pow(t, 2)) * Sim::SIMSTEP;
-	//}
+	m_Vertices[0] =
+		{ m_Position.x - m_Radius, m_Position.y + m_Radius }; // TL
 
-	// S = vt - 1/2(at)^2
-		
-	// Movement due to m_Acceleration
-	//float yAccel = (PhysicsEq::GRAVITY * pow(m_TimeSinceContact, 2)) / 2;
-	y = y + m_Velocity.y * Sim::SIMSTEP ;
+	m_Vertices[1] =
+		{ m_Position.x + m_Radius, m_Position.y + m_Radius }; // TR
 
-	// When bounce
-	if (y <= 0) {
-		y = 0;
-		bounce();
-	}
+	m_Vertices[2] =
+		{ m_Position.x + m_Radius, m_Position.y - m_Radius }; // BR
 
-	if (m_Acceleration.z < 0) {
-		// If negative m_Acceleration/ decceleration, distance moves back instead
-		//z = z + (m_Velocity.getZ() * t) * Sim::SIMSTEP;
-	}
-	else
-	{
-		//z = z + ((m_Velocity.getZ() * t) + (m_Acceleration.getZ() / 2) * pow(t, 2)) * Sim::SIMSTEP;
-	}
-
-	m_Position = glm::vec3(x, y, z);
-	m_Coords.update(m_Position,m_Radius);
-
-	// update square coordinate pointss
+	m_Vertices[3] =
+		{ m_Position.x - m_Radius, m_Position.y - m_Radius }; // BL
 
 	//std::cout << "X a:" << m_Acceleration.x << "  " << "V: " << m_Velocity.x;
 	//std::cout << ", Y a:" << m_Acceleration.y << "  " << "V: " << m_Velocity.y << std::endl;
@@ -157,31 +307,10 @@ void Particle::update_Pos(float time) {
 void Particle::bounce() {
 	float bounceCoEff = 0.7;
 
-	m_Acceleration.y = invert(m_Acceleration.y);
-	m_Velocity.y = bounceCoEff * invert(m_Velocity.y);
+	m_Acceleration.y = invert(m_Acceleration.y) * ((float)rand()) / RAND_MAX;
+	m_Velocity.y = bounceCoEff * invert(m_Velocity.y) * (((float)rand()) / RAND_MAX) ;
 
 	m_Velocity.x = m_Velocity.x * 0.7;
-}
-
-bool Particle::isMoving(float time) {
-	/*
-	if ((m_Velocity.getX() != 0 || m_Velocity.getY() != 0 || m_Velocity.getZ() != 0) || time >= 0) {
-		//std::cout << "run" << std::endl;
-		return true;
-	}
-	std::cout << "dont run" << std::endl;
-	return false;
-	*/
-	return false;
-}
-
-bool Particle::notMoving(float time) {
-	return !isMoving(time);
-}
-
-void Particle::setVelocity(float v)
-{
-	m_Velocity.x = v;
 }
 
 // Inverts value
@@ -212,14 +341,18 @@ void Particle::invert(glm::vec3 type)
 		m_Velocity.y = -m_Velocity.y;
 		m_Acceleration.y = -m_Acceleration.y;
 	}
+
+	if (type.z) {
+		m_Velocity.z = -m_Velocity.z;
+		m_Acceleration.z = -m_Acceleration.z;
+	}
 }
 
-// Always returns Negative value
-inline float Particle::toNegative(float value) {
-	return -toPositive(value);
+void Particle::setVelocity(float velocity) {
+	m_Velocity.x = velocity;
 }
 
-// Always returns positive value
-inline float Particle::toPositive(float value) {
-	return abs(value);
+void Particle::setDensity(float den)
+{
+	m_Density = den;
 }
