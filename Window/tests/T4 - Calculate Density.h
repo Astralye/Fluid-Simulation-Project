@@ -7,7 +7,6 @@
 #include "Simulation/Collision.h"
 #include "Simulation/Particle.h"
 #include "Simulation/PhysicsEq.h"
-#include "Simulation/Sim.h"
 #include "Simulation/Rectangle.h"
 #include "Shader.h"
 

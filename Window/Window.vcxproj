@@ -159,7 +159,6 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation\Collision.cpp" />
     <ClCompile Include="Simulation\Particle.cpp" />

@@ -17,7 +17,9 @@ void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, flo
 	uint16_t column, row;
 	float squareDimension;
 
-// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
+	glm::vec2 offset, position, max_Size, containerCenter{50,50};
+
+	// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
 
 	squareDimension = (float)sqrt(MAX_PARTICLES);
 
@@ -101,6 +103,7 @@ float Particle::CalculateDensity(std::vector<Particle>& arr, Particle &chosenPar
 		density += arr[i].getMass() * PhysicsEq::SmoothingKernel(arr[i].m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / volume;
 	}
 
+	chosenParticle.setDensity(density);
 	return density;
 }
 
@@ -243,9 +246,6 @@ void Particle::update_Vel() {
 
 	m_Velocity = vel;
 }
-
-// S = ut + 1/2(at)^2
-// If m_Acceleration is negative, maintain distance, remove 1/2(at)^2
 
 /*
 *	Updates position of a particle

@@ -100,9 +100,9 @@ int main(void){
 		ImGui::NewFrame();
 
 		// If currentTest exists
-		if (currentTest)
+		if (currentTest) {
+
 			currentTest->OnUpdate(SIMSTEP);
-			currentTest->OnUpdate(Sim::SIMSTEP);
 			currentTest->OnRender();
 			ImGui::Begin("Test");
 
@@ -135,16 +135,16 @@ int main(void){
 
 	currentTest->Shutdown();
 
-	delete currentTest;
-	if (currentTest != testMenu)
-		delete testMenu;
+		delete currentTest;
+		if (currentTest != testMenu)
+			delete testMenu;
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 
-    glfwTerminate();
-    return 0;
+		glfwTerminate();
+		return 0;
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {

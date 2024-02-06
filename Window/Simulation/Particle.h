@@ -9,7 +9,6 @@
 #include <vector>
 
 class Particle{
-{
 private:
 
 	glm::vec3 m_Acceleration;
@@ -24,11 +23,9 @@ public:
 	enum Vector {
 		Acceleration = 1,
 		Velocity = 2,
+	};
+
 	glm::vec4 m_Position;
-	glm::vec2 m_Vertices[4];
-
-	SquareCoords m_Coords;
-
 	glm::vec2 m_Vertices[4];
 
 	float m_KernelRadius;
@@ -38,24 +35,29 @@ public:
 		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
 		float mass = 1,
 		float radius = 1,
-		float kernelRadius = 5,
 		glm::vec3 vel = { 0.0f, 0.0f, 0.0f },
 		glm::vec3 acc = { 0.0f, 0.0f, 0.0f }
+	)
+		:
+		m_Position(pos),
+		m_Radius(radius),
+		m_Acceleration(acc),
+		m_Mass(mass),
 		m_Density(0)
-		m_KernelRadius(kernelRadius),
+	{
+		m_Vertices[0] =
+		{ m_Position.x - radius, m_Position.y + radius }; // TL
 
-		// Remove m_Coords
-		m_Coords(
-			glm::vec2(m_Position.x - radius, m_Position.y + radius), // TL
-			glm::vec2(m_Position.x + radius, m_Position.y + radius), // TR
-			glm::vec2(m_Position.x - radius, m_Position.y - radius), // BL
-			glm::vec2(m_Position.x + radius, m_Position.y - radius)  // BR
-		)
-		m_Radius(particle.m_Radius)
-		  m_Acceleration(particle.m_Acceleration),
-		m_Mass(particle.m_Mass),
-		m_Radius(particle.m_Radius),
-		m_KernelRadius(particle.m_KernelRadius),
+		m_Vertices[1] =
+		{ m_Position.x + radius, m_Position.y + radius }; // TR
+
+		m_Vertices[2] =
+		{ m_Position.x + radius, m_Position.y - radius }; // BR
+
+		m_Vertices[3] =
+		{ m_Position.x - radius, m_Position.y - radius }; // BL
+	}
+
 	// Static functions
 	// -------------------------------------------------
 	// Creates a cube of particles
@@ -79,16 +81,10 @@ public:
 
 
 	// Update values
-			glm::vec2(m_Position.x + particle.m_Radius, m_Position.y + particle.m_Radius), // TR
-			glm::vec2(m_Position.x - particle.m_Radius, m_Position.y - particle.m_Radius), // BL
+	void update_Accel();
+	void update_Vel();
 	void update_Pos();
 	void update();
-	{
-		//std::cout << "Copied!" << std::endl;
-	}
-
-	static void init_Cube(std::vector<Particle> &particleArray, float radius, float spacing);
-	static void init_Random(std::vector<Particle>& particleArray, float radius);
 
 	// Getters
 	void bounce();
@@ -100,13 +96,13 @@ public:
 	bool isMoving(float time);
 	bool notMoving(float time);
 
-
-
 	// Getters
 	inline float getRadius() { return m_Radius; }
 	inline float getMass() { return m_Mass; }
+	inline float getDensity() { return m_Density; }
 	inline glm::vec3 getAcceleration() { return m_Acceleration; }
 	inline glm::vec3 getVelocity() { return m_Velocity; }
+
 	
 
 	// Setter
@@ -116,8 +112,6 @@ public:
 	bool operator==(const Particle& comp) const;
 	bool operator!=(const Particle& comp) const;
 
-	// Setters
-	void setVelocity(float v);
 };
 
 #endif
