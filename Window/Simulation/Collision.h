@@ -18,8 +18,8 @@ struct collisionType {
 class Collision {
 
 public:
-	static void collisionResponse(Particle* A, Particle* B);
-	static void collisionResponse(Particle* A, collisionType::Type type);
+	static void collisionResponse(Particle& A, Particle& B);
+	static void collisionResponse(Particle& A, collisionType::Type type);
 
 
 

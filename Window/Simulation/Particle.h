@@ -28,20 +28,18 @@ public:
 	glm::vec4 m_Position;
 	glm::vec2 m_Vertices[4];
 
-	float m_KernelRadius;
-
 	// Default constructor
 	Particle(
 		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
 		float mass = 1,
 		float radius = 1,
 		glm::vec3 vel = { 0.0f, 0.0f, 0.0f },
-		glm::vec3 acc = { 0.0f, 0.0f, 0.0f }
-	)
-		:
+		glm::vec3 acc = { 0.0f, 0.0f, 0.0f } )
+	:
 		m_Position(pos),
 		m_Radius(radius),
 		m_Acceleration(acc),
+		m_Velocity(vel),
 		m_Mass(mass),
 		m_Density(0)
 	{
@@ -61,14 +59,14 @@ public:
 	// Static functions
 	// -------------------------------------------------
 	// Creates a cube of particles
-	static void init_Cube(std::vector<Particle> &particleArray, float radius, float spacing);
+	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing);
 
 	// Creates a particles with random positions and velocities
-	static void init_Random(std::vector<Particle>& particleArray, float radius);
+	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
-	static float CalculateDensity(std::vector<Particle> &arr, Particle &particle);
-	static float CalculateProperty(std::vector<Particle>& arr, Particle& particle);
-	static glm::vec2 CalculatePropertyGradient(std::vector<Particle>& arr, Particle& chosenParticle);
+	static float CalculateDensity(std::vector<Particle> *arr, Particle &particle);
+	static float CalculateProperty(std::vector<Particle> *arr, Particle &particle);
+	static glm::vec2 CalculatePropertyGradient(std::vector<Particle> *arr, Particle &chosenParticle);
 
 	static float ExampleFunction(glm::vec2 pos);
 

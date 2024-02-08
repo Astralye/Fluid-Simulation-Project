@@ -47,7 +47,7 @@ template<> BufferData<Vertex>::BufferData()
 }
 
 template<> BufferData<CircleVertex>::BufferData()
-	: BufferType(VertexType::CIRCLE) 
+	: BufferType(VertexType::CIRCLE)
 {
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Circle.shader");
@@ -71,7 +71,7 @@ template<> BufferData<CircleVertex>::BufferData()
 
 // End Batch ------------------------------------------------------------------
 // These are all the same code
-template<typename T> void BufferData<T>::EndBatch(){}
+template<typename T> void BufferData<T>::EndBatch() {}
 template<> void BufferData<Vertex>::EndBatch()
 {
 	GLsizeiptr size = (uint8_t*)m_BufferPtr - (uint8_t*)m_Buffer;
@@ -89,8 +89,8 @@ template<> void BufferData<CircleVertex>::EndBatch()
 
 // Begin Batch ----------------------------------------------------------------
 // These are all the same code
-template<typename T> void BufferData<T>::BeginBatch(){}
-template<> void BufferData<Vertex>::BeginBatch(){
+template<typename T> void BufferData<T>::BeginBatch() {}
+template<> void BufferData<Vertex>::BeginBatch() {
 	m_BufferPtr = m_Buffer;
 }
 template<> void BufferData<CircleVertex>::BeginBatch() {
@@ -99,8 +99,8 @@ template<> void BufferData<CircleVertex>::BeginBatch() {
 
 // Flush Batch ---------------------------------------------------------------
 // These are all the same code
-template<typename T> void BufferData<T>::Flush(){}
-template<> void BufferData<Vertex>::Flush(){
+template<typename T> void BufferData<T>::Flush() {}
+template<> void BufferData<Vertex>::Flush() {
 	m_Shader->Bind();
 	m_VAO->Bind();
 
@@ -119,8 +119,8 @@ template<> void BufferData<CircleVertex>::Flush() {
 // Draw Batch ----------------------------------------------------------------
 
 // Draw Quads
-template<typename T> void BufferData<T>::Draw(Rectangle &quad, glm::mat4 mvp){}
-template<> void BufferData<Vertex>::Draw(Rectangle &quad, glm::mat4 mvp){
+template<typename T> void BufferData<T>::Draw(Rectangle& quad, glm::mat4 mvp) {}
+template<> void BufferData<Vertex>::Draw(Rectangle& quad, glm::mat4 mvp) {
 
 	if (IndexCount >= MaxIndexCount) {
 		EndBatch();
@@ -139,8 +139,8 @@ template<> void BufferData<Vertex>::Draw(Rectangle &quad, glm::mat4 mvp){
 }
 
 // Draw circles
-template<typename T> void BufferData<T>::Draw(Particle &particle, glm::mat4 mvp) {}
-template<> void BufferData<CircleVertex>::Draw(Particle &particle, glm::mat4 mvp) {
+template<typename T> void BufferData<T>::Draw(Particle& particle, glm::mat4 mvp) {}
+template<> void BufferData<CircleVertex>::Draw(Particle& particle, glm::mat4 mvp) {
 
 	if (IndexCount >= MaxIndexCount) {
 		EndBatch();
@@ -150,7 +150,7 @@ template<> void BufferData<CircleVertex>::Draw(Particle &particle, glm::mat4 mvp
 
 	glm::vec4 vertex;
 	for (int i = 0; i < 4; i++) {
-		
+
 		vertex = mvp * glm::vec4(particle.m_Vertices[i], 0.0f, 1.0f);
 
 		m_BufferPtr->WorldPosition = vertex;

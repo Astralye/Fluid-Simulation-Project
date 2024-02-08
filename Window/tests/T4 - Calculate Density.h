@@ -19,11 +19,6 @@
 
 #include <memory>
 
-#define HBatchRender(x) BeginBatch();\
-					   x;\
-				       EndBatch();\
-					   Flush();
-
 namespace test {
 
 	class T4_Calculate_Density : public Test {
@@ -43,7 +38,7 @@ namespace test {
 
 	private:
 
-		std::vector<Particle> m_ParticleArray;
+		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
 
 		BufferData<Vertex> QuadBuffer;

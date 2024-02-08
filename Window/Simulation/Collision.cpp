@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-void Collision::collisionResponse(Particle* A, Particle* B) {
+void Collision::collisionResponse(Particle& A, Particle& B) {
 
 	//glm::vec3 a_Accel = A->getAcceleration();
 	//glm::vec3 a_Vel = A->getVelocity();
@@ -40,7 +40,7 @@ void Collision::collisionResponse(Particle* A, Particle* B) {
 	//std::cout << "u1 = " << vel1 << ", u2 =" << vel2 << std::endl;
 }
 
-void Collision::collisionResponse(Particle* A, collisionType::Type type) {
+void Collision::collisionResponse(Particle& A, collisionType::Type type) {
 
 	glm::vec3 flip{ false,false,false };
 
@@ -49,14 +49,14 @@ void Collision::collisionResponse(Particle* A, collisionType::Type type) {
 
 		if (ENABLE_GRAVITY) {
 
-			if (A->getVelocity().x == 0) {
-				A->setVelocity(0);
+			if (A.getVelocity().x == 0) {
+				A.setVelocity(0);
 			}
 			else {
-				A->m_Position.y += 0.1;
+				A.m_Position.y += 0.1;
 			}
 
-			A->bounce();
+			A.bounce();
 		}
 		else {
 			flip.y = true;
@@ -68,7 +68,7 @@ void Collision::collisionResponse(Particle* A, collisionType::Type type) {
 		break;
 	}
 
-	A->invert(flip);
+	A.invert(flip);
 }
 
 bool Collision::collisionDetection(Particle& A, Particle& B) {

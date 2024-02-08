@@ -11,13 +11,14 @@ float Particle::particleProperties[MAX_PARTICLES] = {0};
 
 // Particle Initializers
 
-void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, float spacing)
+void Particle::init_Cube(std::vector<Particle>* particleArray, float radius, float spacing)
 {
 	// 8 bit -> 256^2 = max 65k particles
 	uint16_t column, row;
 	float squareDimension;
 
-	glm::vec2 offset, position, max_Size, containerCenter{50,50};
+	glm::vec2 offset, position, max_Size;
+	glm::vec2 containerCenter = { 50.0f,50.0f };
 
 	// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
 
@@ -33,7 +34,6 @@ void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, flo
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 		position = { row * (2 * radius + spacing),
 					column * (2 * radius + spacing)};
-
 		row++;
 
 		if (row == max_Size.x) {
@@ -41,19 +41,19 @@ void Particle::init_Cube(std::vector<Particle>& particleArray, float radius, flo
 			row = 0;
 		}
 
-		particleArray.emplace_back(
+		particleArray->emplace_back(
 			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
 
-		Particle::particleProperties[i] = Particle::ExampleFunction(particleArray[i].m_Position);
+		//Particle::particleProperties[i] = Particle::ExampleFunction(particleArray->at(i).m_Position);
 	}
 }
-void Particle::init_Random(std::vector<Particle>& particleArray, float radius) {
+void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
 
 	int maxVelocity = 25;
 
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 
-		particleArray.emplace_back(
+		particleArray->emplace_back(
 			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f,0.0f), 1.0f, radius,
 			glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f)
@@ -89,7 +89,7 @@ float Particle::ExampleFunction(glm::vec2 pos) {
 *
 *	=======================================================
 */
-float Particle::CalculateDensity(std::vector<Particle>& arr, Particle &chosenParticle) {
+float Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenParticle) {
 
 	float density = 0;
 
@@ -98,9 +98,9 @@ float Particle::CalculateDensity(std::vector<Particle>& arr, Particle &chosenPar
 	float volume = ( M_PI * pow(Particle::KERNEL_RADIUS, 8) ) / 4;
 
 	// SUM
-	for (int i = 0; i < arr.size(); i++) {
-		if (arr[i] == chosenParticle) { continue; }
-		density += arr[i].getMass() * PhysicsEq::SmoothingKernel(arr[i].m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / volume;
+	for (int i = 0; i < arr->size(); i++) {
+		if (arr->at(i) == chosenParticle) { continue; }
+		density += arr->at(i).getMass() * PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / volume;
 	}
 
 	chosenParticle.setDensity(density);
@@ -126,16 +126,16 @@ float Particle::CalculateDensity(std::vector<Particle>& arr, Particle &chosenPar
 *	=========================================================
 * 
 */
-float Particle::CalculateProperty(std::vector<Particle>& arr, Particle& chosenParticle) {
+float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenParticle) {
 
 	float property = 0;
 
-	for (int i = 0; i < arr.size(); i++) {
-		if (arr[i] == chosenParticle) { continue; }
+	for (int i = 0; i < arr->size(); i++) {
+		if (arr->at(i) == chosenParticle) { continue; }
 
-		float influence = PhysicsEq::SmoothingKernel(arr[i].m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS);
-		float density = CalculateDensity(arr, arr[i]);
-		property += Particle::particleProperties[i] * ( arr[i].getMass() / density ) * influence;
+		float influence = PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS);
+		float density = CalculateDensity(arr, arr->at(i));
+		property += Particle::particleProperties[i] * ( arr->at(i).getMass() / density) * influence;
 	}
 
 	return property;
@@ -149,19 +149,19 @@ float Particle::CalculateProperty(std::vector<Particle>& arr, Particle& chosenPa
 *	A(x) = SIGMA,i [ Ai * m/p * W()
 * 
 */
-glm::vec2 Particle::CalculatePropertyGradient(std::vector<Particle>& arr, Particle& chosenParticle) {
+glm::vec2 Particle::CalculatePropertyGradient(std::vector<Particle>* arr, Particle& chosenParticle) {
 
 	glm::vec2 propertyGrad = {0,0};
 
-	for (int i = 0; i < arr.size(); i++) {
-		if (arr[i] == chosenParticle) { continue; }
+	for (int i = 0; i < arr->size(); i++) {
+		if (arr->at(i) == chosenParticle) { continue; }
 
-		float dst = PhysicsEq::euclid_Distance(arr[i].m_Position, chosenParticle.m_Position);
+		float dst = PhysicsEq::euclid_Distance(arr->at(i).m_Position, chosenParticle.m_Position);
 
-		glm::vec2 dir = (arr[i].m_Position - chosenParticle.m_Position) / dst;
+		glm::vec2 dir = (arr->at(i).m_Position - chosenParticle.m_Position) / dst;
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
-		float density = CalculateDensity(arr, arr[i]);
-		propertyGrad += -Particle::particleProperties[i] * slope * arr[i].getMass() / density;
+		float density = CalculateDensity(arr, arr->at(i));
+		propertyGrad += -Particle::particleProperties[i] * slope * arr->at(i).getMass() / density;
 	}
 
 	return propertyGrad;
@@ -225,7 +225,7 @@ void Particle::update_Accel() {
 */
 void Particle::update_Vel() {
 
-	glm::vec3 vel{ m_Velocity.x,m_Velocity.y,m_Velocity.z };
+	glm::vec3 vel{ m_Velocity.x, m_Velocity.y, m_Velocity.z };
 	
 	float friction = 1;
 	//float friction = 0.9999;
@@ -236,7 +236,7 @@ void Particle::update_Vel() {
 	if (m_Acceleration.y != 0) { vel.y += (m_Acceleration.y * SIMSTEP); }
 	else { vel.y *= friction; }
 
-	if (m_Acceleration.z != 0) { vel.z += +(m_Acceleration.z * SIMSTEP); }
+	if (m_Acceleration.z != 0) { vel.z += (m_Acceleration.z * SIMSTEP); }
 	else { vel.z *= friction; }
 	
 	// Remove values close to zero

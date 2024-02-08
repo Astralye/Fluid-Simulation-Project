@@ -15,6 +15,7 @@ struct CircleVertex {
 };
 
 enum VertexType {
+	Null,
 	QUAD,
 	CIRCLE
 };
