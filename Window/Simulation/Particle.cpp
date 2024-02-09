@@ -6,8 +6,12 @@
 #include "Settings.h"
 #include "Particle.h"
 
+// Static variables
 float Particle::KERNEL_RADIUS = 5.0f;
-float Particle::particleProperties[MAX_PARTICLES] = {0};
+float Particle::particleProperties[MAX_PARTICLES] = { 0 };
+
+// Static functions
+// ---------------------------------------------------------------------------------------------------
 
 // Particle Initializers
 
@@ -49,12 +53,13 @@ void Particle::init_Cube(std::vector<Particle>* particleArray, float radius, flo
 }
 void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
 
-	int maxVelocity = 25;
+	int maxVelocity = 20;
 
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 
 		particleArray->emplace_back(
-			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 30, 0.0f,0.0f), 1.0f, radius,
+			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 60, 0.0f,0.0f), 1.0f, radius,
+			//glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f)
 		);
@@ -72,6 +77,15 @@ bool Particle::operator==(const Particle& comp) const {
 float Particle::ExampleFunction(glm::vec2 pos) {
 	return cos(pos.y - 3 + sin(pos.x));
 }
+
+void Particle::UpdateDensities(std::vector<Particle>* arr) {
+
+}
+
+
+
+// ---------------------------------------------------------------------------------------------------
+
 
 /* 
 *	Calculate the density for a specified particle
@@ -95,12 +109,13 @@ float Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenPar
 
 	// This current function is O(n^2), need to improve upon it.
 
-	float volume = ( M_PI * pow(Particle::KERNEL_RADIUS, 8) ) / 4;
+	//float volume = ( M_PI * pow(Particle::KERNEL_RADIUS, 8) ) / 4;
+	float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
 
 	// SUM
 	for (int i = 0; i < arr->size(); i++) {
 		if (arr->at(i) == chosenParticle) { continue; }
-		density += arr->at(i).getMass() * PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / volume;
+		density += arr->at(i).getMass() * ( PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) * kernelNormalization);
 	}
 
 	chosenParticle.setDensity(density);
@@ -132,9 +147,9 @@ float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenPa
 
 	for (int i = 0; i < arr->size(); i++) {
 		if (arr->at(i) == chosenParticle) { continue; }
-
+			
 		float influence = PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS);
-		float density = CalculateDensity(arr, arr->at(i));
+		float density = arr->at(i).getDensity();
 		property += Particle::particleProperties[i] * ( arr->at(i).getMass() / density) * influence;
 	}
 
@@ -142,29 +157,31 @@ float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenPa
 }
 
 /* 
-*	Calculate the density for a specified particle
+*	Property Gradient.
+*	Tells us where the highest gradient point is pointed towards
 * 
 *	==============================================
 * 
 *	A(x) = SIGMA,i [ Ai * m/p * W()
 * 
 */
-glm::vec2 Particle::CalculatePropertyGradient(std::vector<Particle>* arr, Particle& chosenParticle) {
+glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle& chosenParticle) {
 
-	glm::vec2 propertyGrad = {0,0};
+	glm::vec2 pressureForce = { 0,0 };
 
 	for (int i = 0; i < arr->size(); i++) {
 		if (arr->at(i) == chosenParticle) { continue; }
 
 		float dst = PhysicsEq::euclid_Distance(arr->at(i).m_Position, chosenParticle.m_Position);
-
 		glm::vec2 dir = (arr->at(i).m_Position - chosenParticle.m_Position) / dst;
+
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
-		float density = CalculateDensity(arr, arr->at(i));
-		propertyGrad += -Particle::particleProperties[i] * slope * arr->at(i).getMass() / density;
+		float density = arr->at(i).getDensity();
+
+		pressureForce += PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(i).getMass() / density;
 	}
 
-	return propertyGrad;
+	return pressureForce;
 }
 
 
@@ -302,6 +319,12 @@ void Particle::update(){
 
 }
 
+void Particle::add_Velocity(glm::vec2 vel) {
+
+	m_Velocity.x += vel.x * SIMSTEP;
+	m_Velocity.y += vel.y * SIMSTEP;
+}
+
 void Particle::bounce() {
 	float bounceCoEff = 0.7f;
 
@@ -346,8 +369,9 @@ void Particle::invert(glm::vec3 type)
 	}
 }
 
-void Particle::setVelocity(float velocity) {
-	m_Velocity.x = velocity;
+void Particle::setVelocity(glm::vec2 vel) {
+	m_Velocity.x = vel.x;
+	m_Velocity.y = vel.y;
 }
 
 void Particle::setDensity(float den)

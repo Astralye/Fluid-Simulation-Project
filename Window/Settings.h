@@ -12,7 +12,7 @@ static const uint16_t MaxQuadCount = 10000;
 static const uint16_t MaxVertexCount = MaxQuadCount * 4;
 static const uint16_t MaxIndexCount = MaxQuadCount * 6;
 
-static const uint16_t MAX_PARTICLES = 500;
+static const uint16_t MAX_PARTICLES = 100;
 
 static const bool ENABLE_GRAVITY = false;
 

@@ -14,6 +14,9 @@ class PhysicsEq
 // Physics equations are public. Can be used anywhere
 public:
 
+	static float targetDensity;
+	static float pressureMultiplier;
+
 	constexpr static float GRAVITY = -10 ; // This is in m/s
 
 	// Pythagorean theorem
@@ -28,6 +31,8 @@ public:
 	static float SmoothingKernel(const glm::vec3& particleA, const glm::vec3& particleB, const float radius);
 
 	static float SmoothingKernelDerivative(float dst, float radius);
+
+	static float ConvertDensityToPressure(float density);
 
 	// Always returns Negative value
 	static inline float toNegative(float value) { return -toPositive(value); }

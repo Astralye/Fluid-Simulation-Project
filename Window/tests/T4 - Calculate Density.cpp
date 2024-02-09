@@ -2,6 +2,8 @@
 
 #include "Camera.h"
 
+#include <algorithm>
+
 #include "Renderer.h"
 #include <imgui/imgui.h>
 
@@ -35,10 +37,10 @@ namespace test {
 		// ------------------------------------------------------------
 
 		float radius = 0.5f;
-		float spacing = 0.0f;
+		float spacing = 0.1f;
 
-		//Particle::init_Cube(m_ParticleArray,radius,spacing);
-		Particle::init_Random(m_ParticleArray, radius);
+		Particle::init_Cube(m_ParticleArray,radius,spacing);
+		//Particle::init_Random(m_ParticleArray, radius);
 	}
 
 	//Destructor
@@ -52,15 +54,6 @@ namespace test {
 	*/
 	void T4_Calculate_Density::OnUpdate(float deltaTime){
 
-		// SPH FUNCTIONS HERE
-		// Ideally would be in its own class and function.
-		//Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(0));
-
-
-		//float kernel = PhysicsEq::SmoothingKernel(m_ParticleArray[0].m_Position, m_ParticleArray[1].m_Position, 10);
-		//std::cout << kernel << std::endl;
-
-
 		// Updates positions, projections and models.
 		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().right, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
@@ -68,8 +61,30 @@ namespace test {
 
 		m_MVP = m_Proj * m_View * m_Model;
 
+
+		// SPH FUNCTIONS HERE
+		// Ideally would be in its own class and function.
+
+		// Updates all the densities
+	
+		for (int i = 0; i < MAX_PARTICLES; i++) {
+			m_ParticleArray->at(i).setDensity(Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(i)));
+		}
+
+		//for (int i = 0; i < m_ParticleArray->size(); i++) {
+		//	glm::vec2 pressureForce = Particle::CalculatePressureForce(m_ParticleArray, m_ParticleArray->at(i));
+
+		//	// F = MA --> A = F / M
+		//	glm::vec2 pressureAcceleration = pressureForce / m_ParticleArray->at(i).getDensity();
+
+		//	m_ParticleArray->at(i).setVelocity({ pressureAcceleration.x, pressureAcceleration.y });
+
+
+		//}
+		
 		// 10k
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
+
 			m_ParticleArray->at(i).update();
 
 			// Check for collision detection for each particle against the container.
@@ -153,23 +168,23 @@ namespace test {
 
 		ImGui::Text("Time: %.3f", time);
 
-		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 5.0f);
+		ImGui::Text("Density of particle[0]: %.3f", m_ParticleArray->at(0).getDensity());
 
-		ImGui::Text("Density for particle[0]: %.1f",m_ParticleArray->at(0).getDensity());
-		ImGui::Text("Function value at particle[0]: %.1f", Particle::particleProperties[0]);
+		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 20.0f);
+		ImGui::SliderFloat("Pressure Multiplier:", &PhysicsEq::pressureMultiplier, 0.0f, 20.0f);
+		ImGui::SliderFloat("Target Density:", &PhysicsEq::targetDensity, 0.0f, 10.0f);
+
+
+
+		ImGui::SliderFloat("Particle[1].x :", &m_ParticleArray->at(1).m_Position.x, 15.0f, 40.0f);
+
+
+		ImGui::Text("Particle[0] velocitiy: { %.1f, %.1f } ", m_ParticleArray->at(0).getVelocity().x, m_ParticleArray->at(0).getVelocity().y );
 
 	}
 
 	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }
 	
-	/* Shutdown function
-	Right now the entire array of particles is stored
-					ON THE STACK.
-	This should be stored on the heap 'new' command,
-	and deleted when necessary. This also allows dynamic
-	allocation during runtime.
-	
-	*/
 	void T4_Calculate_Density::Shutdown() {
 		delete[] m_ParticleArray;
 	}

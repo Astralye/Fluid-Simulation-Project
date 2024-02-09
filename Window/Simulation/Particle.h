@@ -18,6 +18,8 @@ private:
 	float m_Radius;
 	float m_Density;
 
+	float m_Pressure;
+
 public:
 
 	enum Vector {
@@ -56,8 +58,12 @@ public:
 		{ m_Position.x - radius, m_Position.y - radius }; // BL
 	}
 
-	// Static functions
+	// Static
 	// -------------------------------------------------
+
+
+	// Static functions
+
 	// Creates a cube of particles
 	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing);
 
@@ -66,14 +72,17 @@ public:
 
 	static float CalculateDensity(std::vector<Particle> *arr, Particle &particle);
 	static float CalculateProperty(std::vector<Particle> *arr, Particle &particle);
-	static glm::vec2 CalculatePropertyGradient(std::vector<Particle> *arr, Particle &chosenParticle);
+	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle);
 
 	static float ExampleFunction(glm::vec2 pos);
 
+	static void UpdateDensities(std::vector<Particle>* arr);
 
 	// Static variables
+
 	static float KERNEL_RADIUS;
 	static float particleProperties[MAX_PARTICLES];
+	static float TARGET_DENSITY;
 
 	// -------------------------------------------------
 
@@ -83,6 +92,8 @@ public:
 	void update_Vel();
 	void update_Pos();
 	void update();
+
+	void add_Velocity(glm::vec2 vel);
 
 	// Getters
 	void bounce();
@@ -105,6 +116,8 @@ public:
 
 	// Setter
 	void setVelocity(float vel);
+	void setVelocity(glm::vec2 vel);
+
 	void setDensity(float den);
 
 	bool operator==(const Particle& comp) const;

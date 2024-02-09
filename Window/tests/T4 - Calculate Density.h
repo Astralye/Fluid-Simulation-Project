@@ -38,6 +38,8 @@ namespace test {
 
 	private:
 
+		float m_testvalue = 0.0f;
+
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
 
