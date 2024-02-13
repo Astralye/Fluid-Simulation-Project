@@ -7,7 +7,7 @@
 #include "Particle.h"
 
 // Static variables
-float Particle::KERNEL_RADIUS = 5.0f;
+float Particle::KERNEL_RADIUS = 0.0f;
 float Particle::particleProperties[MAX_PARTICLES] = { 0 };
 
 // Static functions
@@ -17,6 +17,9 @@ float Particle::particleProperties[MAX_PARTICLES] = { 0 };
 
 void Particle::init_Cube(std::vector<Particle>* particleArray, float radius, float spacing)
 {
+
+	Particle::KERNEL_RADIUS = radius * 4;
+
 	// 8 bit -> 256^2 = max 65k particles
 	uint16_t column, row;
 	float squareDimension;
@@ -58,10 +61,8 @@ void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 
 		particleArray->emplace_back(
-			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 60, 0.0f,0.0f), 1.0f, radius,
-			//glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f)
+			glm::vec4(10.0f + rand() % 80, 20.0f + rand() % 60, 0.0f,0.0f), 1.0f, radius
+			//glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
 		);
 	}
 }
@@ -109,13 +110,12 @@ float Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenPar
 
 	// This current function is O(n^2), need to improve upon it.
 
-	//float volume = ( M_PI * pow(Particle::KERNEL_RADIUS, 8) ) / 4;
 	float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
 
 	// SUM
 	for (int i = 0; i < arr->size(); i++) {
 		if (arr->at(i) == chosenParticle) { continue; }
-		density += arr->at(i).getMass() * ( PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) * kernelNormalization);
+		density += arr->at(i).getMass() * ( PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / kernelNormalization);
 	}
 
 	chosenParticle.setDensity(density);
@@ -162,7 +162,7 @@ float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenPa
 * 
 *	==============================================
 * 
-*	A(x) = SIGMA,i [ Ai * m/p * W()
+*	A(x) = SIGMA,i [ Ai * m/p * GRAD W()
 * 
 */
 glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle& chosenParticle) {
@@ -175,10 +175,20 @@ glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle&
 		float dst = PhysicsEq::euclid_Distance(arr->at(i).m_Position, chosenParticle.m_Position);
 		glm::vec2 dir = (arr->at(i).m_Position - chosenParticle.m_Position) / dst;
 
+		// GRAD
+		// For particles further than the smoothing radius,
+		// This value is 0, and the pressure acting upon the
+		// particle is subsequently 0
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
+
 		float density = arr->at(i).getDensity();
 
-		pressureForce += PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(i).getMass() / density;
+		pressureForce += PhysicsEq::ConvertDensityToPressure(density) * arr->at(i).getMass() / density * dir * slope ;
+	}
+
+	std::cout << pressureForce.x << "," << pressureForce.y << std::endl;
+	if (pressureForce.x < -5) {
+		pressureForce.x = 0;
 	}
 
 	return pressureForce;

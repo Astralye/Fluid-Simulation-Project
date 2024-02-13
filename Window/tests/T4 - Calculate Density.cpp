@@ -36,8 +36,8 @@ namespace test {
 
 		// ------------------------------------------------------------
 
-		float radius = 0.5f;
-		float spacing = 0.1f;
+		float radius = 1.0f;
+		float spacing = 1.0f;
 
 		Particle::init_Cube(m_ParticleArray,radius,spacing);
 		//Particle::init_Random(m_ParticleArray, radius);
@@ -65,22 +65,24 @@ namespace test {
 		// SPH FUNCTIONS HERE
 		// Ideally would be in its own class and function.
 
-		// Updates all the densities
-	
-		for (int i = 0; i < MAX_PARTICLES; i++) {
+		// Updates all density values
+		for (int i = 0; i < m_ParticleArray->size(); i++) {
 			m_ParticleArray->at(i).setDensity(Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(i)));
 		}
 
-		//for (int i = 0; i < m_ParticleArray->size(); i++) {
-		//	glm::vec2 pressureForce = Particle::CalculatePressureForce(m_ParticleArray, m_ParticleArray->at(i));
+		// Updates all pressure values
+		for (int i = 0; i < m_ParticleArray->size(); i++) {
+			glm::vec2 pressureForce = Particle::CalculatePressureForce(m_ParticleArray, m_ParticleArray->at(i));
 
-		//	// F = MA --> A = F / M
-		//	glm::vec2 pressureAcceleration = pressureForce / m_ParticleArray->at(i).getDensity();
+			// F = MA --> A = F / M
+			glm::vec2 pressureAcceleration = pressureForce / m_ParticleArray->at(i).getDensity();
 
-		//	m_ParticleArray->at(i).setVelocity({ pressureAcceleration.x, pressureAcceleration.y });
+			m_ParticleArray->at(i).setVelocity(pressureAcceleration);
 
-
-		//}
+			if (i == 0) {
+				m_testvalue = pressureForce;
+			}
+		}
 		
 		// 10k
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
@@ -168,18 +170,18 @@ namespace test {
 
 		ImGui::Text("Time: %.3f", time);
 
-		ImGui::Text("Density of particle[0]: %.3f", m_ParticleArray->at(0).getDensity());
+		ImGui::Text("Density of particle[25]: %.3f", m_ParticleArray->at(25).getDensity());
+		//ImGui::Text("Kernel result of particle[0]: %.3f", m_testvalue);
 
-		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 20.0f);
-		ImGui::SliderFloat("Pressure Multiplier:", &PhysicsEq::pressureMultiplier, 0.0f, 20.0f);
-		ImGui::SliderFloat("Target Density:", &PhysicsEq::targetDensity, 0.0f, 10.0f);
+		ImGui::SliderFloat("Pressure Multiplier:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 10.0f);
+		ImGui::SliderFloat("Target Density:", &PhysicsEq::targetDensity, 0.7f, 1.5f);
 
 
 
 		ImGui::SliderFloat("Particle[1].x :", &m_ParticleArray->at(1).m_Position.x, 15.0f, 40.0f);
 
 
-		ImGui::Text("Particle[0] velocitiy: { %.1f, %.1f } ", m_ParticleArray->at(0).getVelocity().x, m_ParticleArray->at(0).getVelocity().y );
+		ImGui::Text("Particle[0] pressure: { %.1f, %.1f } ", m_testvalue.x, m_testvalue.y);
 
 	}
 

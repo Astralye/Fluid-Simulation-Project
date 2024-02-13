@@ -15,7 +15,7 @@ class PhysicsEq
 public:
 
 	static float targetDensity;
-	static float pressureMultiplier;
+	static float STIFFNESS_CONSTANT;
 
 	constexpr static float GRAVITY = -10 ; // This is in m/s
 

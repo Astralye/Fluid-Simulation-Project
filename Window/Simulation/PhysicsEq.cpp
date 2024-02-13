@@ -8,8 +8,8 @@
 
 
 // Static variables
-float PhysicsEq::targetDensity = 0.0f;
-float PhysicsEq::pressureMultiplier = 0.0f;
+float PhysicsEq::targetDensity = 1.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 1.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
@@ -29,12 +29,14 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 
 	float q = ( 1 / radius ) * distance;
 
-	float result;
+	//float result;
 
 	if (0 <= q && q <= 0.5) {
+
 		return (6 * (pow(q, 3) - pow(q, 2))) + 1;
 	}
 	else if (0.5 < q && q <= 1) {
+
 		return 2 * pow((1 - q), 3);
 	}
 	else {
@@ -54,18 +56,79 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 }
 
 // This function is the derivative of the smoothing kernel Equation
+//
+// GRAD W(r-r',h)
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 	if (dst > radius) { return 0; }
 
-	float f = pow(radius,2) - pow(dst,2);
-	float scale = -24 / (M_PI * pow(radius, 8));
-	return scale * dst * pow(f,2);
+	//// f can never be negative
+	//float f = pow(radius,2) - pow(dst,2);
+
+	//float scale = -24 / (M_PI * pow(radius, 8));
+	//return scale * dst * pow(f,2);
+
+
+	float q = (1 / radius) * dst;
+
+	if (0 <= q && q <= 0.5) {
+
+		// Derivative of function within same smoothing function
+
+		// This has a much more dramatic gradient.
+		float scale = -1440 / (7 * M_PI * pow(radius, 2));
+		float kernelVal = pow(radius, 3) - pow(dst, 2);
+
+		return scale * dst * pow(kernelVal,2);
+	}
+	else if (0.5 < q && q <= 1) {
+
+		// Derivative of function within same smoothing function
+
+		// This has a has a slower gradient
+		float scale = -240 / (7 * M_PI * pow(radius, 2));
+		float kernelVal = pow(dst - 1, 2);
+
+		return scale * dst * pow(kernelVal, 2);
+
+	}
+	else {
+		return 1;
+	}
+
+
+
+
 }
 
+/*
+* 
+*	Converts density to pressure 
+*	====================================================
+*
+*	Explicit Volume Deviation
+* 
+*		p		  =	   p_i	 -		 p^0
+*	---------------------------------------------
+*	Density error	density		target density
+* 
+* 
+*	State Equation SPH (SESPH)
+* 
+*	From one of many different equations to solve pressure,
+*	one example is as follow
+* 
+*		p	=			k			(	 p_i	-		p^0	)
+*	-------------------------------------------------------------
+*	pressure	stiffness constant		density		target density
+* 
+*	
+*	SPH simulations that use State equations are compressible.
+* 
+*	-> More challenging to minimize compression compared to PPE
+*	(Pressure Poisson Equation)
+*/
 float PhysicsEq::ConvertDensityToPressure(float density) {
-	float densityError = density - targetDensity;
-	float pressure = densityError * pressureMultiplier;
-	return pressure;
+	return STIFFNESS_CONSTANT * (std::max(density - targetDensity, 0.0f));
 }
 
 // Inputs can be positive or negative, but squaring removes negative values

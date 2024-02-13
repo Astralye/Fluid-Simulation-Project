@@ -33,7 +33,7 @@ public:
 	// Default constructor
 	Particle(
 		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
-		float mass = 1,
+		float mass = 18,
 		float radius = 1,
 		glm::vec3 vel = { 0.0f, 0.0f, 0.0f },
 		glm::vec3 acc = { 0.0f, 0.0f, 0.0f } )
