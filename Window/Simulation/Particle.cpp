@@ -104,17 +104,19 @@ void Particle::UpdateDensities(std::vector<Particle>* arr) {
 *
 *	=======================================================
 */
-float Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenParticle) {
+float Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenParticle,int j) {
 
 	float density = 0;
 
 	// This current function is O(n^2), need to improve upon it.
 
 	float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
+	//float kernelNormalization = M_PI * pow(Particle::KERNEL_RADIUS, 8) / 4;
 
 	// SUM
 	for (int i = 0; i < arr->size(); i++) {
 		if (arr->at(i) == chosenParticle) { continue; }
+
 		density += arr->at(i).getMass() * ( PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS) / kernelNormalization);
 	}
 
@@ -150,6 +152,7 @@ float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenPa
 			
 		float influence = PhysicsEq::SmoothingKernel(arr->at(i).m_Position, chosenParticle.m_Position, Particle::KERNEL_RADIUS);
 		float density = arr->at(i).getDensity();
+
 		property += Particle::particleProperties[i] * ( arr->at(i).getMass() / density) * influence;
 	}
 
@@ -165,30 +168,36 @@ float Particle::CalculateProperty(std::vector<Particle>* arr, Particle& chosenPa
 *	A(x) = SIGMA,i [ Ai * m/p * GRAD W()
 * 
 */
-glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle& chosenParticle) {
+glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle& chosenParticle, int j) {
 
 	glm::vec2 pressureForce = { 0,0 };
 
 	for (int i = 0; i < arr->size(); i++) {
+		// Skips the code if the particle is itself or the density is 0
 		if (arr->at(i) == chosenParticle) { continue; }
+		// || arr->at(i).getDensity() == 0
+
 
 		float dst = PhysicsEq::euclid_Distance(arr->at(i).m_Position, chosenParticle.m_Position);
 		glm::vec2 dir = (arr->at(i).m_Position - chosenParticle.m_Position) / dst;
 
-		// GRAD
-		// For particles further than the smoothing radius,
-		// This value is 0, and the pressure acting upon the
-		// particle is subsequently 0
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
-
 		float density = arr->at(i).getDensity();
 
-		pressureForce += PhysicsEq::ConvertDensityToPressure(density) * arr->at(i).getMass() / density * dir * slope ;
-	}
+		// input particle1, loop particle 0
+		//if (j == 1 && i == 0) {
+		//	float v = PhysicsEq::STIFFNESS_CONSTANT * std::max(density - PhysicsEq::targetDensity, 0.0f);
+		//	float k = (arr->at(i).getMass() / density);
+		//	glm::vec2 dirsl = dir * slope;
 
-	std::cout << pressureForce.x << "," << pressureForce.y << std::endl;
-	if (pressureForce.x < -5) {
-		pressureForce.x = 0;
+		//	glm::vec2 val = PhysicsEq::ConvertDensityToPressure(density) * (arr->at(i).getMass() / density) * dir * slope;
+
+		//	std::cout << "density: " << density << ", Target:" << PhysicsEq::targetDensity << std::endl;
+		//	std::cout << "pres: " << v << "| m/rho " << k << "| m: {" << dirsl.x << "," << dirsl.y << "} | Result {" << val.x  << ", " << val.y << "}" << std::endl;
+		//}
+		if (density != 0){
+			pressureForce += PhysicsEq::ConvertDensityToPressure(density) * (arr->at(i).getMass() / density) * dir * slope;
+		}
 	}
 
 	return pressureForce;
@@ -207,13 +216,21 @@ void Particle::update_Accel() {
 	glm::vec3 accel{ m_Acceleration.x, m_Acceleration.y, m_Acceleration.z };
 	glm::vec3 jerk{ 30.0f, 30.0f, 0.0f };
 
+	//
+	float CHAOS_MULTIPLIER = 0.05f;
+
 	if (m_Velocity.x > 0 && m_Acceleration.x > 0) {
 		jerk.x = PhysicsEq::toNegative(jerk.x);
+		accel.x *= CHAOS_MULTIPLIER;
 	}
 
 	if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
 		jerk.y = PhysicsEq::toNegative(jerk.y);
+
+		accel.y *= CHAOS_MULTIPLIER;
 	}
+
+
 
 	// Gravity
 	if (ENABLE_GRAVITY) {
@@ -329,11 +346,6 @@ void Particle::update(){
 
 }
 
-void Particle::add_Velocity(glm::vec2 vel) {
-
-	m_Velocity.x += vel.x * SIMSTEP;
-	m_Velocity.y += vel.y * SIMSTEP;
-}
 
 void Particle::bounce() {
 	float bounceCoEff = 0.7f;
@@ -382,6 +394,16 @@ void Particle::invert(glm::vec3 type)
 void Particle::setVelocity(glm::vec2 vel) {
 	m_Velocity.x = vel.x;
 	m_Velocity.y = vel.y;
+}
+
+void Particle::addVelocity(glm::vec2 vel) {
+	m_Velocity.x += vel.x;
+	m_Velocity.y += vel.y;
+}
+
+void Particle::setAcceleration(glm::vec2 acc) {
+	m_Acceleration.x = acc.x;
+	m_Acceleration.y = acc.y;
 }
 
 void Particle::setDensity(float den)

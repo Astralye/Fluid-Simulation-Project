@@ -27,12 +27,12 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 
 	float distance = euclid_Distance(positionA, positionB);
 
+	//float value = std::max((float)0.0, (float)(pow(radius, 2) - pow(distance, 2)));
+	//return pow(value, 3);
+
 	float q = ( 1 / radius ) * distance;
 
-	//float result;
-
 	if (0 <= q && q <= 0.5) {
-
 		return (6 * (pow(q, 3) - pow(q, 2))) + 1;
 	}
 	else if (0.5 < q && q <= 1) {
@@ -42,43 +42,32 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 	else {
 		return 0;
 	}
-	
-	//// Finds the length between two points within a 3 dimensional space.
-	//float distance = euclid_Distance(positionA, positionB);
-
-	//// This is currently a linear function
-	//float value = std::max(0.0f, float( pow(radius,2) - pow(distance,2) ));
-	//
-	//// Cubic function
-	//value = (float)pow(value, 3);
-
-	//return value;
 }
 
 // This function is the derivative of the smoothing kernel Equation
 //
 // GRAD W(r-r',h)
+// For particles further than the smoothing radius,
+// This value is 0, and the pressure acting upon the
+// particle is subsequently 0
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
+
+
 	if (dst > radius) { return 0; }
 
-	//// f can never be negative
-	//float f = pow(radius,2) - pow(dst,2);
-
+	//float f = pow(radius, 2) - pow(dst, 2);
 	//float scale = -24 / (M_PI * pow(radius, 8));
-	//return scale * dst * pow(f,2);
-
+	//return scale * dst * pow(f, 2);
 
 	float q = (1 / radius) * dst;
 
 	if (0 <= q && q <= 0.5) {
-
 		// Derivative of function within same smoothing function
-
-		// This has a much more dramatic gradient.
+		// Static collision
 		float scale = -1440 / (7 * M_PI * pow(radius, 2));
-		float kernelVal = pow(radius, 3) - pow(dst, 2);
+		float kernelVal = pow(radius, 3) - pow(q, 2);
 
-		return scale * dst * pow(kernelVal,2);
+		return scale * pow(kernelVal,2);
 	}
 	else if (0.5 < q && q <= 1) {
 
@@ -86,13 +75,13 @@ float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 
 		// This has a has a slower gradient
 		float scale = -240 / (7 * M_PI * pow(radius, 2));
-		float kernelVal = pow(dst - 1, 2);
+		float kernelVal = pow(q - 1, 2);
 
-		return scale * dst * pow(kernelVal, 2);
+		return scale * pow(kernelVal, 2);
 
 	}
 	else {
-		return 1;
+		return 0;
 	}
 
 

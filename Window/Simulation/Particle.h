@@ -70,9 +70,9 @@ public:
 	// Creates a particles with random positions and velocities
 	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
-	static float CalculateDensity(std::vector<Particle> *arr, Particle &particle);
+	static float CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
 	static float CalculateProperty(std::vector<Particle> *arr, Particle &particle);
-	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle);
+	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle,int j);
 
 	static float ExampleFunction(glm::vec2 pos);
 
@@ -92,8 +92,6 @@ public:
 	void update_Vel();
 	void update_Pos();
 	void update();
-
-	void add_Velocity(glm::vec2 vel);
 
 	// Getters
 	void bounce();
@@ -117,6 +115,8 @@ public:
 	// Setter
 	void setVelocity(float vel);
 	void setVelocity(glm::vec2 vel);
+	void addVelocity(glm::vec2 vel);
+	void setAcceleration(glm::vec2 acc);
 
 	void setDensity(float den);
 
