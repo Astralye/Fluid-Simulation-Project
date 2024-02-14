@@ -8,8 +8,9 @@
 
 
 // Static variables
-float PhysicsEq::targetDensity = 1.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 1.0f;
+float PhysicsEq::REST_DENSITY = 0.5f;
+float PhysicsEq::STIFFNESS_CONSTANT = 50000.0f;
+float PhysicsEq::EXPONENT = 2.6f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
@@ -33,12 +34,13 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 	float q = ( 1 / radius ) * distance;
 
 	if (0 <= q && q <= 0.5) {
+
 		return (6 * (pow(q, 3) - pow(q, 2))) + 1;
 	}
-	else if (0.5 < q && q <= 1) {
+	//else if (0.5 < q && q <= 1) {
 
-		return 2 * pow((1 - q), 3);
-	}
+	//	return 2 * pow((1 - q), 3);
+	//}
 	else {
 		return 0;
 	}
@@ -51,8 +53,6 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 // This value is 0, and the pressure acting upon the
 // particle is subsequently 0
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
-
-
 	if (dst > radius) { return 0; }
 
 	//float f = pow(radius, 2) - pow(dst, 2);
@@ -62,24 +62,23 @@ float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 	float q = (1 / radius) * dst;
 
 	if (0 <= q && q <= 0.5) {
-		// Derivative of function within same smoothing function
-		// Static collision
-		float scale = -1440 / (7 * M_PI * pow(radius, 2));
-		float kernelVal = pow(radius, 3) - pow(q, 2);
-
-		return scale * pow(kernelVal,2);
-	}
-	else if (0.5 < q && q <= 1) {
 
 		// Derivative of function within same smoothing function
+		float scale = 240 / (7 * M_PI * pow(radius, 2));
+		float kernelVal = (3 * pow(q, 2)) - (2 * q);
 
-		// This has a has a slower gradient
-		float scale = -240 / (7 * M_PI * pow(radius, 2));
-		float kernelVal = pow(q - 1, 2);
-
-		return scale * pow(kernelVal, 2);
-
+		return scale * kernelVal;
 	}
+	//else if (0.5 < q && q <= 1) {
+	//	return 0;
+	//	// Derivative of function within same smoothing function
+
+	//	float scale = -240 / (7 * M_PI * pow(radius, 2));
+	//	float kernelVal = pow(1 - q, 2);
+
+	//	return scale * kernelVal;
+
+	//}
 	else {
 		return 0;
 	}
@@ -117,7 +116,14 @@ float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 *	(Pressure Poisson Equation)
 */
 float PhysicsEq::ConvertDensityToPressure(float density) {
-	return STIFFNESS_CONSTANT * (std::max(density - targetDensity, 0.0f));
+
+	float multiplier = (STIFFNESS_CONSTANT * REST_DENSITY) / EXPONENT;
+	float pressureChange = pow((density / REST_DENSITY), EXPONENT) - 1;
+
+	return multiplier * pressureChange;
+
+
+	return STIFFNESS_CONSTANT * (std::max(density - REST_DENSITY, 0.0f));
 }
 
 // Inputs can be positive or negative, but squaring removes negative values

@@ -18,9 +18,12 @@ private:
 	float m_Radius;
 	float m_Density;
 
-	float m_Pressure;
-
 public:
+
+	enum axis {
+		x,
+		y
+	};
 
 	enum Vector {
 		Acceleration = 1,
@@ -28,12 +31,15 @@ public:
 	};
 
 	glm::vec4 m_Position;
+
+	glm::vec3 m_PredictedPos;
+	glm::vec3 m_PredictedVelocity;
 	glm::vec2 m_Vertices[4];
 
 	// Default constructor
 	Particle(
 		glm::vec4 pos = { 0.0f, 0.0f, 0.0f, 0.0f },
-		float mass = 18,
+		float mass = 1,
 		float radius = 1,
 		glm::vec3 vel = { 0.0f, 0.0f, 0.0f },
 		glm::vec3 acc = { 0.0f, 0.0f, 0.0f } )
@@ -43,7 +49,10 @@ public:
 		m_Acceleration(acc),
 		m_Velocity(vel),
 		m_Mass(mass),
-		m_Density(0)
+
+		m_Density(0),
+		m_PredictedPos({ 0,0,0 }),
+		m_PredictedVelocity({ 0,0,0 })
 	{
 		m_Vertices[0] =
 		{ m_Position.x - radius, m_Position.y + radius }; // TL
@@ -70,13 +79,9 @@ public:
 	// Creates a particles with random positions and velocities
 	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
-	static float CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
-	static float CalculateProperty(std::vector<Particle> *arr, Particle &particle);
+	static void CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
+
 	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle,int j);
-
-	static float ExampleFunction(glm::vec2 pos);
-
-	static void UpdateDensities(std::vector<Particle>* arr);
 
 	// Static variables
 
@@ -91,6 +96,7 @@ public:
 	void update_Accel();
 	void update_Vel();
 	void update_Pos();
+	void update_PosPredicted();
 	void update();
 
 	// Getters
@@ -109,14 +115,19 @@ public:
 	inline float getDensity() { return m_Density; }
 	inline glm::vec3 getAcceleration() { return m_Acceleration; }
 	inline glm::vec3 getVelocity() { return m_Velocity; }
+	inline glm::vec3 getPredictedVelocity() { return m_PredictedVelocity; }
 
 	
 
 	// Setter
-	void setVelocity(float vel);
 	void setVelocity(glm::vec2 vel);
+	void setVelocity(float vel, axis type);
+
+	void setPredictedVelocity(glm::vec3 pVel);
+
 	void addVelocity(glm::vec2 vel);
 	void setAcceleration(glm::vec2 acc);
+	void addAcceleration(float acc, axis type);
 
 	void setDensity(float den);
 

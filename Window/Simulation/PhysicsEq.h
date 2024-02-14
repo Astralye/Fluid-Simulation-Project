@@ -14,8 +14,9 @@ class PhysicsEq
 // Physics equations are public. Can be used anywhere
 public:
 
-	static float targetDensity;
+	static float REST_DENSITY;
 	static float STIFFNESS_CONSTANT;
+	static float EXPONENT;
 
 	constexpr static float GRAVITY = -10 ; // This is in m/s
 

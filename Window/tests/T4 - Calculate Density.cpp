@@ -24,7 +24,7 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(50.0f, 50.0f, 0.0f), 90.0f, 80.0f),
+		m_RectContainer(glm::vec3(50.0f, 50.0f, 0.0f), 80.0f, 80.0f),
 		drawType(VertexType::Null),
 		m_DrawCalls(0),
 		time(0)
@@ -43,7 +43,7 @@ namespace test {
 		// ------------------------------------------------------------
 
 		float radius = 1.0f;
-		float spacing = 0.75f;
+		float spacing = 0.0f;
 
 		Particle::init_Cube(m_ParticleArray,radius,spacing);
 		//Particle::init_Random(m_ParticleArray, radius);
@@ -71,10 +71,20 @@ namespace test {
 		// SPH FUNCTIONS HERE
 		// Ideally would be in its own class and function.
 
-		// Updates all density values
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
-			Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(i),i);
+
+			// Predictd velocity v*
+			glm::vec3 predictedVel = m_ParticleArray->at(i).getVelocity() + (SIMSTEP * m_ParticleArray->at(i).getAcceleration());
+			m_ParticleArray->at(i).setPredictedVelocity(predictedVel);
+
+			// update position for next timestep
+			m_ParticleArray->at(i).update_PosPredicted();
+
+			// Updates all density values
+			Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(i), i);
 		}
+
+		tmp = 0;
 
 		// Updates all pressure values
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
@@ -83,11 +93,10 @@ namespace test {
 			// F = MA --> A = F / M
 			if (m_ParticleArray->at(i).getDensity() != 0) {
 				glm::vec2 pressureAcceleration = pressureForce / m_ParticleArray->at(i).getDensity();
-				m_ParticleArray->at(i).setAcceleration(pressureAcceleration);
-			}
 
-			if (i == 48) {
-				m_testvalue = pressureForce;
+				//pressure projection
+				glm::vec3 sum = m_ParticleArray->at(i).getPredictedVelocity() + (SIMSTEP * glm::vec3(pressureAcceleration, 0));
+				m_ParticleArray->at(i).setVelocity(sum);
 			}
 		}
 		
@@ -103,12 +112,6 @@ namespace test {
 				Collision::collisionResponse(m_ParticleArray->at(i), collide.type);
 			}
 		}
-
-		// Collision between particles
-		// Omitted this as it isn't really relevant
-		//if (Collision::collisionDetection(m_ParticleA, m_ParticleB)) {
-		//	Collision::collisionResponse(&m_ParticleA, &m_ParticleB);
-		//}
 
 		timeStep();
 	}
@@ -177,22 +180,10 @@ namespace test {
 
 		ImGui::Text("Time: %.3f", time);
 
-		ImGui::Text("Density of particle[0]: %.3f", m_ParticleArray->at(0).getDensity());
-		//ImGui::Text("Kernel result of particle[0]: %.3f", m_testvalue);
-
-		ImGui::SliderFloat("Pressure Multiplier:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 1.0f);
-		ImGui::SliderFloat("Target Density:", &PhysicsEq::targetDensity, 0.7f, 1.5f);
-
-		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 5.0f);
-
-
-
-		ImGui::SliderFloat("Particle[48].x :", &m_ParticleArray->at(48).m_Position.x, 20.0f, 40.0f);
-		ImGui::SliderFloat("Particle[48].y :", &m_ParticleArray->at(48).m_Position.y, 20.0f, 40.0f);
-
-
-		ImGui::Text("Particle[48] pressure: { %.1f, %.1f } ", m_testvalue.x, m_testvalue.y);
-
+		ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 100000.0f);
+		ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY,3.0f, 0.0f);
+		ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 2.7f);
+		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 20.0f);
 	}
 
 	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }

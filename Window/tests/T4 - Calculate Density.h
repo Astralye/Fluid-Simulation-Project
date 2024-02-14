@@ -38,7 +38,7 @@ namespace test {
 
 	private:
 
-		glm::vec2 m_testvalue = {0.0f,0.0f};
+		float tmp;
 
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
