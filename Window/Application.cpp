@@ -26,6 +26,8 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_glfw.h>
 
+#include "Project_ImGui.h"
+
 #include "tests/Test.h"
 #include "tests/T4 - Calculate Density.h"
 #include "tests/T4 - Calculate Density.h"
@@ -87,11 +89,11 @@ int main(void){
 	test::Test* currentTest = nullptr;
 	test::TestMenu* testMenu = new test::TestMenu(currentTest);
 	currentTest = testMenu;
-	testMenu->RegisterTest<test::T4_Calculate_Density>("T4 - Calculate Density");
+	testMenu->RegisterTest<test::T4_Calculate_Density>("2D Container");
 
 	while (!glfwWindowShouldClose(window))
 	{
-		GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+		GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
 		renderer.Clear();
 
 		// ImGui
@@ -104,7 +106,14 @@ int main(void){
 
 			currentTest->OnUpdate(SIMSTEP);
 			currentTest->OnRender();
-			ImGui::Begin("Test");
+
+			//ImGui::ShowDemoWindow();
+			
+			Gui_Menus::DisplayMenus();
+
+			ImGui::Begin("Load Sim");
+
+			// Perhaps have a main menu?
 
 			// If the test is the not test menu
 			if (currentTest != testMenu)

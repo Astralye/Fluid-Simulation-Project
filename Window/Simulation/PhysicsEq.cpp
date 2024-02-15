@@ -8,9 +8,9 @@
 
 
 // Static variables
-float PhysicsEq::REST_DENSITY = 0.5f;
-float PhysicsEq::STIFFNESS_CONSTANT = 50000.0f;
-float PhysicsEq::EXPONENT = 2.6f;
+float PhysicsEq::REST_DENSITY = 6.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 15000.0f;
+float PhysicsEq::EXPONENT = 6.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
@@ -121,9 +121,6 @@ float PhysicsEq::ConvertDensityToPressure(float density) {
 	float pressureChange = pow((density / REST_DENSITY), EXPONENT) - 1;
 
 	return multiplier * pressureChange;
-
-
-	return STIFFNESS_CONSTANT * (std::max(density - REST_DENSITY, 0.0f));
 }
 
 // Inputs can be positive or negative, but squaring removes negative values

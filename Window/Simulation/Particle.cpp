@@ -13,19 +13,20 @@ float Particle::particleProperties[MAX_PARTICLES] = { 0 };
 // Static functions
 // ---------------------------------------------------------------------------------------------------
 
+
 // Particle Initializers
 
-void Particle::init_Cube(std::vector<Particle>* particleArray, float radius, float spacing)
+void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing)
 {
 
-	Particle::KERNEL_RADIUS = 8;
+	Particle::KERNEL_RADIUS = 4 * radius;
 
 	// 8 bit -> 256^2 = max 65k particles
 	uint16_t column, row;
 	float squareDimension;
 
 	glm::vec2 offset, position, max_Size;
-	glm::vec2 containerCenter = { 50.0f,50.0f };
+	glm::vec2 containerCenter = { -50.0f,50.0f };
 
 	// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
 
@@ -47,7 +48,6 @@ void Particle::init_Cube(std::vector<Particle>* particleArray, float radius, flo
 			column++;
 			row = 0;
 		}
-
 		particleArray->emplace_back(
 			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
 	}
@@ -78,7 +78,27 @@ bool Particle::operator==(const Particle& comp) const {
 // ---------------------------------------------------------------------------------------------------
 
 
-/* 
+void Particle::CalculateAllDensities(std::vector<Particle>* particleArray)
+{
+	// Calculate predicted postion and velocity
+	for (int i = 0; i < particleArray->size(); i++) {
+
+		// Predictd velocity v*
+		glm::vec3 predictedVel = particleArray->at(i).getVelocity() + (SIMSTEP * particleArray->at(i).getAcceleration());
+
+		if(ENABLE_GRAVITY){ 
+			predictedVel.y += (SIMSTEP * PhysicsEq::GRAVITY);
+		}
+
+		particleArray->at(i).setPredictedVelocity(predictedVel);
+		particleArray->at(i).update_PosPredicted();
+
+		// Updates all density values
+		Particle::CalculateDensity(particleArray, particleArray->at(i), i);
+	}
+}
+
+/*
 *	Calculate the density for a specified particle
 *	
 *	======================================================
@@ -132,7 +152,32 @@ void Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenPart
 * 
 */
 
-/* 
+void Particle::CalculateAllPressures(std::vector<Particle>* particleArray)
+{		
+	// Calculates pressure and resultant velocity
+	for (int i = 0; i < particleArray->size(); i++) {
+		glm::vec2 pressureForce = Particle::CalculatePressureForce(particleArray, particleArray->at(i), i);
+		glm::vec3 sum = particleArray->at(i).getPredictedVelocity();
+
+		// F = MA --> A = F / M
+		if (particleArray->at(i).getDensity() != 0) {
+			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(i).getDensity();
+
+			//pressure projection
+			sum += (SIMSTEP * glm::vec3(pressureAcceleration, 0));
+		}
+
+		// Gravity is Enabled
+		if (ENABLE_GRAVITY) {
+			sum.y += SIMSTEP * PhysicsEq::GRAVITY;
+		}
+
+		particleArray->at(i).setVelocity(sum);
+
+	}
+}
+
+/*
 *	Property Gradient.
 *	Tells us where the highest gradient point is pointed towards
 * 
@@ -193,16 +238,6 @@ void Particle::update_Accel() {
 
 	if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
 		jerk.y = PhysicsEq::toNegative(jerk.y);
-	}
-
-	// Gravity
-	if (ENABLE_GRAVITY) {
-		if (abs(accel.y) < abs(PhysicsEq::GRAVITY) && m_Position.y > 0) {
-			accel.y = accel.y + (-jerk.y * SIMSTEP);
-		}
-		else {
-			accel.y = PhysicsEq::GRAVITY;
-		}
 	}
 
 	// Remove values close to zero
@@ -395,41 +430,7 @@ void Particle::addVelocity(glm::vec2 vel) {
 }
 
 void Particle::setAcceleration(glm::vec2 acc) {
-
-	m_Acceleration = glm::vec3(acc,0);
-
-	return;
-
-	//glm::vec3 accel{ m_Acceleration.x, m_Acceleration.y, m_Acceleration.z };
-	//glm::vec3 jerk{ 30.0f, 30.0f, 0.0f };
-
-	//if (m_Velocity.y > 0 && m_Acceleration.y > 0) {
-	//	jerk.y = PhysicsEq::toNegative(jerk.y);
-	//}
-
-	//// Gravity
-	//if (ENABLE_GRAVITY) {
-	//	if (abs(accel.y) < abs(PhysicsEq::GRAVITY) && m_Position.y > 0) {
-	//		accel.y = accel.y + (-jerk.y * SIMSTEP) + acc.y;
-	//	}
-	//	else {
-	//		accel.y = PhysicsEq::GRAVITY+ acc.y;
-	//	}
-	//}
-
-
-	//m_Acceleration = accel;
-}
-
-void Particle::addAcceleration(float acc, axis type) {
-	if (type == axis::x) {
-		m_Acceleration.x = acc;
-	}
-	else {
-		if (ENABLE_GRAVITY) {
-			m_Acceleration.y += PhysicsEq::GRAVITY;
-		}
-	}
+	m_Acceleration = glm::vec3(acc, 0);
 }
 
 void Particle::setDensity(float den)

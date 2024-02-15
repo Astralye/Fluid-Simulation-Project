@@ -21,6 +21,12 @@ void Camera::move(axis type, bool positive) {
 
 void Camera::zoom(bool pos) {
 
+	// TODO:
+
+	// This code is being very buggy.
+	// It needs to scale with aspect ratio but for some reason I cant seem
+	// To get it to worK
+
 	float increment = 10.0f;
 	m_Zoom = (pos) ? increment : -increment;
 

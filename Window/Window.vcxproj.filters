@@ -78,6 +78,9 @@
     <ClCompile Include="BufferData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Project_ImGui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexBuffer.h">
@@ -156,6 +159,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BufferData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Project_ImGui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

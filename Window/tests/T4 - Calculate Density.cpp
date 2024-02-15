@@ -24,21 +24,14 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(50.0f, 50.0f, 0.0f), 80.0f, 80.0f),
+		m_RectContainer(glm::vec3(20.0f, 50.0f, 0.0f),150.0f, 70.0f),
 		drawType(VertexType::Null),
 		m_DrawCalls(0),
 		time(0)
 	{
-
-		// TODO
-		// ISSUE : m_ParticleArray uses 'new' and 'reserve'
-		// 
-		// MAX_PARTICLES cannot be less than 40
-		// For some reason there is a memory leak or something
-
-		// Array is created on the heap.
 		m_ParticleArray = new std::vector<Particle>;
 		m_ParticleArray->reserve(MAX_PARTICLES);
+
 
 		// ------------------------------------------------------------
 
@@ -67,40 +60,10 @@ namespace test {
 
 		m_MVP = m_Proj * m_View * m_Model;
 
+		Particle::CalculateAllDensities(m_ParticleArray);
+		Particle::CalculateAllPressures(m_ParticleArray);
 
-		// SPH FUNCTIONS HERE
-		// Ideally would be in its own class and function.
-
-		for (int i = 0; i < m_ParticleArray->size(); i++) {
-
-			// Predictd velocity v*
-			glm::vec3 predictedVel = m_ParticleArray->at(i).getVelocity() + (SIMSTEP * m_ParticleArray->at(i).getAcceleration());
-			m_ParticleArray->at(i).setPredictedVelocity(predictedVel);
-
-			// update position for next timestep
-			m_ParticleArray->at(i).update_PosPredicted();
-
-			// Updates all density values
-			Particle::CalculateDensity(m_ParticleArray, m_ParticleArray->at(i), i);
-		}
-
-		tmp = 0;
-
-		// Updates all pressure values
-		for (int i = 0; i < m_ParticleArray->size(); i++) {
-			glm::vec2 pressureForce = Particle::CalculatePressureForce(m_ParticleArray, m_ParticleArray->at(i),i);
-
-			// F = MA --> A = F / M
-			if (m_ParticleArray->at(i).getDensity() != 0) {
-				glm::vec2 pressureAcceleration = pressureForce / m_ParticleArray->at(i).getDensity();
-
-				//pressure projection
-				glm::vec3 sum = m_ParticleArray->at(i).getPredictedVelocity() + (SIMSTEP * glm::vec3(pressureAcceleration, 0));
-				m_ParticleArray->at(i).setVelocity(sum);
-			}
-		}
-		
-		// 10k
+		// Updates particle positions and checks for collisions
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
 
 			m_ParticleArray->at(i).update();
@@ -169,21 +132,44 @@ namespace test {
 	}
 
 	// All the IMGui rendering to be displayed
+
+
+
+	// This needs to be in its own file.
 	void T4_Calculate_Density::OnImGuiRender()
 	{
-		ImGui::Text("Move {W,A,S,D}");
-		ImGui::Text("Zoom {-,+}");
-		ImGui::Text("Particles: %i", MAX_PARTICLES);
-		//ImGui::Text("Draw calls: %i", m_DrawCalls);
+		
+		ImGui::End();
+		// Things to add:
+	
+		// - Menu bar
+		
+		// - Performance and statistics
+		// - General overview of program.
+		// - Help
+		// - Modifications
 
-		ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
+		ImGui::Begin("Misc");
 
-		ImGui::Text("Time: %.3f", time);
+		if (ImGui::CollapsingHeader("Controls")) {
+			ImGui::Text("Move {W,A,S,D}");
+			ImGui::Text("Zoom {-,+}");
+		}
+		if (ImGui::CollapsingHeader("Performance")) {
+			ImGui::Text("Particles: %i", MAX_PARTICLES);
+			ImGui::Text("Draw calls: %i", m_DrawCalls);
+			ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
+			ImGui::Text("Time: %.3f", time);
+		}
 
-		ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 100000.0f);
-		ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY,3.0f, 0.0f);
-		ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 2.7f);
-		ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 20.0f);
+		ImGui::End();
+
+		ImGui::Begin("Settings");
+
+		ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 50000.0f);
+		ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY,20.0f, 1.0f);
+		ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 10.0f);
+
 	}
 
 	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }

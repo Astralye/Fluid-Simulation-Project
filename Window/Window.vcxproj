@@ -158,6 +158,7 @@
     <ClCompile Include="BufferData.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="Project_ImGui.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation\Collision.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="BufferData.h" />
     <ClInclude Include="Data_Structures.h" />
     <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="Project_ImGui.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shader.h" />

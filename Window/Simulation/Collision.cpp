@@ -49,11 +49,8 @@ void Collision::collisionResponse(Particle& A, collisionType::Type type) {
 
 		if (ENABLE_GRAVITY) {
 
-			if (A.getVelocity().x == 0) {
-				A.setVelocity({0,A.getVelocity().y});
-			}
-			else {
-				A.m_Position.y += 0.1;
+			if (A.getVelocity().y != 0) {
+				A.m_Position.y += 0.05;
 			}
 
 			A.bounce();

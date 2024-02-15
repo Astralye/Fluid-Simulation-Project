@@ -75,12 +75,15 @@ public:
 
 	// Creates a cube of particles
 	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing);
-
-	// Creates a particles with random positions and velocities
 	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
+	// SPH FUNCTIONS
+	// This may need to change again for optimization,
+	// but we can leave them here for now
+	static void CalculateAllDensities(std::vector<Particle> *particleArray);
 	static void CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
 
+	static void CalculateAllPressures(std::vector<Particle>* particleArray);
 	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle,int j);
 
 	// Static variables
@@ -106,9 +109,6 @@ public:
 	void invert(Vector type);
 	void invert(glm::vec3 type);
 
-	bool isMoving(float time);
-	bool notMoving(float time);
-
 	// Getters
 	inline float getRadius() { return m_Radius; }
 	inline float getMass() { return m_Mass; }
@@ -127,7 +127,6 @@ public:
 
 	void addVelocity(glm::vec2 vel);
 	void setAcceleration(glm::vec2 acc);
-	void addAcceleration(float acc, axis type);
 
 	void setDensity(float den);
 

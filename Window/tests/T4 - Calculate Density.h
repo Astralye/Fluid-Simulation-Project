@@ -17,6 +17,8 @@
 #include "Texture.h"
 #include "Camera.h"
 
+#include "Project_ImGui.h"
+
 #include <memory>
 
 namespace test {
