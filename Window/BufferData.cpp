@@ -3,10 +3,10 @@
 #include <iostream>
 
 void CreateIndexBuffer(GLuint indexBuffer) {
-	uint32_t indices[MaxIndexCount];
+	uint32_t indices[Settings::MaxIndexCount];
 	uint32_t offset = 0;
 
-	for (size_t i = 0; i < MaxIndexCount; i += 6)
+	for (size_t i = 0; i < Settings::MaxIndexCount; i += 6)
 	{
 		indices[i + 0] = 0 + offset;
 		indices[i + 1] = 1 + offset;
@@ -31,10 +31,10 @@ template<> BufferData<Vertex>::BufferData()
 {
 
 	m_Shader = std::make_unique<Shader>("res/shaders/quad.shader");
-	m_Buffer = new Vertex[MaxVertexCount];
+	m_Buffer = new Vertex[Settings::MaxVertexCount];
 
 	m_VAO = std::make_unique<VertexArray>();
-	m_VBO = std::make_unique<VertexBuffer>(BufferType, MaxVertexCount);
+	m_VBO = std::make_unique<VertexBuffer>(BufferType, Settings::MaxVertexCount);
 	VertexBufferLayout layout;
 
 	layout.Push<float>(4); // WorldPosition
@@ -51,10 +51,10 @@ template<> BufferData<CircleVertex>::BufferData()
 {
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Circle.shader");
-	m_Buffer = new CircleVertex[MaxVertexCount];
+	m_Buffer = new CircleVertex[Settings::MaxVertexCount];
 
 	m_VAO = std::make_unique<VertexArray>();
-	m_VBO = std::make_unique<VertexBuffer>(BufferType, MaxVertexCount);
+	m_VBO = std::make_unique<VertexBuffer>(BufferType, Settings::MaxVertexCount);
 	VertexBufferLayout layout;
 
 	layout.Push<float>(4); // WorldPosition
@@ -122,7 +122,7 @@ template<> void BufferData<CircleVertex>::Flush() {
 template<typename T> void BufferData<T>::Draw(Rectangle& quad, glm::mat4 mvp) {}
 template<> void BufferData<Vertex>::Draw(Rectangle& quad, glm::mat4 mvp) {
 
-	if (IndexCount >= MaxIndexCount) {
+	if (IndexCount >= Settings::MaxIndexCount) {
 		EndBatch();
 		Flush();
 		BeginBatch();
@@ -142,7 +142,7 @@ template<> void BufferData<Vertex>::Draw(Rectangle& quad, glm::mat4 mvp) {
 template<typename T> void BufferData<T>::Draw(Particle& particle, glm::mat4 mvp) {}
 template<> void BufferData<CircleVertex>::Draw(Particle& particle, glm::mat4 mvp) {
 
-	if (IndexCount >= MaxIndexCount) {
+	if (IndexCount >= Settings::MaxIndexCount) {
 		EndBatch();
 		Flush();
 		BeginBatch();

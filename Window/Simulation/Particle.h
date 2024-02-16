@@ -6,7 +6,13 @@
 
 #include "PhysicsEq.h"
 #include "glm/glm.hpp"
+#include "Rectangle.h"
+#include "Settings.h"
+
 #include <vector>
+
+// Particle Class
+// -------------------------------------------------------------------------------------
 
 class Particle{
 private:
@@ -82,14 +88,18 @@ public:
 	// but we can leave them here for now
 	static void CalculateAllDensities(std::vector<Particle> *particleArray);
 	static void CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
+	static void CalculatePositionCollision(std::vector<Particle>* arr, RectangleContainer& container);
 
 	static void CalculateAllPressures(std::vector<Particle>* particleArray);
-	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle & chosenParticle,int j);
+	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle &chosenParticle,int j);
+
+	static void CalculateAllViscosities(std::vector<Particle>* particleArray);
+	static glm::vec2 CalculateViscosity(std::vector<Particle>* particleArray, Particle &chosenParticle);
 
 	// Static variables
 
 	static float KERNEL_RADIUS;
-	static float particleProperties[MAX_PARTICLES];
+	static float particleProperties[Settings::MAX_PARTICLES];
 	static float TARGET_DENSITY;
 
 	// -------------------------------------------------
@@ -133,6 +143,35 @@ public:
 	bool operator==(const Particle& comp) const;
 	bool operator!=(const Particle& comp) const;
 
+};
+
+
+// Collision Class
+// I have made the decision to put collsion here 
+// Makes the most sense, as particles can only be having collision detection
+// Removes the need for cyclical includes and bugs
+// -------------------------------------------------------------------------------
+
+struct collisionType {
+
+	enum Type { N_A, Vertical, Horizontal };
+
+	bool m_isCollision;
+	Type type;
+
+	collisionType(bool collision, Type value = Type::N_A)
+		: m_isCollision(collision), type(value) {}
+
+};
+
+class Collision {
+
+public:
+	static void collisionResponse(Particle& A, collisionType::Type type);
+
+	static bool collisionDetection(Particle& A, Particle& B);
+	static bool collisionDetection(Rectangle& A, Particle& B);
+	static collisionType collisionDetection(RectangleContainer& A, Particle& B);
 };
 
 #endif

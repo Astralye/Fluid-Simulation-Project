@@ -54,7 +54,7 @@ int main(void){
 
 
     // GLFW window
-	GLFWwindow* window = glfwCreateWindow((int)WINDOW_RESOLUTION.x, (int)WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)Settings::WINDOW_RESOLUTION.x, (int)Settings::WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
     if (!window){
         glfwTerminate();
         return -1;
@@ -104,7 +104,7 @@ int main(void){
 		// If currentTest exists
 		if (currentTest) {
 
-			currentTest->OnUpdate(SIMSTEP);
+			currentTest->OnUpdate(Settings::SIMSTEP);
 			currentTest->OnRender();
 
 			//ImGui::ShowDemoWindow();
@@ -118,12 +118,15 @@ int main(void){
 			// If the test is the not test menu
 			if (currentTest != testMenu)
 			{
+				// Within Simulation
 
 				if (ImGui::Button("<-")) {
-					// Runs only if button click, delete the current test
 					delete currentTest;
 					currentTest = testMenu;
-				}
+				} ImGui::SameLine();
+			}
+			else {
+				ImGui::Begin("Load Sim");
 			}
 
 			currentTest->OnImGuiRender();

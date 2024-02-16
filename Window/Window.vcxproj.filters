@@ -45,9 +45,6 @@
     <ClCompile Include="Simulation\PhysicsEq.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Simulation\Collision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\vendor\imgui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,6 +78,9 @@
     <ClCompile Include="Project_ImGui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexBuffer.h">
@@ -111,9 +111,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Simulation\PhysicsEq.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Simulation\Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Simulation\Rectangle.h">

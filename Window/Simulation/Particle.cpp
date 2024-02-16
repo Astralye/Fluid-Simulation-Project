@@ -3,12 +3,89 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "Settings.h"
 #include "Particle.h"
+
+// Collision functions
+// --------------------------------------------------------------------------------------------------
+
+void Collision::collisionResponse(Particle& A, collisionType::Type type) {
+
+	glm::vec3 flip{ false,false,false };
+
+	switch (type) {
+	case collisionType::Horizontal:
+
+		if (Settings::ENABLE_GRAVITY) {
+
+			if (A.getVelocity().y != 0) {
+				A.m_Position.y += 0.05;
+			}
+
+			A.bounce();
+		}
+		else {
+			flip.y = true;
+		}
+		break;
+
+	case collisionType::Vertical:
+		flip.x = true;
+		break;
+	}
+
+	A.invert(flip);
+}
+
+bool Collision::collisionDetection(Particle& A, Particle& B) {
+	float distance = PhysicsEq::euclid_Distance(A.m_Position, B.m_Position);
+	auto maxLength = A.getRadius() + B.getRadius();
+
+	if (distance <= maxLength) {
+		return true;
+	}
+	return false;
+}
+
+bool Collision::collisionDetection(Rectangle& A, Particle& B) {
+
+	glm::vec4 clamp;
+
+	clamp.x = PhysicsEq::clamp(B.m_Position.x, A.m_Position.x - (A.length / 2), A.m_Position.x + (A.length / 2));
+	clamp.y = PhysicsEq::clamp(B.m_Position.y, A.m_Position.y - (A.height / 2), A.m_Position.y + (A.height / 2));
+
+	glm::vec4 difference = clamp - B.m_Position;
+
+	float overlap = B.getRadius() - PhysicsEq::pythagoras(difference.x, difference.y);
+
+	if (std::isnan(overlap)) {
+		overlap = 0;
+	}
+
+	if (overlap > 0) {
+		return true;
+	}
+	return false;
+}
+
+// Collision between a Rectangle and Particle
+collisionType Collision::collisionDetection(RectangleContainer& A, Particle& B) {
+	if (collisionDetection(A.m_SideA, B) || collisionDetection(A.m_SideC, B)) {
+		return { true, collisionType::Horizontal };
+	}
+
+	if (collisionDetection(A.m_SideB, B) || collisionDetection(A.m_SideD, B)) {
+		return { true, collisionType::Vertical };
+	}
+
+	return { false , collisionType::N_A };
+}
+
+// Particle
+// ---------------------------------------------------------------------------------------------------
 
 // Static variables
 float Particle::KERNEL_RADIUS = 0.0f;
-float Particle::particleProperties[MAX_PARTICLES] = { 0 };
+float Particle::particleProperties[Settings::MAX_PARTICLES] = { 0 };
 
 // Static functions
 // ---------------------------------------------------------------------------------------------------
@@ -30,7 +107,7 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 
 	// MAKE SURE EVERY MOVEMENT IS IN RESPECT TO A SINGLE SIMULATION STEP.
 
-	squareDimension = (float)sqrt(MAX_PARTICLES);
+	squareDimension = (float)sqrt(Settings::MAX_PARTICLES);
 
 	offset = { containerCenter.x / 2, containerCenter.y / 2 };
 	max_Size = { (int)ceil(squareDimension), (int)floor(squareDimension) };
@@ -39,7 +116,7 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 	column = 0;
 	row = 0;
 
-	for (int i = 0; i < MAX_PARTICLES; i++) {
+	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
 		position = { row * (2 * radius + spacing),
 					column * (2 * radius + spacing)};
 		row++;
@@ -59,7 +136,7 @@ void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
 
 	int maxVelocity = 20;
 
-	for (int i = 0; i < MAX_PARTICLES; i++) {
+	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
 
 		particleArray->emplace_back(
 			glm::vec4(8.0f + rand() % 85, 12.0f + rand() % 70, 0.0f,0.0f), 1.0f, radius
@@ -80,14 +157,15 @@ bool Particle::operator==(const Particle& comp) const {
 
 void Particle::CalculateAllDensities(std::vector<Particle>* particleArray)
 {
+
 	// Calculate predicted postion and velocity
 	for (int i = 0; i < particleArray->size(); i++) {
 
 		// Predictd velocity v*
-		glm::vec3 predictedVel = particleArray->at(i).getVelocity() + (SIMSTEP * particleArray->at(i).getAcceleration());
+		glm::vec3 predictedVel = particleArray->at(i).getVelocity() + (Settings::SIMSTEP * particleArray->at(i).getAcceleration());
 
-		if(ENABLE_GRAVITY){ 
-			predictedVel.y += (SIMSTEP * PhysicsEq::GRAVITY);
+		if(Settings::ENABLE_GRAVITY){
+			predictedVel.y += (Settings::SIMSTEP * PhysicsEq::GRAVITY);
 		}
 
 		particleArray->at(i).setPredictedVelocity(predictedVel);
@@ -132,6 +210,21 @@ void Particle::CalculateDensity(std::vector<Particle>* arr, Particle &chosenPart
 	chosenParticle.setDensity(density);
 }
 
+void Particle::CalculatePositionCollision(std::vector<Particle>* arr, RectangleContainer& container)
+{
+	for (int i = 0; i < arr->size(); i++) {
+
+		arr->at(i).update();
+
+		// Check for collision detection for each particle against the container.
+		auto collide = Collision::collisionDetection(container, arr->at(i));
+
+		if (collide.m_isCollision) {
+			Collision::collisionResponse(arr->at(i), collide.type);
+		}
+	}
+}
+
 /*
 *	Calculate the density for a specified particle
 *
@@ -164,12 +257,12 @@ void Particle::CalculateAllPressures(std::vector<Particle>* particleArray)
 			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(i).getDensity();
 
 			//pressure projection
-			sum += (SIMSTEP * glm::vec3(pressureAcceleration, 0));
+			sum += (Settings::SIMSTEP * glm::vec3(pressureAcceleration, 0));
 		}
 
 		// Gravity is Enabled
-		if (ENABLE_GRAVITY) {
-			sum.y += SIMSTEP * PhysicsEq::GRAVITY;
+		if (Settings::ENABLE_GRAVITY) {
+			sum.y += Settings::SIMSTEP * PhysicsEq::GRAVITY;
 		}
 
 		particleArray->at(i).setVelocity(sum);
@@ -214,6 +307,31 @@ glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle&
 
 	return pressureForce;
 }
+
+void Particle::CalculateAllViscosities(std::vector<Particle>* arr)
+{
+	for (int i = 0; i < arr->size(); i++) {
+		arr->at(i).addVelocity(CalculateViscosity(arr, arr->at(i)));
+	}
+}
+
+glm::vec2 Particle::CalculateViscosity(std::vector<Particle>* arr, Particle& chosenParticle) {
+
+	glm::vec2 viscosityForce = { 0,0 };
+
+	for (int i = 0; i < arr->size(); i++) {
+		if (arr->at(i) == chosenParticle) { continue; }
+
+		glm::vec2 difference = {
+			arr->at(i).getVelocity().x - chosenParticle.getVelocity().x,
+			arr->at(i).getVelocity().y - chosenParticle.getVelocity().y, };
+
+		viscosityForce += difference * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, chosenParticle.m_PredictedPos, Particle::KERNEL_RADIUS));
+	}
+
+	return viscosityForce * PhysicsEq::VISCOSITY;
+}
+
 
 
 
@@ -272,13 +390,13 @@ void Particle::update_Vel() {
 	float friction = 1;
 	//float friction = 0.8;
 
-	if (m_Acceleration.x != 0) { vel.x += (m_Acceleration.x * SIMSTEP); }
+	if (m_Acceleration.x != 0) { vel.x += (m_Acceleration.x * Settings::SIMSTEP); }
 	else { vel.x *= friction; }
 
-	if (m_Acceleration.y != 0) { vel.y += (m_Acceleration.y * SIMSTEP); }
+	if (m_Acceleration.y != 0) { vel.y += (m_Acceleration.y * Settings::SIMSTEP); }
 	else { vel.y *= friction; }
 
-	if (m_Acceleration.z != 0) { vel.z += (m_Acceleration.z * SIMSTEP); }
+	if (m_Acceleration.z != 0) { vel.z += (m_Acceleration.z * Settings::SIMSTEP); }
 	else { vel.z *= friction; }
 
 	// Remove values close to zero
@@ -321,9 +439,9 @@ void Particle::update_PosPredicted() {
 	//pos.y += m_Velocity.y * SIMSTEP;
 	//pos.z += m_Velocity.z * SIMSTEP;
 
-	pos.x += m_PredictedVelocity.x * SIMSTEP;
-	pos.y += m_PredictedVelocity.y * SIMSTEP;
-	pos.z += m_PredictedVelocity.z * SIMSTEP;
+	pos.x += m_PredictedVelocity.x * Settings::SIMSTEP;
+	pos.y += m_PredictedVelocity.y * Settings::SIMSTEP;
+	pos.z += m_PredictedVelocity.z * Settings::SIMSTEP;
 
 
 	m_PredictedPos = glm::vec4(pos, 0.0f);
@@ -332,17 +450,15 @@ void Particle::update_PosPredicted() {
 void Particle::update_Pos() {
 	glm::vec3 pos{ m_Position.x, m_Position.y, m_Position.z };
 
-	pos.x += m_Velocity.x * SIMSTEP;
-	pos.y += m_Velocity.y * SIMSTEP;
-	pos.z += m_Velocity.z * SIMSTEP;
+	pos.x += m_Velocity.x * Settings::SIMSTEP;
+	pos.y += m_Velocity.y * Settings::SIMSTEP;
+	pos.z += m_Velocity.z * Settings::SIMSTEP;
 
 	m_Position = glm::vec4(pos, 0.0f);
 }
 
 // Updates all the accelerations, velocities and positions before changing the vertex positions.
 void Particle::update(){
-	//update_Accel();
-	//update_Vel();
 	update_Pos();
 
 	m_Vertices[0] =

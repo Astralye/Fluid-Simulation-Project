@@ -17,8 +17,8 @@ public:
 	static float REST_DENSITY;
 	static float STIFFNESS_CONSTANT;
 	static float EXPONENT;
-
-	constexpr static float GRAVITY = -10 ; // This is in m/s
+	static float VISCOSITY;
+	static float GRAVITY; // This is in m/s
 
 	// Pythagorean theorem
 	static float pythagoras( float a, float b );

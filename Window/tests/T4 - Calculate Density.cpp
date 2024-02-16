@@ -14,6 +14,28 @@
 #include <array>
 #include <cstdlib>
 
+// CAN PUT THIS IN ITS OWN CLASS
+// INCLUDE 
+// --> PARTICLE, VECTOR, CHRONO, RECTANGLECONTAINER
+// 
+// Couldn't use macro, using function pointers
+
+void TIME(void (*func)(std::vector<Particle>*), std::vector<Particle>* particleArray, std::chrono::duration<float> &timer) {
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+	start = std::chrono::system_clock::now();
+	func(particleArray);
+	end = std::chrono::system_clock::now();
+	timer = end - start;
+}
+
+void TIME(void (*func)(std::vector<Particle>*,RectangleContainer &container), std::vector<Particle>* particleArray, RectangleContainer& container, std::chrono::duration<float>& timer) {
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+	start = std::chrono::system_clock::now();
+	func(particleArray,container);
+	end = std::chrono::system_clock::now();
+	timer = end - start;
+}
+
 namespace test {
 
 	T4_Calculate_Density::T4_Calculate_Density()
@@ -30,7 +52,7 @@ namespace test {
 		time(0)
 	{
 		m_ParticleArray = new std::vector<Particle>;
-		m_ParticleArray->reserve(MAX_PARTICLES);
+		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
 
 
 		// ------------------------------------------------------------
@@ -60,21 +82,10 @@ namespace test {
 
 		m_MVP = m_Proj * m_View * m_Model;
 
-		Particle::CalculateAllDensities(m_ParticleArray);
-		Particle::CalculateAllPressures(m_ParticleArray);
-
-		// Updates particle positions and checks for collisions
-		for (int i = 0; i < m_ParticleArray->size(); i++) {
-
-			m_ParticleArray->at(i).update();
-
-			// Check for collision detection for each particle against the container.
-			auto collide = Collision::collisionDetection(m_RectContainer, m_ParticleArray->at(i));
-
-			if (collide.m_isCollision) {
-				Collision::collisionResponse(m_ParticleArray->at(i), collide.type);
-			}
-		}
+		TIME(&Particle::CalculateAllDensities, m_ParticleArray, m_Statistics.Time_Calculate_Density);
+		TIME(&Particle::CalculateAllPressures, m_ParticleArray, m_Statistics.Time_Calculate_Pressure);
+		TIME(&Particle::CalculatePositionCollision, m_ParticleArray, m_RectContainer, m_Statistics.Time_Calculate_Movement);
+		TIME(&Particle::CalculateAllViscosities, m_ParticleArray, m_Statistics.Time_Calculate_Viscosity);
 
 		timeStep();
 	}
@@ -137,39 +148,81 @@ namespace test {
 
 	// This needs to be in its own file.
 	void T4_Calculate_Density::OnImGuiRender()
-	{
-		
-		ImGui::End();
+	{	
 		// Things to add:
-	
+
 		// - Menu bar
-		
+
 		// - Performance and statistics
 		// - General overview of program.
 		// - Help
 		// - Modifications
-
-		ImGui::Begin("Misc");
-
-		if (ImGui::CollapsingHeader("Controls")) {
-			ImGui::Text("Move {W,A,S,D}");
-			ImGui::Text("Zoom {-,+}");
-		}
-		if (ImGui::CollapsingHeader("Performance")) {
-			ImGui::Text("Particles: %i", MAX_PARTICLES);
-			ImGui::Text("Draw calls: %i", m_DrawCalls);
-			ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
-			ImGui::Text("Time: %.3f", time);
-		}
-
+		
 		ImGui::End();
+		{
+			ImGui::Begin("", 0,
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-		ImGui::Begin("Settings");
+			//if (ImGui::ArrowButton("##right -", ImGuiDir_Right)) {
+			//	// Play
+			//} ImGui::SameLine();
 
-		ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 50000.0f);
-		ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY,20.0f, 1.0f);
-		ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 10.0f);
+			if (ImGui::Button("Start")) {
+				// Play
+			} ImGui::SameLine();
 
+			if (ImGui::Button("Stop")) {
+				// Stop
+			} ImGui::SameLine();
+
+			if (ImGui::Button("Restart")) {
+				// Stop
+			} ImGui::SameLine();
+
+			ImGui::End();
+		}
+
+		{
+			ImGui::Begin("Misc", 0,
+				ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar);
+
+			if (ImGui::CollapsingHeader("Controls")) {
+				ImGui::Text("Move {W,A,S,D}");
+				ImGui::Text("Zoom {-,+}");
+			}
+
+			if (ImGui::CollapsingHeader("Performance")) {
+
+				ImGui::SeparatorText("General");
+				ImGui::Text("Particles: %i", Settings::MAX_PARTICLES);
+				ImGui::Text("Draw calls: %i", m_DrawCalls);
+				ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
+				ImGui::Text("Time: %.3f", time);
+
+				ImGui::SeparatorText("Compute Times");
+				ImGui::Text("Density: %.2fms", m_Statistics.Time_Calculate_Density.count() * 1000);
+				ImGui::Text("Pressure: %.2fms", m_Statistics.Time_Calculate_Pressure.count() * 1000);
+				ImGui::Text("Viscosity: %.2fms", m_Statistics.Time_Calculate_Viscosity.count() * 1000);
+				ImGui::Text("Movement: %.2fms", m_Statistics.Time_Calculate_Movement.count() * 1000);
+			}
+
+			if (ImGui::CollapsingHeader("SPH Config")) {
+				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 100000.0f);
+				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 20.0f, 1.0f);
+				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 10.0f);
+				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 1.0f);
+			}
+
+			if (ImGui::CollapsingHeader("Simulation Config")) {
+
+				ImGui::Checkbox("Enable Gravity", &Settings::ENABLE_GRAVITY);
+				ImGui::InputFloat("Acceleration constant:", &PhysicsEq::GRAVITY, 0.1f,0.5f);
+				ImGui::Text("Max Particles:");
+
+			}
+
+			ImGui::End();
+		}
 	}
 
 	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }

@@ -160,8 +160,8 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Project_ImGui.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Simulation\Collision.cpp" />
     <ClCompile Include="Simulation\Particle.cpp" />
     <ClCompile Include="Simulation\PhysicsEq.cpp" />
     <ClCompile Include="tests\T4 - Calculate Density.cpp" />
@@ -188,7 +188,6 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="Simulation\Collision.h" />
     <ClInclude Include="Simulation\Particle.h" />
     <ClInclude Include="Simulation\PhysicsEq.h" />
     <ClInclude Include="Simulation\Rectangle.h" />

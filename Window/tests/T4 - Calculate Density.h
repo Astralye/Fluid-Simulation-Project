@@ -4,7 +4,6 @@
 #include "Settings.h"
 #include "Data_Structures.h"
 
-#include "Simulation/Collision.h"
 #include "Simulation/Particle.h"
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Rectangle.h"
@@ -19,7 +18,16 @@
 
 #include "Project_ImGui.h"
 
+#include <chrono>
 #include <memory>
+
+struct Statistics {
+	std::chrono::duration<float> Time_Calculate_Density;
+	std::chrono::duration<float> Time_Calculate_Pressure;
+	std::chrono::duration<float> Time_Calculate_Movement;
+	std::chrono::duration<float> Time_Calculate_Viscosity;
+	std::chrono::duration<float> Time_Render_Particles;
+};
 
 namespace test {
 
@@ -40,7 +48,7 @@ namespace test {
 
 	private:
 
-		float tmp;
+		Statistics m_Statistics;
 
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
