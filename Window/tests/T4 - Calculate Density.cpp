@@ -51,16 +51,19 @@ namespace test {
 		m_DrawCalls(0),
 		time(0)
 	{
+		Initialize();
+	}
+
+	void T4_Calculate_Density::Initialize() {
 		m_ParticleArray = new std::vector<Particle>;
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
-
 
 		// ------------------------------------------------------------
 
 		float radius = 1.0f;
 		float spacing = 0.0f;
 
-		Particle::init_Cube(m_ParticleArray,radius,spacing);
+		Particle::init_Cube(m_ParticleArray, radius, spacing);
 		//Particle::init_Random(m_ParticleArray, radius);
 	}
 
@@ -75,12 +78,15 @@ namespace test {
 	*/
 	void T4_Calculate_Density::OnUpdate(float deltaTime){
 
-		// Updates positions, projections and models.
 		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().right, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
 		m_Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 		m_MVP = m_Proj * m_View * m_Model;
+
+		if (Settings::PAUSE_SIMULATION) {
+			return;
+		}
 
 		TIME(&Particle::CalculateAllDensities, m_ParticleArray, m_Statistics.Time_Calculate_Density);
 		TIME(&Particle::CalculateAllPressures, m_ParticleArray, m_Statistics.Time_Calculate_Pressure);
@@ -166,17 +172,29 @@ namespace test {
 			//if (ImGui::ArrowButton("##right -", ImGuiDir_Right)) {
 			//	// Play
 			//} ImGui::SameLine();
+			const char* text;
 
-			if (ImGui::Button("Start")) {
-				// Play
-			} ImGui::SameLine();
+			if (Settings::PAUSE_SIMULATION) {
+				text = "Play";
+			}
+			else {
+				text = "Pause";
+			}
 
-			if (ImGui::Button("Stop")) {
-				// Stop
+
+			if (ImGui::Button(text)) {
+
+				if (Settings::PAUSE_SIMULATION) {
+					Settings::PAUSE_SIMULATION = false;
+				}
+				else {
+					Settings::PAUSE_SIMULATION = true;
+				}
+
 			} ImGui::SameLine();
 
 			if (ImGui::Button("Restart")) {
-				// Stop
+				Initialize();
 			} ImGui::SameLine();
 
 			ImGui::End();

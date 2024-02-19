@@ -42,6 +42,8 @@ namespace test {
 		void OnImGuiRender() override;
 		void Shutdown() override;
 
+		void Initialize();
+
 		void DrawCircle();
 		void CreateContainer(RectangleContainer& rc);
 		inline void timeStep();
