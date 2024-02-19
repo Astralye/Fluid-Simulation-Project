@@ -55,7 +55,7 @@ bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 
 	glm::vec4 difference = clamp - B.m_Position;
 
-	float overlap = B.getRadius() - PhysicsEq::pythagoras(difference.x, difference.y);
+	float overlap = B.getRadius() - PhysicsEq::pythagoras({ difference.x, difference.y });
 
 	if (std::isnan(overlap)) {
 		overlap = 0;
@@ -86,6 +86,7 @@ collisionType Collision::collisionDetection(RectangleContainer& A, Particle& B) 
 // Static variables
 float Particle::KERNEL_RADIUS = 0.0f;
 float Particle::particleProperties[Settings::MAX_PARTICLES] = { 0 };
+Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 
 // Static functions
 // ---------------------------------------------------------------------------------------------------
@@ -244,7 +245,6 @@ void Particle::CalculatePositionCollision(std::vector<Particle>* arr, RectangleC
 *	=========================================================
 * 
 */
-
 void Particle::CalculateAllPressures(std::vector<Particle>* particleArray)
 {		
 	// Calculates pressure and resultant velocity
@@ -285,6 +285,11 @@ glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle&
 
 	float localDensity = chosenParticle.getDensity();
 	float localPressure = PhysicsEq::ConvertDensityToPressure(localDensity);
+
+	// Gets rid of zero values
+	if (localDensity == 0) {
+		localDensity = 0.01f;
+	}
 	
 	// Pi / pi^2
 	float localPressureDensity = localPressure / pow(localDensity, 2);
@@ -305,6 +310,7 @@ glm::vec2 Particle::CalculatePressureForce(std::vector<Particle>* arr, Particle&
 			* PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS) * dir;
 	}
 
+	chosenParticle.setPressure(pressureForce);
 	return pressureForce;
 }
 
@@ -435,10 +441,6 @@ void Particle::update_Vel() {
 void Particle::update_PosPredicted() {
 	glm::vec3 pos{ m_Position.x, m_Position.y, m_Position.z };
 
-	//pos.x += m_Velocity.x * SIMSTEP;
-	//pos.y += m_Velocity.y * SIMSTEP;
-	//pos.z += m_Velocity.z * SIMSTEP;
-
 	pos.x += m_PredictedVelocity.x * Settings::SIMSTEP;
 	pos.y += m_PredictedVelocity.y * Settings::SIMSTEP;
 	pos.z += m_PredictedVelocity.z * Settings::SIMSTEP;
@@ -494,7 +496,7 @@ float Particle::invert(float value)
 
 void Particle::invert(Vector type)
 {
-	if (type == Vector::Acceleration) {
+	if (type == Vector::V_Acceleration) {
 		m_Acceleration.x = -m_Acceleration.x;
 	}else
 	{
@@ -518,6 +520,45 @@ void Particle::invert(glm::vec3 type)
 		m_Velocity.z = -m_Velocity.z;
 		m_Acceleration.z = -m_Acceleration.z;
 	}
+}
+
+glm::vec4 Particle::DebugColour()
+{
+	glm::vec3 maxColour = { 1.0f, 0.03f, 0.03f };
+	glm::vec3 minColour = { 0.0f, 0.3f , 1.0f };
+
+	float max, min, value, percentage;
+
+	if (Debug == DebugType::D_Velocity) {
+		// Arbituary values
+		max = 125.0f;
+		min = 0.0f;
+
+		value = PhysicsEq::pythagoras(m_Velocity);
+	}
+
+	if (Debug == DebugType::D_Density) {
+		max = 9 * PhysicsEq::REST_DENSITY;
+		min = 0.0f;
+
+		value = m_Density;
+	}
+
+	if (Debug == DebugType::D_Pressure) {
+		max = 500.0f;
+		min = 0.0f;
+
+		value = PhysicsEq::pythagoras(m_Pressure);
+	}
+
+	percentage = (value - min) / (max - min);
+
+	glm::vec3 newColour;
+	newColour.x = PhysicsEq::lerp(minColour.x, maxColour.x, percentage);
+	newColour.y = PhysicsEq::lerp(minColour.y, maxColour.y, percentage);
+	newColour.z = PhysicsEq::lerp(minColour.z, maxColour.z, percentage);
+
+	return glm::vec4(newColour,1.0f);
 }
 
 void Particle::setVelocity(glm::vec2 vel) {
@@ -549,7 +590,5 @@ void Particle::setAcceleration(glm::vec2 acc) {
 	m_Acceleration = glm::vec3(acc, 0);
 }
 
-void Particle::setDensity(float den)
-{
-	m_Density = den;
-}
+void Particle::setDensity(float den) { m_Density = den; }
+void Particle::setPressure(glm::vec2 pressure) { m_Pressure = pressure; }

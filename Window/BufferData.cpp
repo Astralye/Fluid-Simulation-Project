@@ -155,7 +155,13 @@ template<> void BufferData<CircleVertex>::Draw(Particle& particle, glm::mat4 mvp
 
 		m_BufferPtr->WorldPosition = vertex;
 		m_BufferPtr->LocalPosition = QuadVertexPositions[i] * 2.0f;
-		m_BufferPtr->Colour = { 0.2f, 0.6f, 1.0f, 1.0f };
+
+		if (Settings::ENABLE_DEBUG_MODE) {
+			m_BufferPtr->Colour = particle.DebugColour();
+		}
+		else {
+			m_BufferPtr->Colour = { 0.2f, 0.6f, 1.0f, 1.0f };
+		}
 		m_BufferPtr++;
 	}
 	IndexCount += 6;

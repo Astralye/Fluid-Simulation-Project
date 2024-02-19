@@ -20,6 +20,8 @@ private:
 	glm::vec3 m_Acceleration;
 	glm::vec3 m_Velocity;
 
+	glm::vec2 m_Pressure;
+
 	float m_Mass;
 	float m_Radius;
 	float m_Density;
@@ -32,8 +34,14 @@ public:
 	};
 
 	enum Vector {
-		Acceleration = 1,
-		Velocity = 2,
+		V_Acceleration,
+		V_Velocity,
+	};
+
+	enum DebugType {
+		D_Velocity,
+		D_Density,
+		D_Pressure
 	};
 
 	glm::vec4 m_Position;
@@ -100,10 +108,10 @@ public:
 
 	static float KERNEL_RADIUS;
 	static float particleProperties[Settings::MAX_PARTICLES];
-	static float TARGET_DENSITY;
+
+	static DebugType Debug;
 
 	// -------------------------------------------------
-
 
 	// Update values
 	void update_Accel();
@@ -112,12 +120,13 @@ public:
 	void update_PosPredicted();
 	void update();
 
-	// Getters
 	void bounce();
 	
 	float invert(float value);
 	void invert(Vector type);
 	void invert(glm::vec3 type);
+
+	glm::vec4 DebugColour();
 
 	// Getters
 	inline float getRadius() { return m_Radius; }
@@ -139,6 +148,7 @@ public:
 	void setAcceleration(glm::vec2 acc);
 
 	void setDensity(float den);
+	void setPressure(glm::vec2 pressure);
 
 	bool operator==(const Particle& comp) const;
 	bool operator!=(const Particle& comp) const;

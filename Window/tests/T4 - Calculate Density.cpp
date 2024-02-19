@@ -46,7 +46,7 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(20.0f, 50.0f, 0.0f),150.0f, 70.0f),
+		m_RectContainer(glm::vec3(0.0f, 50.0f, 0.0f),90.0f, 90.0f),
 		drawType(VertexType::Null),
 		m_DrawCalls(0),
 		time(0)
@@ -219,6 +219,17 @@ namespace test {
 				ImGui::InputFloat("Acceleration constant:", &PhysicsEq::GRAVITY, 0.1f,0.5f);
 				ImGui::Text("Max Particles:");
 
+			}
+
+			if (ImGui::CollapsingHeader("DEBUG MENU")) {
+
+				ImGui::Checkbox("Enable Debug mode", &Settings::ENABLE_DEBUG_MODE);
+
+				static int mode = 0;
+
+				if (ImGui::RadioButton("Velocity", mode == Particle::DebugType::D_Velocity)){ mode = Particle::DebugType::D_Velocity; Particle::Debug = Particle::DebugType::D_Velocity; } ImGui::SameLine();
+				if (ImGui::RadioButton("Density", mode == Particle::DebugType::D_Density)) { mode = Particle::DebugType::D_Density; Particle::Debug = Particle::DebugType::D_Density; } ImGui::SameLine();
+				if (ImGui::RadioButton("Pressure", mode == Particle::DebugType::D_Pressure)) { mode = Particle::DebugType::D_Pressure; Particle::Debug = Particle::DebugType::D_Pressure; }
 			}
 
 			ImGui::End();

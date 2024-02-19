@@ -9,20 +9,26 @@
 
 // Static variables
 float PhysicsEq::REST_DENSITY = 2.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 74000.0f;
-float PhysicsEq::EXPONENT = 3.8f;
-float PhysicsEq::VISCOSITY = 0.15f;
+float PhysicsEq::STIFFNESS_CONSTANT = 12000.0f;
+float PhysicsEq::EXPONENT = 4.4f;
+float PhysicsEq::VISCOSITY = 0.024f;
 float PhysicsEq::GRAVITY = -200.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
 {
 	// Returns a non-negative value as results of pythagoras can only be non-negative
-	return PhysicsEq::pythagoras( c1.x - c2.x, c1.y - c2.y);
+	return PhysicsEq::pythagoras( c1-c2);
 }
 
 
 float PhysicsEq::clamp(float value, float min, float max) { return std::max(min, std::min(max, value)); }
+
+// Linear interpolation
+float PhysicsEq::lerp(float a, float b, float f)
+{
+	return a + f * (b - a);
+}
 
 // Smoothing Kernel Function, W(r - r', h)
 float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &positionB, const float radius)
@@ -128,7 +134,6 @@ float PhysicsEq::ConvertDensityToPressure(float density) {
 // Inputs can be positive or negative, but squaring removes negative values
 
 // Magnitude for 2D space
-float PhysicsEq::pythagoras(float a, float b) { return (float)sqrt(pow(a, 2) + pow(b, 2)); }
-// Magnitude for 3D space
-float PhysicsEq::pythagoras(float a, float b, float c) { return (float) sqrt(pow(a, 2) + pow(b, 2) + pow(c,2)); }
+float PhysicsEq::pythagoras(glm::vec2 position) { return (float)sqrt(pow(position.x, 2) + pow(position.y, 2)); }
 
+float PhysicsEq::pythagoras(glm::vec3 position) { return (float)sqrt(pow(position.x, 2) + pow(position.y, 2) + pow(position.z, 2)); }

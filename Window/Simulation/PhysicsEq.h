@@ -21,8 +21,11 @@ public:
 	static float GRAVITY; // This is in m/s
 
 	// Pythagorean theorem
-	static float pythagoras( float a, float b );
-	static float pythagoras( float a, float b, float c );
+	static float pythagoras(glm::vec2 position);
+	static float pythagoras(glm::vec3 position);
+
+	// Linear Interpolation
+	static float lerp(float a, float b, float f);
 
 	// Euclidean distance
 	static float euclid_Distance(glm::vec3 c1, glm::vec3 c2);

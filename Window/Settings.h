@@ -17,9 +17,10 @@ struct Settings {
 	static const uint16_t MaxVertexCount = MaxQuadCount * 4;
 	static const uint16_t MaxIndexCount = MaxQuadCount * 6;
 
-	static const uint16_t MAX_PARTICLES = 300;
+	static const uint16_t MAX_PARTICLES = 500;
 
 	static bool ENABLE_GRAVITY;
+	static bool ENABLE_DEBUG_MODE;
 };
 
 #endif
