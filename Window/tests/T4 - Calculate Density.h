@@ -1,33 +1,23 @@
 #pragma once
 
+#include <memory>
+#include <imgui/imgui.h>
+
+#include "Project_ImGui.h"
+
+#include "BufferData.h"
 #include "Test.h"
 #include "Settings.h"
-#include "Data_Structures.h"
+#include "Camera.h"
+#include "Statistics.h"
 
 #include "Simulation/Particle.h"
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Rectangle.h"
-#include "Shader.h"
+#include "SPH.h"
 
-#include "BufferData.h"
-
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "Texture.h"
-#include "Camera.h"
-
-#include "Project_ImGui.h"
-
-#include <chrono>
-#include <memory>
-
-struct Statistics {
-	std::chrono::duration<float> Time_Calculate_Density;
-	std::chrono::duration<float> Time_Calculate_Pressure;
-	std::chrono::duration<float> Time_Calculate_Movement;
-	std::chrono::duration<float> Time_Calculate_Viscosity;
-	std::chrono::duration<float> Time_Render_Particles;
-};
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace test {
 
@@ -37,7 +27,7 @@ namespace test {
 		T4_Calculate_Density();
 		~T4_Calculate_Density();
 
-		void OnUpdate(float deltaTime) override;
+		void OnUpdate() override;
 		void OnRender() override;
 		void OnImGuiRender() override;
 		void Shutdown() override;
@@ -49,8 +39,6 @@ namespace test {
 		inline void timeStep();
 
 	private:
-
-		Statistics m_Statistics;
 
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
@@ -67,7 +55,6 @@ namespace test {
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
 		constexpr static float SIMSTEP = 0.016f; // An integer is one second.
-		int m_DrawCalls;
 
 		// 30 FPS = 1/30 = 0.03
 		// 60 FPS = 1/60 = 0.016

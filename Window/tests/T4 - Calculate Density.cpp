@@ -1,41 +1,5 @@
 #include "T4 - Calculate Density.h"
 
-#include "Camera.h"
-
-#include <algorithm>
-
-#include "Renderer.h"
-#include <imgui/imgui.h>
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
-#include <chrono>
-#include <array>
-#include <cstdlib>
-
-// CAN PUT THIS IN ITS OWN CLASS
-// INCLUDE 
-// --> PARTICLE, VECTOR, CHRONO, RECTANGLECONTAINER
-// 
-// Couldn't use macro, using function pointers
-
-void TIME(void (*func)(std::vector<Particle>*), std::vector<Particle>* particleArray, std::chrono::duration<float> &timer) {
-	std::chrono::time_point<std::chrono::system_clock> start, end;
-	start = std::chrono::system_clock::now();
-	func(particleArray);
-	end = std::chrono::system_clock::now();
-	timer = end - start;
-}
-
-void TIME(void (*func)(std::vector<Particle>*,RectangleContainer &container), std::vector<Particle>* particleArray, RectangleContainer& container, std::chrono::duration<float>& timer) {
-	std::chrono::time_point<std::chrono::system_clock> start, end;
-	start = std::chrono::system_clock::now();
-	func(particleArray,container);
-	end = std::chrono::system_clock::now();
-	timer = end - start;
-}
-
 namespace test {
 
 	T4_Calculate_Density::T4_Calculate_Density()
@@ -48,7 +12,6 @@ namespace test {
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
 		m_RectContainer(glm::vec3(0.0f, 50.0f, 0.0f),90.0f, 90.0f),
 		drawType(VertexType::Null),
-		m_DrawCalls(0),
 		time(0)
 	{
 		Initialize();
@@ -57,8 +20,6 @@ namespace test {
 	void T4_Calculate_Density::Initialize() {
 		m_ParticleArray = new std::vector<Particle>;
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
-
-		// ------------------------------------------------------------
 
 		float radius = 1.0f;
 		float spacing = 0.0f;
@@ -70,13 +31,12 @@ namespace test {
 	//Destructor
 	T4_Calculate_Density::~T4_Calculate_Density(){}
 
-	/*On update function runs on every frame.
-	- Updating each particle
-	- Updates projection matrix
-	- Checking and resolving for collisions (Would need to be optimized later)
-	- (Not implemented) Resolve SPH values
+	/*
+	On update function runs on every frame.
+	-	Updating each particle
+	-	Updates projection matrix
 	*/
-	void T4_Calculate_Density::OnUpdate(float deltaTime){
+	void T4_Calculate_Density::OnUpdate(){
 
 		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().right, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
@@ -88,10 +48,10 @@ namespace test {
 			return;
 		}
 
-		TIME(&Particle::CalculateAllDensities, m_ParticleArray, m_Statistics.Time_Calculate_Density);
-		TIME(&Particle::CalculateAllPressures, m_ParticleArray, m_Statistics.Time_Calculate_Pressure);
-		TIME(&Particle::CalculatePositionCollision, m_ParticleArray, m_RectContainer, m_Statistics.Time_Calculate_Movement);
-		TIME(&Particle::CalculateAllViscosities, m_ParticleArray, m_Statistics.Time_Calculate_Viscosity);
+		TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
+		TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
+		TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
+		TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
 		timeStep();
 	}
@@ -115,12 +75,10 @@ namespace test {
 	/* OnRender function runs after OnUpdate()
 	- Renders all particles
 	- Renders the container
-	- Sets other OpenGL values
 	*/
 	void T4_Calculate_Density::OnRender()
 	{
 		// Set dynamic vertex buffer
-		m_DrawCalls = 0;
 
 		// Set Background
 		GLCall(glClearColor(m_ClearColour[0], m_ClearColour[1], m_ClearColour[2], m_ClearColour[3]));
@@ -130,6 +88,7 @@ namespace test {
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+
 		// Quad Batch Render
 		{
 			QuadBuffer.BeginBatch();
@@ -137,7 +96,6 @@ namespace test {
 			QuadBuffer.EndBatch();
 			QuadBuffer.Flush();
 		}
-
 
 		// Circle Batch Render
 		{
@@ -147,10 +105,6 @@ namespace test {
 			CircleBuffer.Flush();
 		}
 	}
-
-	// All the IMGui rendering to be displayed
-
-
 
 	// This needs to be in its own file.
 	void T4_Calculate_Density::OnImGuiRender()
@@ -169,9 +123,6 @@ namespace test {
 			ImGui::Begin("", 0,
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-			//if (ImGui::ArrowButton("##right -", ImGuiDir_Right)) {
-			//	// Play
-			//} ImGui::SameLine();
 			const char* text;
 
 			if (Settings::PAUSE_SIMULATION) {
@@ -213,15 +164,16 @@ namespace test {
 
 				ImGui::SeparatorText("General");
 				ImGui::Text("Particles: %i", Settings::MAX_PARTICLES);
-				ImGui::Text("Draw calls: %i", m_DrawCalls);
+				ImGui::Text("Draw calls: %i", stats.m_DrawCalls);
 				ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
 				ImGui::Text("Time: %.3f", time);
 
 				ImGui::SeparatorText("Compute Times");
-				ImGui::Text("Density: %.2fms", m_Statistics.Time_Calculate_Density.count() * 1000);
-				ImGui::Text("Pressure: %.2fms", m_Statistics.Time_Calculate_Pressure.count() * 1000);
-				ImGui::Text("Viscosity: %.2fms", m_Statistics.Time_Calculate_Viscosity.count() * 1000);
-				ImGui::Text("Movement: %.2fms", m_Statistics.Time_Calculate_Movement.count() * 1000);
+				ImGui::Text("Density: %.2fms", stats.Time_Calculate_Density.count() * 1000);
+				ImGui::Text("Pressure: %.2fms", stats.Time_Calculate_Pressure.count() * 1000);
+				ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
+				ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
+				ImGui::Text("Render: %.2fms", stats.Time_Render_Particles.count() * 1000);
 			}
 
 			if (ImGui::CollapsingHeader("SPH Config")) {

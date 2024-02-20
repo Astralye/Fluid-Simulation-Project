@@ -1,15 +1,15 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#define _USE_MATH_DEFINES
-#include <cmath>
+#include <vector>
 
 #include "PhysicsEq.h"
 #include "glm/glm.hpp"
 #include "Rectangle.h"
 #include "Settings.h"
 
-#include <vector>
+#include <iostream>
+
 
 // Particle Class
 // -------------------------------------------------------------------------------------
@@ -27,28 +27,9 @@ private:
 	float m_Density;
 
 public:
-
-	enum axis {
-		x,
-		y
-	};
-
-	enum Vector {
-		V_Acceleration,
-		V_Velocity,
-	};
-
-	enum DebugType {
-		D_Velocity,
-		D_Density,
-		D_Pressure
-	};
-
-	glm::vec4 m_Position;
-
-	glm::vec3 m_PredictedPos;
-	glm::vec3 m_PredictedVelocity;
-	glm::vec2 m_Vertices[4];
+	enum axis { x, y };
+	enum Vector { V_Acceleration, V_Velocity };
+	enum DebugType { D_Velocity, D_Density, D_Pressure };
 
 	// Default constructor
 	Particle(
@@ -64,6 +45,7 @@ public:
 		m_Velocity(vel),
 		m_Mass(mass),
 
+		m_Pressure(0),
 		m_Density(0),
 		m_PredictedPos({ 0,0,0 }),
 		m_PredictedVelocity({ 0,0,0 })
@@ -81,43 +63,25 @@ public:
 		{ m_Position.x - radius, m_Position.y - radius }; // BL
 	}
 
+	glm::vec4 m_Position;
+	glm::vec3 m_PredictedPos;
+	glm::vec3 m_PredictedVelocity;
+	glm::vec2 m_Vertices[4];
+
 	// Static
-	// -------------------------------------------------
-
-
-	// Static functions
-
-	// Creates a cube of particles
+	// --------------------------------------------------
+	
 	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing);
 	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
-	// SPH FUNCTIONS
-	// This may need to change again for optimization,
-	// but we can leave them here for now
-	static void CalculateAllDensities(std::vector<Particle> *particleArray);
-	static void CalculateDensity(std::vector<Particle> *arr, Particle &particle, int j);
-	static void CalculatePositionCollision(std::vector<Particle>* arr, RectangleContainer& container);
-
-	static void CalculateAllPressures(std::vector<Particle>* particleArray);
-	static glm::vec2 CalculatePressureForce(std::vector<Particle> *arr, Particle &chosenParticle,int j);
-
-	static void CalculateAllViscosities(std::vector<Particle>* particleArray);
-	static glm::vec2 CalculateViscosity(std::vector<Particle>* particleArray, Particle &chosenParticle);
-
-	// Static variables
-
 	static float KERNEL_RADIUS;
 	static float particleProperties[Settings::MAX_PARTICLES];
-
 	static DebugType Debug;
 
 	// -------------------------------------------------
 
 	// Update values
-	void update_Accel();
-	void update_Vel();
-	void update_Pos();
-	void update_PosPredicted();
+	void SetPredictedPosition();
 	void update();
 
 	void bounce();
@@ -136,23 +100,15 @@ public:
 	inline glm::vec3 getVelocity() { return m_Velocity; }
 	inline glm::vec3 getPredictedVelocity() { return m_PredictedVelocity; }
 
-	
 
 	// Setter
 	void setVelocity(glm::vec2 vel);
-	void setVelocity(float vel, axis type);
-
 	void setPredictedVelocity(glm::vec3 pVel);
-
-	void addVelocity(glm::vec2 vel);
 	void setAcceleration(glm::vec2 acc);
-
 	void setDensity(float den);
 	void setPressure(glm::vec2 pressure);
 
-	bool operator==(const Particle& comp) const;
-	bool operator!=(const Particle& comp) const;
-
+	void addVelocity(glm::vec2 vel);
 };
 
 

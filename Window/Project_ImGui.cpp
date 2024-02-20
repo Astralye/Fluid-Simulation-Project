@@ -94,3 +94,5 @@ void Gui_Menus::MainMenu() {
 
 }
 
+void Gui_Menus::SimMenus(){
+}

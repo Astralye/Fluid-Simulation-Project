@@ -35,8 +35,8 @@ void Camera::zoom(bool pos) {
 	m_Projection.left += projZoom;
 	m_Projection.right -= projZoom;
 
-	m_Projection.bottom += projZoom;
-	m_Projection.top -= projZoom;
+	m_Projection.bottom += projZoom / 1.77f;
+	m_Projection.top -= projZoom / 1.77f;
 }
 
 Camera camera;
