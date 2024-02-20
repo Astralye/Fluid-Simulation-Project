@@ -5,6 +5,9 @@ The aim of this project is to create a fluid simulation from scratch using C++ a
 ## Acknowledgements
 - [Setting up OpenGL](https://youtube.com/playlist?list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2&si=h-WkK5zo02fcNIEF)
 - [Fluid simulation Implementation in C#](https://youtu.be/rSKMYc1CQHE?si=uEoApdGKHVgMOW8-)  
+- [Implementation of SPH](https://sph-tutorial.physics-simulation.org/pdf/SPH_Tutorial.pdf)
+- [IMGUI web documentation](https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html)
+
 ## API References
 This project uses [OpenGL](https://www.opengl.org/) and all its relevant modules. Documentation can be found on [docs.GL](https://docs.gl). Usage of other API such as Vulkan was considered but OpenGL was chosen due to prior experience.
 ## Required Libraries
