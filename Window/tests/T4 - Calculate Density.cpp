@@ -38,12 +38,19 @@ namespace test {
 	*/
 	void T4_Calculate_Density::OnUpdate(){
 
-		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().right, -1.0f, 1.0f);
+		// This should always be run
+		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
 		m_Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 		m_MVP = m_Proj * m_View * m_Model;
 
+		
+		if (Settings::RECT_RESIZE) {
+			m_RectContainer.update();
+		}
+
+		// If paused, does not update any values, is after MVP, to allow movement of camera
 		if (Settings::PAUSE_SIMULATION) {
 			return;
 		}
@@ -56,7 +63,6 @@ namespace test {
 		timeStep();
 	}
 	
-	//Function call for rendering all circles
 	void T4_Calculate_Density::DrawCircle() {
 		// Draw Particles
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
@@ -64,7 +70,6 @@ namespace test {
 		}
 	}
 
-	//Function call for rendering the container
 	void T4_Calculate_Density::CreateContainer(RectangleContainer &rc) {
 		QuadBuffer.Draw(rc.m_SideA, m_MVP);
 		QuadBuffer.Draw(rc.m_SideB, m_MVP);
@@ -72,10 +77,9 @@ namespace test {
 		QuadBuffer.Draw(rc.m_SideD, m_MVP);
 	}
 
-	/* OnRender function runs after OnUpdate()
-	- Renders all particles
-	- Renders the container
-	*/
+
+	// Renders all particles
+	// Renders the container
 	void T4_Calculate_Density::OnRender()
 	{
 		// Set dynamic vertex buffer
@@ -166,6 +170,7 @@ namespace test {
 				ImGui::Text("Particles: %i", Settings::MAX_PARTICLES);
 				ImGui::Text("Draw calls: %i", stats.m_DrawCalls);
 				ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
+				ImGui::Text("Per Frame: %.3fms", 1 / ImGui::GetIO().Framerate);
 				ImGui::Text("Time: %.3f", time);
 
 				ImGui::SeparatorText("Compute Times");
@@ -185,9 +190,41 @@ namespace test {
 
 			if (ImGui::CollapsingHeader("Simulation Config")) {
 
-				ImGui::Checkbox("Enable Gravity", &Settings::ENABLE_GRAVITY);
-				ImGui::InputFloat("Acceleration constant:", &PhysicsEq::GRAVITY, 0.1f,0.5f);
-				ImGui::Text("Max Particles:");
+				if (ImGui::TreeNode("Gravity")) {
+
+					ImGui::Checkbox("Enable Gravity", &Settings::ENABLE_GRAVITY);
+					if (!Settings::ENABLE_GRAVITY) { ImGui::BeginDisabled(); }
+						ImGui::InputFloat("Acceleration constant:", &PhysicsEq::GRAVITY, 0.1f, 0.5f);
+					if (!Settings::ENABLE_GRAVITY) { ImGui::EndDisabled(); }
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNode("Particles")) {
+					ImGui::Text("Max Particles:");
+					ImGui::Text("Particles: ");
+					ImGui::Text("Particle size: ");
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNode("Container Config")) {
+
+					ImGui::Checkbox("Modify Container", &Settings::RECT_RESIZE);
+
+					if (!Settings::RECT_RESIZE) { ImGui::BeginDisabled(); }
+						ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
+						ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
+
+
+						ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -50.0f, 50.0f);
+						ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -50.0f, 50.0f);
+
+					if (!Settings::RECT_RESIZE) { ImGui::EndDisabled(); }
+
+					ImGui::TreePop();
+				}
+
 
 			}
 
@@ -197,9 +234,16 @@ namespace test {
 
 				static int mode = 0;
 
-				if (ImGui::RadioButton("Velocity", mode == Particle::DebugType::D_Velocity)){ mode = Particle::DebugType::D_Velocity; Particle::Debug = Particle::DebugType::D_Velocity; } ImGui::SameLine();
-				if (ImGui::RadioButton("Density", mode == Particle::DebugType::D_Density)) { mode = Particle::DebugType::D_Density; Particle::Debug = Particle::DebugType::D_Density; } ImGui::SameLine();
-				if (ImGui::RadioButton("Pressure", mode == Particle::DebugType::D_Pressure)) { mode = Particle::DebugType::D_Pressure; Particle::Debug = Particle::DebugType::D_Pressure; }
+				if (!Settings::ENABLE_DEBUG_MODE) { ImGui::BeginDisabled(); }
+
+					if (ImGui::RadioButton("Velocity", mode == Particle::DebugType::D_Velocity)){ mode = Particle::DebugType::D_Velocity; Particle::Debug = Particle::DebugType::D_Velocity; } ImGui::SameLine();
+					if (ImGui::RadioButton("Density", mode == Particle::DebugType::D_Density)) { mode = Particle::DebugType::D_Density; Particle::Debug = Particle::DebugType::D_Density; } ImGui::SameLine();
+					if (ImGui::RadioButton("Pressure", mode == Particle::DebugType::D_Pressure)) { mode = Particle::DebugType::D_Pressure; Particle::Debug = Particle::DebugType::D_Pressure; }
+			
+				if (!Settings::ENABLE_DEBUG_MODE) { ImGui::EndDisabled(); }
+
+				ImGui::SeparatorText("UNIFORM ");
+
 			}
 
 			ImGui::End();

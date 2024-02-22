@@ -1,4 +1,6 @@
 #pragma once
+#ifndef RECTANGLE_H
+#define RECTANGLE_H
 
 #include "glm/glm.hpp"
 
@@ -19,18 +21,12 @@ public:
 		length(length),
 		height(height)
 	{
-		m_Vertices[0] =
-			{ m_Position.x - (length / 2), m_Position.y + (height / 2) }; // TL
-
-		m_Vertices[1] =
-			{ m_Position.x + (length / 2), m_Position.y + (height / 2) }; // TR
-			
-		m_Vertices[2] =
-			{ m_Position.x + (length / 2), m_Position.y - (height / 2) }; // BR
-
-		m_Vertices[3] =
-			{ m_Position.x - (length / 2), m_Position.y - (height / 2) }; // BL
+		update_Vertices();
 	}
+
+	void update_Size(float length, float height);
+	void update_Position(glm::vec3 pos);
+	void update_Vertices();
 };
 
 
@@ -43,6 +39,9 @@ public:
 	Rectangle m_SideC; // Bottom
 	Rectangle m_SideD; // Left
 
+	float m_Length;
+	float m_Height;
+
 	glm::vec3 m_Position;
 
 	RectangleContainer(glm::vec3 pos = { 0.0f,0.0f,0.0f },
@@ -51,10 +50,16 @@ public:
 		float thickness = 1
 	)
 		: m_Position(pos),
+		m_Height(height),
+		m_Length(length),
 		m_SideA(glm::vec3{ pos.x			   , pos.y + (height / 2), 0.0f }, length, thickness),
 		m_SideB(glm::vec3{ pos.x + (length / 2), pos.y				 , 0.0f }, thickness, height),
 		m_SideC(glm::vec3{ pos.x			   , pos.y - (height / 2), 0.0f }, length, thickness),
 		m_SideD(glm::vec3{ pos.x - (length / 2), pos.y				 , 0.0f }, thickness, height)
-	{
-	}
+	{}
+
+	void update();
 };
+
+
+#endif

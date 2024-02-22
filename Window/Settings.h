@@ -23,6 +23,7 @@ struct Settings {
 	static bool ENABLE_DEBUG_MODE;
 
 	static bool PAUSE_SIMULATION;
+	static bool RECT_RESIZE;
 };
 
 #endif

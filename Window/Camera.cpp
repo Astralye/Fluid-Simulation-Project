@@ -21,22 +21,33 @@ void Camera::move(axis type, bool positive) {
 
 void Camera::zoom(bool pos) {
 
-	// TODO:
+	// Delete this after debugging
 
-	// This code is being very buggy.
-	// It needs to scale with aspect ratio but for some reason I cant seem
-	// To get it to worK
+	//float increment = 10.0f;
+	//m_Zoom = (pos) ? increment : -increment;
 
-	float increment = 10.0f;
-	m_Zoom = (pos) ? increment : -increment;
+	//float projZoom = m_Zoom / 2;
 
-	float projZoom = m_Zoom / 2;
+	//m_Projection.left += projZoom;
+	//m_Projection.right -= projZoom;
 
-	m_Projection.left += projZoom;
-	m_Projection.right -= projZoom;
+	//m_Projection.bottom += projZoom;
+	//m_Projection.top -= projZoom;
 
-	m_Projection.bottom += projZoom / 1.77f;
-	m_Projection.top -= projZoom / 1.77f;
+
+	glm::vec2 aspectRatio_16_9 = { 16,9 };
+	glm::vec2 projZoom;
+
+	projZoom = ((pos) ? aspectRatio_16_9 : -aspectRatio_16_9);
+	projZoom.x /= 2;
+	projZoom.y /= 2;
+
+	m_Projection.left += projZoom.x;
+	m_Projection.right -= projZoom.x;
+
+	m_Projection.bottom += projZoom.y;
+	m_Projection.top -= projZoom.y;
+
 }
 
 Camera camera;
