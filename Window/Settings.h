@@ -21,9 +21,10 @@ struct Settings {
 
 	static bool ENABLE_GRAVITY;
 	static bool ENABLE_DEBUG_MODE;
+	static bool ENABLE_PARTITION_BACKROUND;
 
 	static bool PAUSE_SIMULATION;
-	static bool RECT_RESIZE;
+	static bool RESIZE_CONTAINER;
 };
 
 #endif

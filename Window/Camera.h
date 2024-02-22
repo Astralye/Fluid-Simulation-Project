@@ -22,8 +22,8 @@ class Camera {
 	public:
 
 		Camera(
-			Projection proj = {0.0f, 1280.0f, 0.0f, 720.0f},
-			//Projection proj = {-77.0f, 100.0f, 0.0f, 100.0f},
+			/*Projection proj = {0.0f, 1280.0f, 0.0f, 720.0f},*/
+			Projection proj = {-77.0f, 100.0f, 0.0f, 100.0f},
 			glm::vec3 pos = glm::vec3(0.0f),
 			float Zoom = 0.0f)
 		: m_Projection(proj),

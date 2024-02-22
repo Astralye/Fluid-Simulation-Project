@@ -15,6 +15,7 @@
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Rectangle.h"
 #include "SPH.h"
+#include "UniformSpacePartition.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -39,6 +40,9 @@ namespace test {
 		inline void timeStep();
 
 	private:
+
+		glm::vec2 USP_Grid;
+		UniformSpacePartition m_USP;
 
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];

@@ -170,6 +170,7 @@
     <ClCompile Include="tests\T4 - Calculate Density.cpp" />
     <ClCompile Include="tests\Test.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="UniformSpacePartition.cpp" />
     <ClCompile Include="VertexArray.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
@@ -199,6 +200,7 @@
     <ClInclude Include="tests\T4 - Calculate Density.h" />
     <ClInclude Include="tests\Test.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="UniformSpacePartition.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferLayout.h" />

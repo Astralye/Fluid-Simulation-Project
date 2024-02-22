@@ -11,10 +11,13 @@ namespace test {
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
 		m_RectContainer(glm::vec3(0.0f, 50.0f, 0.0f),90.0f, 90.0f),
+		USP_Grid({5,5}),
+
 		drawType(VertexType::Null),
 		time(0)
 	{
 		Initialize();
+		m_USP.SetContainer(m_RectContainer, USP_Grid);
 	}
 
 	void T4_Calculate_Density::Initialize() {
@@ -46,8 +49,9 @@ namespace test {
 		m_MVP = m_Proj * m_View * m_Model;
 
 		
-		if (Settings::RECT_RESIZE) {
+		if (Settings::RESIZE_CONTAINER) {
 			m_RectContainer.update();
+			m_USP.SetContainer(m_RectContainer);
 		}
 
 		// If paused, does not update any values, is after MVP, to allow movement of camera
@@ -193,6 +197,8 @@ namespace test {
 				if (ImGui::TreeNode("Gravity")) {
 
 					ImGui::Checkbox("Enable Gravity", &Settings::ENABLE_GRAVITY);
+					ImGui::Separator();
+
 					if (!Settings::ENABLE_GRAVITY) { ImGui::BeginDisabled(); }
 						ImGui::InputFloat("Acceleration constant:", &PhysicsEq::GRAVITY, 0.1f, 0.5f);
 					if (!Settings::ENABLE_GRAVITY) { ImGui::EndDisabled(); }
@@ -210,17 +216,30 @@ namespace test {
 
 				if (ImGui::TreeNode("Container Config")) {
 
-					ImGui::Checkbox("Modify Container", &Settings::RECT_RESIZE);
+					ImGui::Checkbox("Modify Container", &Settings::RESIZE_CONTAINER);
 
-					if (!Settings::RECT_RESIZE) { ImGui::BeginDisabled(); }
+					if (!Settings::RESIZE_CONTAINER) { ImGui::BeginDisabled(); }
 						ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
 						ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
-
 
 						ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -50.0f, 50.0f);
 						ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -50.0f, 50.0f);
 
-					if (!Settings::RECT_RESIZE) { ImGui::EndDisabled(); }
+
+						ImGui::SeparatorText("UNIFORM SPACE PARTITIONING");
+
+						ImGui::Text("Cell Dimensions: {%.1f x %.1f}", m_USP.getCells().x, m_USP.getCells().y);
+						ImGui::Text("Cell Start: {%.1f, %.1f}", m_USP.getPosition().x, m_USP.getPosition().y);
+						ImGui::Text("Cell Size: {%.1f x %.1f}", m_USP.getCellSize().x, m_USP.getCellSize().y);
+
+						ImGui::SliderInt("X cells", &m_USP.m_Cells.x, 2, 50);
+						ImGui::SliderInt("Y cells", &m_USP.m_Cells.y, 2, 50);
+
+						if (ImGui::Button("Auto Cell Size")) {
+							
+						}
+
+					if (!Settings::RESIZE_CONTAINER) { ImGui::EndDisabled(); }
 
 					ImGui::TreePop();
 				}
@@ -240,10 +259,11 @@ namespace test {
 					if (ImGui::RadioButton("Density", mode == Particle::DebugType::D_Density)) { mode = Particle::DebugType::D_Density; Particle::Debug = Particle::DebugType::D_Density; } ImGui::SameLine();
 					if (ImGui::RadioButton("Pressure", mode == Particle::DebugType::D_Pressure)) { mode = Particle::DebugType::D_Pressure; Particle::Debug = Particle::DebugType::D_Pressure; }
 			
+					ImGui::Separator();
+
+					ImGui::Checkbox("Toggle Partitioning Background", &Settings::ENABLE_PARTITION_BACKROUND);
+
 				if (!Settings::ENABLE_DEBUG_MODE) { ImGui::EndDisabled(); }
-
-				ImGui::SeparatorText("UNIFORM ");
-
 			}
 
 			ImGui::End();
