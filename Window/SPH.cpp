@@ -8,7 +8,7 @@ void SPH::CalculateAllDensities(std::vector<Particle>* particleArray)
 	for (int i = 0; i < particleArray->size(); i++) {
 
 		// Predictd velocity v*
-		glm::vec3 predictedVel = particleArray->at(i).getVelocity() + (Settings::SIMSTEP * particleArray->at(i).getAcceleration());
+		glm::vec3 predictedVel = particleArray->at(i).getVelocity();
 
 		if (Settings::ENABLE_GRAVITY) {
 			predictedVel.y += (Settings::SIMSTEP * PhysicsEq::GRAVITY);
@@ -97,6 +97,7 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray)
 		// F = MA --> A = F / M
 		if (particleArray->at(i).getDensity() != 0) {
 			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(i).getDensity();
+			particleArray->at(i).setAcceleration(pressureAcceleration + glm::vec2(0.0f, PhysicsEq::GRAVITY));
 
 			//pressure projection
 			sum += (Settings::SIMSTEP * glm::vec3(pressureAcceleration, 0));
@@ -158,11 +159,11 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, int j) {
 void SPH::CalculateAllViscosities(std::vector<Particle>* arr)
 {
 	for (int i = 0; i < arr->size(); i++) {
-		arr->at(i).addVelocity(CalculateViscosity(arr, i));
+		CalculateViscosity(arr, i);
 	}
 }
 
-glm::vec2 SPH::CalculateViscosity(std::vector<Particle>* arr, int j) {
+void SPH::CalculateViscosity(std::vector<Particle>* arr, int j) {
 
 	glm::vec2 viscosityForce = { 0,0 };
 
@@ -176,6 +177,6 @@ glm::vec2 SPH::CalculateViscosity(std::vector<Particle>* arr, int j) {
 		viscosityForce += difference * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
 	}
 
-	return viscosityForce * PhysicsEq::VISCOSITY;
+	arr->at(j).addVelocity(viscosityForce * PhysicsEq::VISCOSITY);
 }
 

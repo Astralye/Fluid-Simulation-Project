@@ -32,6 +32,10 @@ void Rectangle::update_Position(glm::vec3 pos) {
 	m_Position = pos;
 }
 
+void Rectangle::add_Position(glm::vec3 pos) {
+	m_Position += pos;
+}
+
 void Rectangle::update_Size(float length, float height) {
 	this->length = length;
 	this->height = height;

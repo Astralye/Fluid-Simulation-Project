@@ -48,8 +48,7 @@ namespace test {
 
 		m_MVP = m_Proj * m_View * m_Model;
 
-		
-		if (Settings::RESIZE_CONTAINER) {
+		if (Settings::ENABLE_RESIZE_CONTAINER) {
 			m_RectContainer.update();
 			m_USP.SetContainer(m_RectContainer);
 		}
@@ -81,7 +80,46 @@ namespace test {
 		QuadBuffer.Draw(rc.m_SideD, m_MVP);
 	}
 
+	void T4_Calculate_Density::DrawGrid() {
+		
+		// Copy contents
+		Rectangle tmpRect = m_USP.m_RenderSquare;
+		glm::vec3 offset = { m_USP.m_CellSize.x, m_USP.m_CellSize.y, 0.0f };
+		glm::vec3 origin = tmpRect.m_Position;
 
+		int position = 0;
+
+		glm::vec3 colourA = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 colourB = { 0.95f, 0.95f, 0.95f };
+		glm::vec3 tmp;
+
+		for (int i = 0; i < m_USP.m_Cells.y; i++) {
+
+			for (int j = 0; j < m_USP.m_Cells.x; j++) {
+
+				if (position % 2 == 0) { tmpRect.m_Colour = colourA;}
+				else { tmpRect.m_Colour = colourB; }
+
+				tmpRect.update_Position({ 
+					origin.x + (offset.x * j), 
+					origin.y + (offset.y * i), 0.0f });
+
+				tmpRect.update_Vertices();
+				QuadBuffer.Draw(tmpRect, m_MVP);
+
+				position++;
+			}
+
+			// Swap colour
+			if (m_USP.m_Cells.x % 2 == 0) {
+				tmp = colourA;
+				colourA = colourB;
+				colourB = tmp;
+			}
+
+		}
+
+	}
 	// Renders all particles
 	// Renders the container
 	void T4_Calculate_Density::OnRender()
@@ -99,6 +137,13 @@ namespace test {
 
 		// Quad Batch Render
 		{
+			if (Settings::ENABLE_PARTITION_BACKROUND && Settings::ENABLE_DEBUG_MODE) {
+				QuadBuffer.BeginBatch();
+				DrawGrid();
+				QuadBuffer.EndBatch();
+				QuadBuffer.Flush();
+			}
+
 			QuadBuffer.BeginBatch();
 			CreateContainer(m_RectContainer);
 			QuadBuffer.EndBatch();
@@ -109,6 +154,25 @@ namespace test {
 		{
 			CircleBuffer.BeginBatch();
 			DrawCircle();
+
+			// If hovered
+			if (Settings::IS_HOVER_PARTICLE && Settings::ENABLE_DEBUG_MODE) {
+				Particle particle = m_ParticleArray->at(Settings::HOVER_PARTICLE);
+				particle.setRadius(2 * particle.getRadius());
+				particle.update();
+
+				CircleBuffer.Draw(particle, m_MVP);
+			}
+
+			// If clicked,
+			if ((Settings::CLICK_PARTICLE != -1) && Settings::ENABLE_DEBUG_MODE) {
+				Particle particle = m_ParticleArray->at(Settings::CLICK_PARTICLE);
+				particle.setRadius(2 * particle.getRadius());
+				particle.update();
+
+				CircleBuffer.Draw(particle, m_MVP);
+			}
+
 			CircleBuffer.EndBatch();
 			CircleBuffer.Flush();
 		}
@@ -126,9 +190,8 @@ namespace test {
 		// - Help
 		// - Modifications
 		
-		ImGui::End();
 		{
-			ImGui::Begin("", 0,
+			ImGui::Begin("Hello", 0,
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 			const char* text;
@@ -216,9 +279,9 @@ namespace test {
 
 				if (ImGui::TreeNode("Container Config")) {
 
-					ImGui::Checkbox("Modify Container", &Settings::RESIZE_CONTAINER);
+					ImGui::Checkbox("Modify Container", &Settings::ENABLE_RESIZE_CONTAINER);
 
-					if (!Settings::RESIZE_CONTAINER) { ImGui::BeginDisabled(); }
+					if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::BeginDisabled(); }
 						ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
 						ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
 
@@ -228,22 +291,28 @@ namespace test {
 
 						ImGui::SeparatorText("UNIFORM SPACE PARTITIONING");
 
-						ImGui::Text("Cell Dimensions: {%.1f x %.1f}", m_USP.getCells().x, m_USP.getCells().y);
+						ImGui::Text("Cell Dimensions: {%i x %i}", m_USP.m_Cells.x, m_USP.m_Cells.y);
 						ImGui::Text("Cell Start: {%.1f, %.1f}", m_USP.getPosition().x, m_USP.getPosition().y);
-						ImGui::Text("Cell Size: {%.1f x %.1f}", m_USP.getCellSize().x, m_USP.getCellSize().y);
+						ImGui::Text("Cell Size: {%.1f x %.1f}", m_USP.m_CellSize.x, m_USP.m_CellSize.y);
 
-						ImGui::SliderInt("X cells", &m_USP.m_Cells.x, 2, 50);
-						ImGui::SliderInt("Y cells", &m_USP.m_Cells.y, 2, 50);
-
-						if (ImGui::Button("Auto Cell Size")) {
-							
+						if (ImGui::Button("Kernel Cell Size")) {
+							m_USP.defaultSize(m_RectContainer, { Particle::KERNEL_RADIUS,Particle::KERNEL_RADIUS });
 						}
 
-					if (!Settings::RESIZE_CONTAINER) { ImGui::EndDisabled(); }
+						ImGui::Checkbox("Square Partitions", &Settings::ENABLE_SQUARE_PARTITIONS);
+						
+						if (Settings::ENABLE_SQUARE_PARTITIONS) {
+							ImGui::SliderInt("Cell Size:", &Settings::PARITIONS_SIZE, 2, 50);
+							m_USP.defaultSize(m_RectContainer, { Settings::PARITIONS_SIZE,Settings::PARITIONS_SIZE });
+						}
+						else {
+							ImGui::SliderInt("X cells", &m_USP.m_Cells.x, 2, 50);
+							ImGui::SliderInt("Y cells", &m_USP.m_Cells.y, 2, 50);
+						}
+						if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::EndDisabled(); }
 
 					ImGui::TreePop();
 				}
-
 
 			}
 
@@ -255,17 +324,68 @@ namespace test {
 
 				if (!Settings::ENABLE_DEBUG_MODE) { ImGui::BeginDisabled(); }
 
-					if (ImGui::RadioButton("Velocity", mode == Particle::DebugType::D_Velocity)){ mode = Particle::DebugType::D_Velocity; Particle::Debug = Particle::DebugType::D_Velocity; } ImGui::SameLine();
+					if (ImGui::RadioButton("Velocity", mode == Particle::DebugType::D_Velocity)) { mode = Particle::DebugType::D_Velocity; Particle::Debug = Particle::DebugType::D_Velocity; } ImGui::SameLine();
 					if (ImGui::RadioButton("Density", mode == Particle::DebugType::D_Density)) { mode = Particle::DebugType::D_Density; Particle::Debug = Particle::DebugType::D_Density; } ImGui::SameLine();
 					if (ImGui::RadioButton("Pressure", mode == Particle::DebugType::D_Pressure)) { mode = Particle::DebugType::D_Pressure; Particle::Debug = Particle::DebugType::D_Pressure; }
 			
-					ImGui::Separator();
+				ImGui::Separator();
 
-					ImGui::Checkbox("Toggle Partitioning Background", &Settings::ENABLE_PARTITION_BACKROUND);
+				ImGui::Checkbox("Toggle Partitioning Background", &Settings::ENABLE_PARTITION_BACKROUND);
+				ImGui::Checkbox("Toggle Particle Info", &Settings::ENABLE_HOVER_PARTICLE);
 
+				if (Settings::ENABLE_HOVER_PARTICLE) {
+					ImGuiIO& io = ImGui::GetIO();
+
+					if (ImGui::IsMousePosValid() &&
+						io.MousePos.x <= Settings::WINDOW_RESOLUTION.x && io.MousePos.x >= 0 &&
+						io.MousePos.y <= Settings::WINDOW_RESOLUTION.y && io.MousePos.y >= 0) {
+
+						// Put in its own function
+						float percentageX = io.MousePos.x / Settings::WINDOW_RESOLUTION.x;
+						float percentageY = io.MousePos.y / Settings::WINDOW_RESOLUTION.y;
+
+						glm::vec2 normalizedPosition = {
+							PhysicsEq::lerp(camera.getProjection().left , camera.getProjection().right, percentageX) - camera.getPosition().x,
+							PhysicsEq::lerp(camera.getProjection().top , camera.getProjection().bottom, percentageY) - camera.getPosition().y
+						};
+
+						// Could integrate this within code such that there doesnt need to be another for loop.
+						for (int i = 0; i < m_ParticleArray->size(); i++) {
+							glm::vec4 Particlepos = m_ParticleArray->at(i).m_Position;
+
+							if (normalizedPosition.x <= Particlepos.x + 1 && normalizedPosition.x >= Particlepos.x - 1 &&
+								normalizedPosition.y <= Particlepos.y + 1 && normalizedPosition.y >= Particlepos.y - 1) {
+
+								Settings::IS_HOVER_PARTICLE = true;
+								Settings::HOVER_PARTICLE = i;
+
+								if (ImGui::IsMouseDown(0)) { Settings::CLICK_PARTICLE = i; ImGui::OpenPopup("Particle Property"); }
+
+								// Stops the loop prematurely, prevents resetting of other particles
+								break;
+							}
+							else {
+								Settings::IS_HOVER_PARTICLE = false;
+								if (!ImGui::IsPopupOpen("Particle Property")) { Settings::CLICK_PARTICLE = -1; Settings::HOVER_PARTICLE = -1; }
+							}
+						}
+					}
+				}
 				if (!Settings::ENABLE_DEBUG_MODE) { ImGui::EndDisabled(); }
-			}
 
+				if (ImGui::BeginPopup("Particle Property")) {
+					Particle particle = m_ParticleArray->at(Settings::CLICK_PARTICLE);
+
+					ImGui::SeparatorText("Particle");
+
+					ImGui::Text("Position: {%.1f,%.1f}", particle.m_Position.x, particle.m_Position.y);
+					ImGui::Text("Velocity: {%.1f,%.1f}", particle.getVelocity().x, particle.getVelocity().y);
+					ImGui::Text("Acceleration: {%.1f,%.1f}", particle.getAcceleration().x, particle.getAcceleration().y);
+					ImGui::Text("Density: %.1f", particle.getDensity());
+
+					ImGui::EndPopup();
+				}
+			}
 			ImGui::End();
 		}
 	}

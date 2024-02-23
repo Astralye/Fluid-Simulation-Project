@@ -37,11 +37,13 @@ namespace test {
 
 		void DrawCircle();
 		void CreateContainer(RectangleContainer& rc);
+		void DrawGrid();
+
 		inline void timeStep();
 
 	private:
 
-		glm::vec2 USP_Grid;
+		glm::ivec2 USP_Grid;
 		UniformSpacePartition m_USP;
 
 		std::vector<Particle>* m_ParticleArray;

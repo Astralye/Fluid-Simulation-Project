@@ -102,6 +102,7 @@ public:
 
 
 	// Setter
+	void setRadius(float rad);
 	void setVelocity(glm::vec2 vel);
 	void setPredictedVelocity(glm::vec3 pVel);
 	void setAcceleration(glm::vec2 acc);

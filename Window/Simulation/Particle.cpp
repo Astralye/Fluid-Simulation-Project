@@ -253,6 +253,8 @@ glm::vec4 Particle::DebugColour()
 	return glm::vec4(newColour,1.0f);
 }
 
+void Particle::setRadius(float rad) { m_Radius = rad; }
+
 void Particle::setVelocity(glm::vec2 vel) {
 	m_Velocity.x = vel.x;
 	m_Velocity.y = vel.y;

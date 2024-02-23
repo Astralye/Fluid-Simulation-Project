@@ -22,9 +22,17 @@ struct Settings {
 	static bool ENABLE_GRAVITY;
 	static bool ENABLE_DEBUG_MODE;
 	static bool ENABLE_PARTITION_BACKROUND;
+	static bool ENABLE_HOVER_PARTICLE;
+	static bool ENABLE_RESIZE_CONTAINER;
+	static bool ENABLE_SQUARE_PARTITIONS;
 
 	static bool PAUSE_SIMULATION;
-	static bool RESIZE_CONTAINER;
+	static bool IS_HOVER_PARTICLE;
+	static bool OPEN_POPUP;
+
+	static int HOVER_PARTICLE;
+	static int CLICK_PARTICLE;
+	static int PARITIONS_SIZE;
 };
 
 #endif

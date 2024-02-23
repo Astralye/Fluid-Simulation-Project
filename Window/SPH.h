@@ -16,7 +16,7 @@ public:
 	static glm::vec2 CalculatePressureForce(std::vector<Particle>* arr, int j);
 
 	static void CalculateAllViscosities(std::vector<Particle>* particleArray);
-	static glm::vec2 CalculateViscosity(std::vector<Particle>* particleArray, int j);
+	static void CalculateViscosity(std::vector<Particle>* particleArray, int j);
 };
 
 #endif

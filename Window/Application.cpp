@@ -99,8 +99,6 @@ int main(void){
 
 			Gui_Menus::DisplayMenus();
 
-			ImGui::Begin("Load Sim");
-
 			// Perhaps have a main menu?
 
 			// If the test is the not test menu

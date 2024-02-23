@@ -9,23 +9,27 @@ class Rectangle {
 public:
 	glm::vec3 m_Position;
 	glm::vec2 m_Vertices[4];
+	glm::vec3 m_Colour;
 
 	float length;
 	float height;
 
 	Rectangle(glm::vec3 pos = { 0.0f, 0.0f, 0.0f },
 		float length = 1,
-		float height = 1
+		float height = 1,
+		glm::vec3 colour = { 0.2f, 0.2f, 0.2f}
 	)
 		: m_Position(pos),
 		length(length),
-		height(height)
+		height(height),
+		m_Colour(colour)
 	{
 		update_Vertices();
 	}
 
 	void update_Size(float length, float height);
 	void update_Position(glm::vec3 pos);
+	void add_Position(glm::vec3 pos);
 	void update_Vertices();
 };
 
