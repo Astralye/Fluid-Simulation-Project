@@ -31,7 +31,9 @@ namespace test {
 		void OnUpdate() override;
 		void OnRender() override;
 		void OnImGuiRender() override;
-		void Shutdown() override;
+
+		void allocArray();
+		void resetArray();
 
 		void Initialize();
 
@@ -42,6 +44,8 @@ namespace test {
 		inline void timeStep();
 
 	private:
+
+		bool allocateArrays;
 
 		glm::ivec2 USP_Grid;
 		UniformSpacePartition m_USP;

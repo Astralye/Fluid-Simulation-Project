@@ -131,8 +131,6 @@ int main(void){
 		glfwPollEvents();
 	}
 
-	currentTest->Shutdown();
-
 	delete currentTest;
 	if (currentTest != testMenu)
 		delete testMenu;

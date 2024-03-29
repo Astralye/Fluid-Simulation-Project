@@ -20,7 +20,6 @@ namespace test {
 		virtual void OnUpdate(){}
 		virtual void OnRender() {}
 		virtual void OnImGuiRender() {}
-		virtual void Shutdown() {}
 	};
 
 	class TestMenu : public Test

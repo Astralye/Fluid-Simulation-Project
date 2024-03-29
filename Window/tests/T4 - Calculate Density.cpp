@@ -16,18 +16,38 @@ namespace test {
 		drawType(VertexType::Null),
 		time(0)
 	{
-		Initialize();
+		allocArray();
 		m_USP.SetContainer(m_RectContainer, USP_Grid);
 	}
 
+
+	// Only gets run once
+	void T4_Calculate_Density::allocArray()
+	{
+		m_ParticleArray = new std::vector<Particle>;
+		m_USP.InitializeLookup();
+
+		Initialize();
+	}
+	
+	// Runs for resetting the simulation
+	void T4_Calculate_Density::resetArray() {
+		m_ParticleArray->clear();
+		m_USP.lookupList->clear();
+
+		Initialize();
+	}
+
+	// Run at initialization and resetting.
 	void T4_Calculate_Density::Initialize() {
 		/* 
 			m_ParticleArray contains ALL the particles.
 			This should be used to allocate memory for a max number
 			and not for comparisions and collision detections.
-		*/ 
-		m_ParticleArray = new std::vector<Particle>;
+		*/
+
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
+		m_USP.lookupList->reserve(Settings::MAX_PARTICLES);
 
 		float radius = 1.0f;
 		float spacing = 0.0f;
@@ -35,9 +55,6 @@ namespace test {
 		Particle::init_Cube(m_ParticleArray, radius, spacing);
 		//Particle::init_Random(m_ParticleArray, radius);
 	}
-
-	//Destructor
-	T4_Calculate_Density::~T4_Calculate_Density(){}
 
 	/*
 	On update function runs on every frame.
@@ -75,7 +92,6 @@ namespace test {
 		TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
 		// Deallocated all dynamic arrays in memory per frame.
-		m_USP.Dealloc();
 		timeStep();
 	}
 	
@@ -229,7 +245,7 @@ namespace test {
 			} ImGui::SameLine();
 
 			if (ImGui::Button("Restart")) {
-				Initialize();
+				resetArray();
 			} ImGui::SameLine();
 
 			ImGui::End();
@@ -405,7 +421,10 @@ namespace test {
 
 	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }
 	
-	void T4_Calculate_Density::Shutdown() {
-		delete[] m_ParticleArray;
+	// Destructor
+	T4_Calculate_Density::~T4_Calculate_Density() {
+		// Vectors are an object, not an array, and thus don't use []
+		delete m_ParticleArray;
+		delete m_USP.lookupList;
 	}
 }

@@ -1,8 +1,5 @@
 #include "UniformSpacePartition.h"
 
-// We are only using USP and arrays PURELY for comparision, only makes sense that
-// Livespan is after comparisons.
-
 // Updating the arrays would be complicated for implementation due to movement of particles and needing to reset values
 void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
@@ -13,46 +10,64 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 		If the simulation is paused/ reset, the cell size can change.
 	*/
 
-	// 8 bits -> 256 total, or 16x16 grid arrangement
-	// 16 bits -> 65,536 total, or 256x256 grid arrangement
-	uint16_t n_Cells = m_Cells.x * m_Cells.y;
-
-	// Size of n_TotalCells is n_Cells * sizeof(int)
-	n_TotalCells = new int[n_Cells];
-	
-	// Set index for cell as a number from 0 to n.
-	for (int i = 0; i < n_Cells; i++) {
-		n_TotalCells[i] = i;
-	}
+	// Sets all the values back to 0.
+	lookupList->clear();
 
 	// If we normalized positions to be only inside the box, we can easily calculate which index it lies at
 	// Current positions are in worldspace,
-
 	glm::vec2 xbounds = { cont.m_Position.x - (cont.m_Length / 2) ,cont.m_Position.x + (cont.m_Length / 2) };
 	glm::vec2 ybounds = { cont.m_Position.y - (cont.m_Height / 2) ,cont.m_Position.y + (cont.m_Height / 2) };
 
 	for (int i = 0; i < particleArray->size(); i++) {
 		glm::vec4 particlePos = particleArray->at(i).m_Position;
+		int cellIndex;
+
 		// Bounds checking
 		if ((xbounds.x <= particlePos.x && particlePos.x <= xbounds.y) &&
 			(ybounds.x <= particlePos.y && particlePos.y <= ybounds.y)) {
 
 			// position - smallbound
-			glm::vec2 localPos = { particlePos.x - xbounds.x, particlePos.y - ybounds.x };
+			glm::vec2 localPos = { 
+				particlePos.x - xbounds.x,
+				ybounds.y - particlePos.y
+			};
+
 			localPos = {
 				(float)floor(localPos.x / m_CellSize.x),
 				(float)floor(localPos.y / m_CellSize.y)
 			};
 
-			std::cout << localPos.x << "," << localPos.y << std::endl;
+			cellIndex = localPos.y * m_Cells.x;
+			cellIndex += localPos.x;
+
+			// If the vector size is not full, emplace back
+			lookupList->emplace_back(cellIndex,i);
 		}
 	}
-	// Try not to use a nested loop. It may affect performance.
+
+	// Sorts by cellID
+	std::sort(lookupList->begin(), lookupList->end(), compareCellID);
+
+	// Sorts vector based on cell key.
+	for (int i = 0; i < lookupList->size(); i++) {
+		std::cout << "i: " << i << " cellkey: " << lookupList->at(i).cellKey << " particleID" << lookupList->at(i).particleIndex << std::endl;
+	}
+
+	// Still needs a start indices for checking where to look in the lookup list.
+
+	// For checking nearby cells, needs to use the coordinates, rather than the index.
+	// Makes calculating the cell index more easier.
 }
 
-void UniformSpacePartition::Dealloc()
+bool UniformSpacePartition::compareCellID(const spatialLookup&a, const spatialLookup&b)
 {
-	delete[] n_TotalCells;
+	return a.cellKey < b.cellKey;
+}
+
+
+void UniformSpacePartition::InitializeLookup()
+{
+	lookupList = new std::vector<spatialLookup>;
 }
 
 void UniformSpacePartition::defaultSize(RectangleContainer& cont, glm::vec2 cellSize) {
