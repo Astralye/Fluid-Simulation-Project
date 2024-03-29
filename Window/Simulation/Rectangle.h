@@ -46,6 +46,7 @@ public:
 	float m_Length;
 	float m_Height;
 
+	// m_Position is the center of the rectangle
 	glm::vec3 m_Position;
 
 	RectangleContainer(glm::vec3 pos = { 0.0f,0.0f,0.0f },

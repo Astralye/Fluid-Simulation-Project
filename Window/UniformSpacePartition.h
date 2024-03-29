@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "Simulation/Rectangle.h"
 #include "Simulation/Particle.h"
+#include "Simulation/Particle.h"
 
 class UniformSpacePartition {
 
@@ -17,6 +18,9 @@ public:
 
 	Rectangle m_RenderSquare;
 
+	// Pointer to array including every cell index.
+	int *n_TotalCells;
+
 	// We can pass in the rect container
 	UniformSpacePartition() :
 		m_Cells({ 0,0 }), m_CellSize({ 0,0 }), m_Position({ 0,0,0 })
@@ -26,6 +30,9 @@ public:
 		glm::ivec2 cellDimensions);
 
 	void defaultSize(RectangleContainer& cont, glm::vec2 cellSize);
+
+	void checkPartition(std::vector<Particle>* particleArray, RectangleContainer& cont);
+	void Dealloc();
 
 	inline glm::vec3 getPosition() { return m_Position; }
 };

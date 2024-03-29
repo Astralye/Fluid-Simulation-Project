@@ -1,8 +1,8 @@
 #include "Settings.h"
 
 bool Settings::ENABLE_GRAVITY = true;
-bool Settings::ENABLE_DEBUG_MODE = false;
-bool Settings::ENABLE_PARTITION_BACKROUND = false;
+bool Settings::ENABLE_DEBUG_MODE = true; // change back to false
+bool Settings::ENABLE_PARTITION_BACKROUND = true; // change back to false
 bool Settings::ENABLE_RESIZE_CONTAINER = false;
 bool Settings::ENABLE_SQUARE_PARTITIONS = false;
 bool Settings::ENABLE_HOVER_PARTICLE = false;

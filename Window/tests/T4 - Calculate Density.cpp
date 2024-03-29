@@ -21,6 +21,11 @@ namespace test {
 	}
 
 	void T4_Calculate_Density::Initialize() {
+		/* 
+			m_ParticleArray contains ALL the particles.
+			This should be used to allocate memory for a max number
+			and not for comparisions and collision detections.
+		*/ 
 		m_ParticleArray = new std::vector<Particle>;
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
 
@@ -54,15 +59,23 @@ namespace test {
 		}
 
 		// If paused, does not update any values, is after MVP, to allow movement of camera
-		if (Settings::PAUSE_SIMULATION) {
-			return;
-		}
+		if (Settings::PAUSE_SIMULATION) return;
 
+
+		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
+		/* Todo
+			The implementation of all the calculations are fine
+			The functions take in the entire particle array
+
+			-> Need to make it work for sub arrays of particles
+		*/
 		TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
 		TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
 		TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
 		TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
+		// Deallocated all dynamic arrays in memory per frame.
+		m_USP.Dealloc();
 		timeStep();
 	}
 	
