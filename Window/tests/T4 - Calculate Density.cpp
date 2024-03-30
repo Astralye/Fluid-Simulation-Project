@@ -34,6 +34,7 @@ namespace test {
 	void T4_Calculate_Density::resetArray() {
 		m_ParticleArray->clear();
 		m_USP.lookupList->clear();
+		m_USP.startIndex->clear();
 
 		Initialize();
 	}
@@ -80,6 +81,7 @@ namespace test {
 
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
+		m_USP.getNeighbourParticles(m_ParticleArray);
 		/* Todo
 			The implementation of all the calculations are fine
 			The functions take in the entire particle array
@@ -426,5 +428,6 @@ namespace test {
 		// Vectors are an object, not an array, and thus don't use []
 		delete m_ParticleArray;
 		delete m_USP.lookupList;
+		delete m_USP.startIndex;
 	}
 }

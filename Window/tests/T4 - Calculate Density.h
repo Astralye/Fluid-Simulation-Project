@@ -45,10 +45,9 @@ namespace test {
 
 	private:
 
-		bool allocateArrays;
-
 		glm::ivec2 USP_Grid;
 		UniformSpacePartition m_USP;
+
 
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];

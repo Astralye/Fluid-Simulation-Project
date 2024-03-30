@@ -29,7 +29,9 @@ public:
 
 	glm::ivec2 m_Cells;
 	glm::vec2 m_CellSize;
+
 	std::vector<spatialLookup>* lookupList;
+	std::vector<int>* startIndex;
 
 	Rectangle m_RenderSquare;
 
@@ -38,7 +40,12 @@ public:
 		m_Cells({ 0,0 }), m_CellSize({ 0,0 }), m_Position({ 0,0,0 })
 	{}
 
+	inline int coordToIndex(glm::vec2 coord);
+	inline glm::vec2 indexToCoord(int index);
+
 	void checkPartition(std::vector<Particle>* particleArray, RectangleContainer& cont);
+	void getNeighbourParticles(std::vector<Particle>* particleArray);
+	void neighbourCells(std::vector<Particle>* particleArray, int index);
 
 	static bool compareCellID(const spatialLookup& a, const spatialLookup& b);
 	void InitializeLookup();
