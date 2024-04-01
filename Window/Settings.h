@@ -20,7 +20,7 @@ struct Settings {
 	// Max particles determine max No particles that CAN be rendered
 	// A simulation use n <= max, particles
 	// For now, use max particles
-	static const uint16_t MAX_PARTICLES = 10;
+	static const uint16_t MAX_PARTICLES = 5000;
 
 	static bool ENABLE_GRAVITY;
 	static bool ENABLE_DEBUG_MODE;

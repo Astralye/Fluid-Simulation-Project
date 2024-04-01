@@ -10,7 +10,7 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(0.0f, 50.0f, 0.0f),90.0f, 90.0f),
+		m_RectContainer(glm::vec3(80.0f, 100.0f, 0.0f),250.0f, 250.0f),
 		USP_Grid({5,5}),
 
 		drawType(VertexType::Null),
@@ -81,17 +81,17 @@ namespace test {
 
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
-		m_USP.getNeighbourParticles(m_ParticleArray);
+		m_USP.getNeighbourParticles(m_ParticleArray, m_RectContainer);
 		/* Todo
 			The implementation of all the calculations are fine
 			The functions take in the entire particle array
 
 			-> Need to make it work for sub arrays of particles
 		*/
-		TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
-		TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
-		TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
-		TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
+		//TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
+		//TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
+		//TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
+		//TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
 		// Deallocated all dynamic arrays in memory per frame.
 		timeStep();

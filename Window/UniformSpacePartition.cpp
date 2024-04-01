@@ -72,26 +72,24 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 		}
 	}
 
-	std::cout << "\n" << std::endl;
 }
 
-void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray)
+void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
-	// INCORRECT THIS NEEDS TO BE CHANGED
+	// For every filled partition
 	for (int i = 0; i < startIndex->size(); i++) {
 		if (startIndex->at(i) == std::numeric_limits<int>().max()) continue;
 		
 		int particlestartIndex = startIndex->at(i);
 		int particleCellKey = lookupList->at(particlestartIndex).cellKey;
 
-		neighbourCells(particleArray, particleCellKey);
+		neighbourCells(particleArray, particleCellKey, cont);
 	}
-	std::cout << "end\n" << std::endl;
 }
 
 
 // Coordinates in the container
-void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray, int index)
+void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray, int index , RectangleContainer& cont)
 {
 	int Offset[3] = { -1, 0, 1 };
 
@@ -104,6 +102,7 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 
 	// Stores all the possible particles for collisions
 	std::vector<int> particleIndices;
+	// All the particles that can be compared
 	std::vector<int> particlesInMainCell;
 
 	// Creates coordinates, removes nested for loop
@@ -120,7 +119,7 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 		}
 	}
 
-	// For each quadrant
+	// For each quadrant in the 3x3 grid
 	for (int i = 0; i < 9; i++) {
 		
 		// Skips quadrants with invalid cell coordinates
@@ -138,34 +137,24 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 			// Exit if it has a different key
 			if (lookupList->at(j).cellKey != neighbourCellKey) break;
 
+			// Particles in the center cell. This is what is used for comparisons
 			if (i == 4) { particlesInMainCell.emplace_back(lookupList->at(j).particleIndex); }
 
+			// All particles in the 3x3 grid
 			particleIndices.emplace_back(lookupList->at(j).particleIndex);
 		}
 	}
 
-	// All the particles within the center grid is compared to all the others
-	std::cout << particlesInMainCell.size() << std::endl;
-	std::cout << "cell index:" << index << std::endl;
+	//std::cout << particlesInMainCell.size() << std::endl;
+	//std::cout << "cell index:" << index << std::endl;
 
-	for (int i = 0; i < particlesInMainCell.size(); i++) {
-		std::cout << "Particle no." << particlesInMainCell.at(i) << std::endl;
-		Particle particleA = particleArray->at(particleIndices.at(i));
 
-		for (int j = 0; j < particleIndices.size(); j++) {
-			if (particleIndices.at(j) == particlesInMainCell.at(i)) continue;
-			
-			Particle particleB = particleArray->at(particleIndices.at(j));
+	SPH::CalculateAllDensities(particleArray, particlesInMainCell, particleIndices);
+	SPH::CalculateAllPressures(particleArray, particlesInMainCell, particleIndices);
+	SPH::CalculatePositionCollision(particleArray, particlesInMainCell, cont);
+	SPH::CalculateAllViscosities(particleArray, particlesInMainCell, particleIndices);
 
-			if ((PhysicsEq::euclid_Distance(particleA.m_Position, particleB.m_Position)
-				) <= Particle::KERNEL_RADIUS){
-				std::cout << "	Particle " <<particleIndices.at(j) <<" IN RADIUS" << std::endl;
-
-			}
-		}
-	}
-
-	std::cout << "Changing cell \n" << std::endl;
+	//std::cout << "Changing cell \n" << std::endl;
 }
 
 bool UniformSpacePartition::compareCellID(const spatialLookup&a, const spatialLookup&b)

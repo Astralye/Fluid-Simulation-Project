@@ -8,6 +8,8 @@
 #include "Simulation/Particle.h"
 #include "Simulation/Particle.h"
 
+#include "SPH.h"
+
 #include "Settings.h"
 
 class UniformSpacePartition {
@@ -44,8 +46,8 @@ public:
 	inline glm::vec2 indexToCoord(int index);
 
 	void checkPartition(std::vector<Particle>* particleArray, RectangleContainer& cont);
-	void getNeighbourParticles(std::vector<Particle>* particleArray);
-	void neighbourCells(std::vector<Particle>* particleArray, int index);
+	void getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont);
+	void neighbourCells(std::vector<Particle>* particleArray, int index, RectangleContainer& cont);
 
 	static bool compareCellID(const spatialLookup& a, const spatialLookup& b);
 	void InitializeLookup();
