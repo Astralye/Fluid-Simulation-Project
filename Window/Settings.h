@@ -29,6 +29,9 @@ struct Settings {
 	static bool ENABLE_RESIZE_CONTAINER;
 	static bool ENABLE_SQUARE_PARTITIONS;
 
+	static bool START_BENCHMARK;
+	static bool CREATE_BENCHMARK;
+
 	static bool PAUSE_SIMULATION;
 	static bool IS_HOVER_PARTICLE;
 	static bool OPEN_POPUP;

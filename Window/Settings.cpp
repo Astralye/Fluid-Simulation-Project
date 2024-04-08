@@ -7,6 +7,9 @@ bool Settings::ENABLE_RESIZE_CONTAINER = false;
 bool Settings::ENABLE_SQUARE_PARTITIONS = false;
 bool Settings::ENABLE_HOVER_PARTICLE = false;
 
+bool Settings::START_BENCHMARK = false;
+bool Settings::CREATE_BENCHMARK = false;
+
 bool Settings::PAUSE_SIMULATION = true;
 bool Settings::IS_HOVER_PARTICLE = false;
 bool Settings::OPEN_POPUP = false;

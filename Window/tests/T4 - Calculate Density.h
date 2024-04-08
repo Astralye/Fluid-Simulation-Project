@@ -17,6 +17,8 @@
 #include "SPH.h"
 #include "UniformSpacePartition.h"
 
+#include "Benchmark.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -48,7 +50,6 @@ namespace test {
 		glm::ivec2 USP_Grid;
 		UniformSpacePartition m_USP;
 
-
 		std::vector<Particle>* m_ParticleArray;
 		float m_ClearColour[4];
 
@@ -61,6 +62,8 @@ namespace test {
 		RectangleContainer m_RectContainer;
 
 		glm::mat4 m_Proj, m_View, m_Model, m_MVP;
+
+		Benchmark *benchmark;
 
 		// The smaller the simstep, the higher the accuracy, but will take longer.
 		constexpr static float SIMSTEP = 0.016f; // An integer is one second.

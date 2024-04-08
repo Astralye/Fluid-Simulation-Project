@@ -76,24 +76,40 @@ namespace test {
 			m_USP.SetContainer(m_RectContainer);
 		}
 
+		// This works if the simulation is already paused.
+		if (Settings::START_BENCHMARK) {
+
+			// Creates Benchmark once
+			if (Settings::CREATE_BENCHMARK) {
+				Settings::CREATE_BENCHMARK = false;
+
+				benchmark = new Benchmark(0.033, 10);
+			}
+
+			benchmark->run(ImGui::GetIO().Framerate);
+
+			// Check if at the end of the benchmark
+			if (!benchmark->isStillBenchmark()) {
+				delete benchmark;
+				Settings::START_BENCHMARK = false;
+			}
+		}
+
 		// If paused, does not update any values, is after MVP, to allow movement of camera
 		if (Settings::PAUSE_SIMULATION) return;
 
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
 		m_USP.getNeighbourParticles(m_ParticleArray, m_RectContainer);
-		/* Todo
-			The implementation of all the calculations are fine
-			The functions take in the entire particle array
 
-			-> Need to make it work for sub arrays of particles
-		*/
+		// Naive method, loop through all particles
 		//TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
 		//TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
 		//TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
 		//TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
 		// Deallocated all dynamic arrays in memory per frame.
+
 		timeStep();
 	}
 	
@@ -277,6 +293,28 @@ namespace test {
 				ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
 				ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
 				ImGui::Text("Render: %.2fms", stats.Time_Render_Particles.count() * 1000);
+
+					
+				
+				if (ImGui::Button("Benchmark") && !Settings::START_BENCHMARK) {
+					// Reset simulation
+					resetArray();
+					Settings::PAUSE_SIMULATION = false;
+					// Start timer
+
+					Settings::START_BENCHMARK = true;
+					Settings::CREATE_BENCHMARK = true;
+
+				}
+				
+				// Code for the bench mark is elsewhere.
+				// This is only for displaying the GUI.
+				if (Settings::START_BENCHMARK) {
+					ImGui::Text("Running Benchmark...");
+				}
+
+
+				ImGui::SeparatorText("Compute Times");
 			}
 
 			if (ImGui::CollapsingHeader("SPH Config")) {
