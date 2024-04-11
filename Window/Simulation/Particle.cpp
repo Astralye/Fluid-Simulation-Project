@@ -89,7 +89,7 @@ Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 // ---------------------------------------------------------------------------------------------------
 
 // Particle Initializers
-void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing)
+void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, uint16_t nParticles)
 {
 	Particle::KERNEL_RADIUS = 4 * radius;
 
@@ -110,6 +110,9 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 	row = 0;
 
 	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
+
+		if (i >= nParticles) { return; }
+
 		position = { row * (2 * radius + spacing),
 					column * (2 * radius + spacing)};
 		row++;

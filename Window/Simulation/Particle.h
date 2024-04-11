@@ -71,7 +71,7 @@ public:
 	// Static
 	// --------------------------------------------------
 	
-	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing);
+	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, uint16_t nParticles);
 	static void init_Random(std::vector<Particle> *particleArray, float radius);
 
 	static float KERNEL_RADIUS;

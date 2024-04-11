@@ -40,6 +40,8 @@ void Benchmark::run(float FPS)
 		std::cout << "Average FPS:" << avg << " n: "<< data->size() <<std::endl;
 
 		dataToCSV(avg);
+
+		// Perhaps display to user that results are stored in X location.
 	}
 }
 

@@ -17,10 +17,8 @@ struct Settings {
 	static const uint16_t MaxVertexCount = MaxQuadCount * 4;
 	static const uint16_t MaxIndexCount = MaxQuadCount * 6;
 
-	// Max particles determine max No particles that CAN be rendered
-	// A simulation use n <= max, particles
-	// For now, use max particles
-	static const uint16_t MAX_PARTICLES = 5000;
+	// uint16 can store up to 65k values. Can change to 32 if needed.
+	static const uint16_t MAX_PARTICLES = 4000;
 
 	static bool ENABLE_GRAVITY;
 	static bool ENABLE_DEBUG_MODE;
@@ -28,6 +26,7 @@ struct Settings {
 	static bool ENABLE_HOVER_PARTICLE;
 	static bool ENABLE_RESIZE_CONTAINER;
 	static bool ENABLE_SQUARE_PARTITIONS;
+	static bool ENABLE_SOURCE;
 
 	static bool START_BENCHMARK;
 	static bool CREATE_BENCHMARK;

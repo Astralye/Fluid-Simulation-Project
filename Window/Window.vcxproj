@@ -170,6 +170,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation\Particle.cpp" />
     <ClCompile Include="Simulation\PhysicsEq.cpp" />
+    <ClCompile Include="SourceSink.cpp" />
     <ClCompile Include="SPH.cpp" />
     <ClCompile Include="Statistics.cpp" />
     <ClCompile Include="tests\T4 - Calculate Density.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Simulation\Particle.h" />
     <ClInclude Include="Simulation\PhysicsEq.h" />
     <ClInclude Include="Simulation\Rectangle.h" />
+    <ClInclude Include="SourceSink.h" />
     <ClInclude Include="SPH.h" />
     <ClInclude Include="Statistics.h" />
     <ClInclude Include="tests\T4 - Calculate Density.h" />

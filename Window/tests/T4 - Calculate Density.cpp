@@ -44,8 +44,10 @@ namespace test {
 		/* 
 			m_ParticleArray contains ALL the particles.
 			This should be used to allocate memory for a max number
-			and not for comparisions and collision detections.
+			and not for comparisions and or collision detections.
 		*/
+
+		currentNumberParticles = 0;
 
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
 		m_USP.lookupList->reserve(Settings::MAX_PARTICLES);
@@ -53,8 +55,12 @@ namespace test {
 		float radius = 1.0f;
 		float spacing = 0.0f;
 
-		Particle::init_Cube(m_ParticleArray, radius, spacing);
+		Particle::init_Cube(m_ParticleArray, radius, spacing, currentNumberParticles);
 		//Particle::init_Random(m_ParticleArray, radius);
+
+
+		// Generates the Source
+		sourceA = Source({0.0f,0.0f,0.0f},1,5);
 	}
 
 	/*
@@ -74,6 +80,10 @@ namespace test {
 		if (Settings::ENABLE_RESIZE_CONTAINER) {
 			m_RectContainer.update();
 			m_USP.SetContainer(m_RectContainer);
+		}
+
+		if (Settings::ENABLE_SOURCE) {
+			sourceA.update();
 		}
 
 		// This works if the simulation is already paused.
@@ -98,6 +108,7 @@ namespace test {
 		// If paused, does not update any values, is after MVP, to allow movement of camera
 		if (Settings::PAUSE_SIMULATION) return;
 
+		// SPH CALCULATIONS 
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
 		m_USP.getNeighbourParticles(m_ParticleArray, m_RectContainer);
@@ -108,12 +119,18 @@ namespace test {
 		//TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
 		//TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
 
-		// Deallocated all dynamic arrays in memory per frame.
+
+		// Source generation would be evaluated here.
+		if (Settings::ENABLE_SOURCE) { sourceA.addParticle(currentNumberParticles, m_ParticleArray); }
 
 		timeStep();
 	}
 	
 	void T4_Calculate_Density::DrawCircle() {
+
+		// This is not really efficient
+		// Could perhaps make this faster via cuda
+
 		// Draw Particles
 		for (int i = 0; i < m_ParticleArray->size(); i++) {
 			CircleBuffer.Draw(m_ParticleArray->at(i), m_MVP);
@@ -184,6 +201,7 @@ namespace test {
 
 		// Quad Batch Render
 		{
+			// Partition background
 			if (Settings::ENABLE_PARTITION_BACKROUND && Settings::ENABLE_DEBUG_MODE) {
 				QuadBuffer.BeginBatch();
 				DrawGrid();
@@ -191,10 +209,18 @@ namespace test {
 				QuadBuffer.Flush();
 			}
 
+			// Container Boxes
 			QuadBuffer.BeginBatch();
+			
 			CreateContainer(m_RectContainer);
+
+			if (Settings::ENABLE_SOURCE) {
+				QuadBuffer.Draw(sourceA.m_Quad, m_MVP);
+			}
+
 			QuadBuffer.EndBatch();
 			QuadBuffer.Flush();
+
 		}
 
 		// Circle Batch Render
@@ -339,9 +365,10 @@ namespace test {
 				}
 
 				if (ImGui::TreeNode("Particles")) {
-					ImGui::Text("Max Particles:");
-					ImGui::Text("Particles: ");
-					ImGui::Text("Particle size: ");
+
+					ImGui::Text("Max Particles: %i", Settings::MAX_PARTICLES);
+					ImGui::Text("Particles: %i", currentNumberParticles);
+					ImGui::Text("Particle radius: %i", m_ParticleArray->at(0).getRadius());
 
 					ImGui::TreePop();
 				}
@@ -351,34 +378,54 @@ namespace test {
 					ImGui::Checkbox("Modify Container", &Settings::ENABLE_RESIZE_CONTAINER);
 
 					if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::BeginDisabled(); }
-						ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
-						ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
+					
+					ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
+					ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
 
-						ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -50.0f, 50.0f);
-						ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -50.0f, 50.0f);
+					ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -50.0f, 50.0f);
+					ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -50.0f, 50.0f);
 
 
-						ImGui::SeparatorText("UNIFORM SPACE PARTITIONING");
+					ImGui::SeparatorText("UNIFORM SPACE PARTITIONING");
 
-						ImGui::Text("Cell Dimensions: {%i x %i}", m_USP.m_Cells.x, m_USP.m_Cells.y);
-						ImGui::Text("Cell Start: {%.1f, %.1f}", m_USP.getPosition().x, m_USP.getPosition().y);
-						ImGui::Text("Cell Size: {%.1f x %.1f}", m_USP.m_CellSize.x, m_USP.m_CellSize.y);
+					ImGui::Text("Cell Dimensions: {%i x %i}", m_USP.m_Cells.x, m_USP.m_Cells.y);
+					ImGui::Text("Cell Start: {%.1f, %.1f}", m_USP.getPosition().x, m_USP.getPosition().y);
+					ImGui::Text("Cell Size: {%.1f x %.1f}", m_USP.m_CellSize.x, m_USP.m_CellSize.y);
 
-						if (ImGui::Button("Kernel Cell Size")) {
-							m_USP.defaultSize(m_RectContainer, { Particle::KERNEL_RADIUS,Particle::KERNEL_RADIUS });
-						}
+					if (ImGui::Button("Kernel Cell Size")) {
+						m_USP.defaultSize(m_RectContainer, { Particle::KERNEL_RADIUS,Particle::KERNEL_RADIUS });
+					}
 
-						ImGui::Checkbox("Square Partitions", &Settings::ENABLE_SQUARE_PARTITIONS);
+					ImGui::Checkbox("Square Partitions", &Settings::ENABLE_SQUARE_PARTITIONS);
 						
-						if (Settings::ENABLE_SQUARE_PARTITIONS) {
-							ImGui::SliderInt("Cell Size:", &Settings::PARITIONS_SIZE, 2, 50);
-							m_USP.defaultSize(m_RectContainer, { Settings::PARITIONS_SIZE,Settings::PARITIONS_SIZE });
-						}
-						else {
-							ImGui::SliderInt("X cells", &m_USP.m_Cells.x, 2, 50);
-							ImGui::SliderInt("Y cells", &m_USP.m_Cells.y, 2, 50);
-						}
-						if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::EndDisabled(); }
+					if (Settings::ENABLE_SQUARE_PARTITIONS) {
+						ImGui::SliderInt("Cell Size:", &Settings::PARITIONS_SIZE, 2, 50);
+						m_USP.defaultSize(m_RectContainer, { Settings::PARITIONS_SIZE,Settings::PARITIONS_SIZE });
+					}
+					else {
+						ImGui::SliderInt("X cells", &m_USP.m_Cells.x, 2, 50);
+						ImGui::SliderInt("Y cells", &m_USP.m_Cells.y, 2, 50);
+					}
+
+					if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::EndDisabled(); }
+
+					ImGui::TreePop();
+				}
+
+				// Water Flow
+				if (ImGui::TreeNode("Particle Source and Sinks")) {
+					ImGui::Checkbox("Enable Source Area", &Settings::ENABLE_SOURCE);
+
+					ImGui::Separator();
+
+					if (!Settings::ENABLE_SOURCE) { ImGui::BeginDisabled(); }
+					ImGui::SliderFloat("X:", &sourceA.m_Position.x, -50.0f, 200.0f);
+					ImGui::SliderFloat("Y:", &sourceA.m_Position.y, -50.0f, 200.0f);
+
+
+
+					if (!Settings::ENABLE_SOURCE) { ImGui::EndDisabled(); }
+
 
 					ImGui::TreePop();
 				}
