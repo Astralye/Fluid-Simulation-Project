@@ -89,7 +89,7 @@ Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 // ---------------------------------------------------------------------------------------------------
 
 // Particle Initializers
-void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing)
+void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, uint16_t nParticles)
 {
 	Particle::KERNEL_RADIUS = 4 * radius;
 
@@ -110,6 +110,9 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 	row = 0;
 
 	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
+
+		if (i >= nParticles) { return; }
+
 		position = { row * (2 * radius + spacing),
 					column * (2 * radius + spacing)};
 		row++;
@@ -122,14 +125,14 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
 	}
 }
-void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
+void Particle::init_Random(std::vector<Particle> *particleArray, float radius , uint16_t currentNumberParticles) {
 
 
 	Particle::KERNEL_RADIUS = 8 * radius;
 
 	int maxVelocity = 20;
 
-	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
+	for (int i = 0; i < currentNumberParticles; i++) {
 
 		particleArray->emplace_back(
 			glm::vec4(8.0f + rand() % 85, 12.0f + rand() % 70, 0.0f,0.0f), 1.0f, radius
@@ -252,6 +255,8 @@ glm::vec4 Particle::DebugColour()
 
 	return glm::vec4(newColour,1.0f);
 }
+
+void Particle::setRadius(float rad) { m_Radius = rad; }
 
 void Particle::setVelocity(glm::vec2 vel) {
 	m_Velocity.x = vel.x;

@@ -19,7 +19,6 @@
 #include "tests/T4 - Calculate Density.h"
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void loopFunction(Renderer &renderer, test::TestMenu* testMenu, test::Test* currentTest, GLFWwindow* window);
 
 int main(void){
 
@@ -39,6 +38,8 @@ int main(void){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // GLFW window
 	GLFWwindow* window = glfwCreateWindow((int)Settings::WINDOW_RESOLUTION.x, (int)Settings::WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
@@ -80,10 +81,55 @@ int main(void){
 
 	while (!glfwWindowShouldClose(window))
 	{
-		loopFunction(renderer, testMenu, currentTest, window);
-	}
+		GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
+		renderer.Clear();
 
-	currentTest->Shutdown();
+		// ImGui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		// If currentTest exists
+		if (currentTest) {
+
+			currentTest->OnUpdate();
+			TIME(&test::Test::OnRender, currentTest, stats.Time_Render_Particles);
+
+			//ImGui::ShowDemoWindow();
+
+			Gui_Menus::DisplayMenus();
+
+			// Perhaps have a main menu?
+
+			// If the test is the not test menu
+			if (currentTest != testMenu)
+			{
+				// Within Simulation
+
+				if (ImGui::Button("<-")) {
+					delete currentTest;
+					currentTest = testMenu;
+				} ImGui::SameLine();
+			}
+			else {
+				ImGui::Begin("Load Sim");
+			}
+
+			currentTest->OnImGuiRender();
+			ImGui::End();
+		}
+
+
+		// Render GUI
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+
+		/* Poll for and process events */
+		glfwPollEvents();
+	}
 
 	delete currentTest;
 	if (currentTest != testMenu)
@@ -95,59 +141,6 @@ int main(void){
 
 	glfwTerminate();
 	return 0;
-}
-
-void loopFunction(Renderer &renderer,test::TestMenu* testMenu, test::Test *currentTest, GLFWwindow* window) {
-	GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
-	renderer.Clear();
-
-	// ImGui
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	// If currentTest exists
-	if (currentTest) {
-
-		currentTest->OnUpdate();
-		TIME(&test::Test::OnRender, currentTest, stats.Time_Render_Particles);
-
-		//ImGui::ShowDemoWindow();
-
-		Gui_Menus::DisplayMenus();
-
-		ImGui::Begin("Load Sim");
-
-		// Perhaps have a main menu?
-
-		// If the test is the not test menu
-		if (currentTest != testMenu)
-		{
-			// Within Simulation
-
-			if (ImGui::Button("<-")) {
-				delete currentTest;
-				currentTest = testMenu;
-			} ImGui::SameLine();
-		}
-		else {
-			ImGui::Begin("Load Sim");
-		}
-
-		currentTest->OnImGuiRender();
-		ImGui::End();
-	}
-
-
-	// Render GUI
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	/* Swap front and back buffers */
-	glfwSwapBuffers(window);
-
-	/* Poll for and process events */
-	glfwPollEvents();
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {

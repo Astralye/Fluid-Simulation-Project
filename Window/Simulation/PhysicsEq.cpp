@@ -8,17 +8,22 @@
 
 
 // Static variables
-float PhysicsEq::REST_DENSITY = 2.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 12000.0f;
-float PhysicsEq::EXPONENT = 4.4f;
-float PhysicsEq::VISCOSITY = 0.024f;
-float PhysicsEq::GRAVITY = -200.0f;
+float PhysicsEq::REST_DENSITY = 2.5f;
+float PhysicsEq::STIFFNESS_CONSTANT = 6300.0f;
+float PhysicsEq::EXPONENT = 5.0f;
+float PhysicsEq::VISCOSITY = 0.049f;
+float PhysicsEq::GRAVITY = -100.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
 {
 	// Returns a non-negative value as results of pythagoras can only be non-negative
 	return PhysicsEq::pythagoras( c1-c2);
+}
+
+float PhysicsEq::euclid_Squared(glm::vec3 values)
+{
+	return pow(values.x, 2) + pow(values.y, 2) + pow(values.z, 2);
 }
 
 
@@ -33,7 +38,6 @@ float PhysicsEq::lerp(float a, float b, float f)
 // Smoothing Kernel Function, W(r - r', h)
 float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &positionB, const float radius)
 {
-
 	float distance = euclid_Distance(positionA, positionB);
 
 	//float value = std::max((float)0.0, (float)(pow(radius, 2) - pow(distance, 2)));

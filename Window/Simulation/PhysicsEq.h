@@ -29,6 +29,7 @@ public:
 
 	// Euclidean distance
 	static float euclid_Distance(glm::vec3 c1, glm::vec3 c2);
+	static float euclid_Squared(glm::vec3 values);
 
 	static float clamp(float value, float min, float max);
 

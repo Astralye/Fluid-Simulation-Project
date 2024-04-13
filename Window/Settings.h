@@ -17,12 +17,27 @@ struct Settings {
 	static const uint16_t MaxVertexCount = MaxQuadCount * 4;
 	static const uint16_t MaxIndexCount = MaxQuadCount * 6;
 
-	static const uint16_t MAX_PARTICLES = 250;
+	// uint16 can store up to 65k values. Can change to 32 if needed.
+	static const uint16_t MAX_PARTICLES = 4000;
 
 	static bool ENABLE_GRAVITY;
 	static bool ENABLE_DEBUG_MODE;
+	static bool ENABLE_PARTITION_BACKROUND;
+	static bool ENABLE_HOVER_PARTICLE;
+	static bool ENABLE_RESIZE_CONTAINER;
+	static bool ENABLE_SQUARE_PARTITIONS;
+	static bool ENABLE_SOURCE;
+
+	static bool START_BENCHMARK;
+	static bool CREATE_BENCHMARK;
 
 	static bool PAUSE_SIMULATION;
+	static bool IS_HOVER_PARTICLE;
+	static bool OPEN_POPUP;
+
+	static int HOVER_PARTICLE;
+	static int CLICK_PARTICLE;
+	static int PARITIONS_SIZE;
 };
 
 #endif

@@ -20,19 +20,10 @@ class Camera {
 		float m_Zoom;
 
 	public:
-		// -50 -> 150 : 200
-		// -50 -> 150 : 200
-
-		// 200 x 200 = 1:1 ratio
-		// 800 x 800 = 1:1 ratio
-
-
-		// 1280 x 720 = 16:9 ratio
-		// 640 x 360 = 16:9 ratio
-		// 320 x 180 = 16:9 ratio
 
 		Camera(
-			Projection proj = {-77.7f, 100.0f, 0.0f, 0.0f},
+			/*Projection proj = {0.0f, 1280.0f, 0.0f, 720.0f},*/
+			Projection proj = {-77.0f, 100.0f, 0.0f, 100.0f},
 			glm::vec3 pos = glm::vec3(0.0f),
 			float Zoom = 0.0f)
 		: m_Projection(proj),

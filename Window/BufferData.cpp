@@ -132,7 +132,7 @@ template<> void BufferData<Vertex>::Draw(Rectangle& quad, glm::mat4 mvp) {
 		glm::vec4 vertex = mvp * glm::vec4(quad.m_Vertices[i], 0.0f, 1.0f);
 
 		m_BufferPtr->WorldPosition = vertex;
-		m_BufferPtr->Colour = { 0.2f, 0.2f, 0.2f, 1.0f };
+		m_BufferPtr->Colour = { quad.m_Colour, 1.0f };
 		m_BufferPtr++;
 	}
 	IndexCount += 6;
