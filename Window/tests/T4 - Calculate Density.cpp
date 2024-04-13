@@ -47,7 +47,7 @@ namespace test {
 			and not for comparisions and or collision detections.
 		*/
 
-		currentNumberParticles = 0;
+		currentNumberParticles = 500;
 
 		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
 		m_USP.lookupList->reserve(Settings::MAX_PARTICLES);
@@ -56,11 +56,11 @@ namespace test {
 		float spacing = 0.0f;
 
 		Particle::init_Cube(m_ParticleArray, radius, spacing, currentNumberParticles);
-		//Particle::init_Random(m_ParticleArray, radius);
+		//Particle::init_Random(m_ParticleArray, radius, currentNumberParticles);
 
 
 		// Generates the Source
-		sourceA = Source({0.0f,0.0f,0.0f},1,5);
+		sourceA = Source({ 0.0f,0.0f,0.0f }, 1, 5);
 	}
 
 	/*
@@ -83,7 +83,7 @@ namespace test {
 		}
 
 		if (Settings::ENABLE_SOURCE) {
-			sourceA.update();
+			sourceA.update(); // Update location
 		}
 
 		// This works if the simulation is already paused.
@@ -368,8 +368,9 @@ namespace test {
 
 					ImGui::Text("Max Particles: %i", Settings::MAX_PARTICLES);
 					ImGui::Text("Particles: %i", currentNumberParticles);
-					ImGui::Text("Particle radius: %i", m_ParticleArray->at(0).getRadius());
 
+					//ImGui::Text("Particle radius: %i", m_ParticleArray->at(0).getRadius());
+					
 					ImGui::TreePop();
 				}
 
@@ -416,13 +417,25 @@ namespace test {
 				if (ImGui::TreeNode("Particle Source and Sinks")) {
 					ImGui::Checkbox("Enable Source Area", &Settings::ENABLE_SOURCE);
 
-					ImGui::Separator();
-
+				
 					if (!Settings::ENABLE_SOURCE) { ImGui::BeginDisabled(); }
-					ImGui::SliderFloat("X:", &sourceA.m_Position.x, -50.0f, 200.0f);
-					ImGui::SliderFloat("Y:", &sourceA.m_Position.y, -50.0f, 200.0f);
 
+					ImGui::SeparatorText("Source location:");
 
+					ImGui::SliderFloat("Source X:", &sourceA.m_Position.x, -50.0f, 200.0f);
+					ImGui::SliderFloat("Source Y:", &sourceA.m_Position.y, -50.0f, 200.0f);
+
+					ImGui::SeparatorText("Generation Config");
+
+					const float   f32_zero = 0.f, f32_three = 3.f;
+
+					ImGui::DragScalar("Generation rate (s)", ImGuiDataType_Float, &sourceA.m_GenerationRate, 0.01f, &f32_zero, &f32_three, "%f", ImGuiSliderFlags_Logarithmic);
+					ImGui::SliderFloat("Generation Radius:", &sourceA.m_GenerationRadius, 1.0f, 20.0f);
+					
+					ImGui::SeparatorText("Starting Velocities");
+
+					ImGui::SliderFloat("X:", &sourceA.m_startingVelocity.x, -200.0f, 200.0f);
+					ImGui::SliderFloat("Y:", &sourceA.m_startingVelocity.y, -200.0f, 200.0f);
 
 					if (!Settings::ENABLE_SOURCE) { ImGui::EndDisabled(); }
 

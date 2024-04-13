@@ -79,6 +79,8 @@ void SPH::CalculateDensity(std::vector<Particle>* arr, std::vector<int>& particl
 
 	// SUM
 	for (int i = 0; i < particleIndices.size(); i++) {
+
+
 		index = particleIndices.at(i);
 		if (index == j) { continue; }
 

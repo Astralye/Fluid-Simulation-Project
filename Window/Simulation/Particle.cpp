@@ -125,14 +125,14 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
 	}
 }
-void Particle::init_Random(std::vector<Particle> *particleArray, float radius) {
+void Particle::init_Random(std::vector<Particle> *particleArray, float radius , uint16_t currentNumberParticles) {
 
 
 	Particle::KERNEL_RADIUS = 8 * radius;
 
 	int maxVelocity = 20;
 
-	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
+	for (int i = 0; i < currentNumberParticles; i++) {
 
 		particleArray->emplace_back(
 			glm::vec4(8.0f + rand() % 85, 12.0f + rand() % 70, 0.0f,0.0f), 1.0f, radius

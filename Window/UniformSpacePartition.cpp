@@ -36,6 +36,7 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 	glm::vec2 ybounds = { cont.m_Position.y - (cont.m_Height / 2) ,cont.m_Position.y + (cont.m_Height / 2) };
 
 	for (int i = 0; i < particleArray->size(); i++) {
+
 		glm::vec4 particlePos = particleArray->at(i).m_Position;
 
 		// Bounds checking
@@ -63,26 +64,25 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 	// Stores the first occurance of a new cell position
 	// Null / max value if the same as before.
 	for (int i = 0; i < lookupList->size(); i++) {
-		
+
 		int key = lookupList->at(i).cellKey;
 		int	previousKey = (i == 0) ? std::numeric_limits<int>().max() : lookupList->at(i - 1).cellKey;
-				
+
 		if (key != previousKey) {
 			startIndex->at(key) = i;
 		}
-	}
 
+	}
 }
 
 void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
 	// For every filled partition
 	for (int i = 0; i < startIndex->size(); i++) {
-		if (startIndex->at(i) == std::numeric_limits<int>().max()) continue;
-		
 		int particlestartIndex = startIndex->at(i);
-		int particleCellKey = lookupList->at(particlestartIndex).cellKey;
+		if (particlestartIndex == std::numeric_limits<int>().max()) continue;
 
+		int particleCellKey = lookupList->at(particlestartIndex).cellKey;
 		neighbourCells(particleArray, particleCellKey, cont);
 	}
 }
@@ -100,13 +100,17 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 	int neighbourCellKey;
 	int currentIndex;
 
+	// Might need to set these values to a static value.
+
 	// Stores all the possible particles for collisions
 	std::vector<int> particleIndices;
+
 	// All the particles that can be compared
 	std::vector<int> particlesInMainCell;
 
-	// Creates coordinates, removes nested for loop
+	// Creates coordinates
 	int n = 0;
+
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 

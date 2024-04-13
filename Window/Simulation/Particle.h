@@ -72,7 +72,7 @@ public:
 	// --------------------------------------------------
 	
 	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, uint16_t nParticles);
-	static void init_Random(std::vector<Particle> *particleArray, float radius);
+	static void init_Random(std::vector<Particle> *particleArray, float radius, uint16_t nParticles);
 
 	static float KERNEL_RADIUS;
 	static float particleProperties[Settings::MAX_PARTICLES];
