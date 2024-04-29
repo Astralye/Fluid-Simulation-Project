@@ -47,20 +47,27 @@ namespace test {
 			and not for comparisions and or collision detections.
 		*/
 
+		Settings::INIT_SIM = true;
+
+		Settings::CURRENT_PARTICLES = 500;
 		currentNumberParticles = 500;
 
-		m_ParticleArray->reserve(Settings::MAX_PARTICLES);
-		m_USP.lookupList->reserve(Settings::MAX_PARTICLES);
+		initParticleNo();
 
-		float radius = 1.0f;
-		float spacing = 0.0f;
-
-		Particle::init_Cube(m_ParticleArray, radius, spacing, currentNumberParticles);
 		//Particle::init_Random(m_ParticleArray, radius, currentNumberParticles);
 
 
 		// Generates the Source
 		sourceA = Source({ 0.0f,0.0f,0.0f }, 1, 5);
+	}
+
+	void T4_Calculate_Density::initParticleNo() {
+
+		std::cout << "here" << std::endl;
+
+		float radius = 1.0f;
+		float spacing = 0.0f;
+		Particle::init_Cube(m_ParticleArray, radius, spacing, Settings::CURRENT_PARTICLES);
 	}
 
 	/*
@@ -82,6 +89,10 @@ namespace test {
 			m_USP.SetContainer(m_RectContainer);
 		}
 
+		if (Settings::INIT_SIM) {
+			initParticleNo();
+		}
+
 		if (Settings::ENABLE_SOURCE) {
 			sourceA.update(); // Update location
 		}
@@ -96,7 +107,13 @@ namespace test {
 				benchmark = new Benchmark(0.033, 10);
 			}
 
-			benchmark->run(ImGui::GetIO().Framerate);
+			benchmark->run(ImGui::GetIO().Framerate,
+				{ 
+				stats.Time_Create_Lookup.count() * 1000,
+				stats.Time_Sort_Lookup.count() * 1000,
+				stats.Time_Neighbour_Cells.count() * 1000,
+				stats.Time_Render_Particles.count() * 1000
+				});
 
 			// Check if at the end of the benchmark
 			if (!benchmark->isStillBenchmark()) {
@@ -106,13 +123,17 @@ namespace test {
 		}
 
 		// If paused, does not update any values, is after MVP, to allow movement of camera
-		if (Settings::PAUSE_SIMULATION) return;
+		if (Settings::PAUSE_SIMULATION) { return; }
 
+		Settings::INIT_SIM = false;
 		// SPH CALCULATIONS 
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
 		m_USP.getNeighbourParticles(m_ParticleArray, m_RectContainer);
 
+		//TIME(&m_USP.checkPartition, m_ParticleArray, m_RectContainer);
+		
+		
 		// Naive method, loop through all particles
 		//TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
 		//TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
@@ -314,10 +335,13 @@ namespace test {
 				ImGui::Text("Time: %.3f", time);
 
 				ImGui::SeparatorText("Compute Times");
-				ImGui::Text("Density: %.2fms", stats.Time_Calculate_Density.count() * 1000);
-				ImGui::Text("Pressure: %.2fms", stats.Time_Calculate_Pressure.count() * 1000);
-				ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
-				ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
+				ImGui::Text("Create Lookup Table: %.2fms", stats.Time_Create_Lookup.count() * 1000);
+				ImGui::Text("Sort Lookup: %.2fms", stats.Time_Sort_Lookup.count() * 1000);
+				ImGui::Text("SPH neighbour cells: %.2fms", stats.Time_Neighbour_Cells.count() * 1000);
+				//ImGui::Text("Density: %.2fms", stats.Time_Calculate_Density.count() * 1000);
+				//ImGui::Text("Pressure: %.2fms", stats.Time_Calculate_Pressure.count() * 1000);
+				//ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
+				//ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
 				ImGui::Text("Render: %.2fms", stats.Time_Render_Particles.count() * 1000);
 
 					
@@ -368,6 +392,9 @@ namespace test {
 
 					ImGui::Text("Max Particles: %i", Settings::MAX_PARTICLES);
 					ImGui::Text("Particles: %i", currentNumberParticles);
+
+					ImGui::SliderInt("Starting Particles", &Settings::CURRENT_PARTICLES, 1, Settings::MAX_PARTICLES);
+					ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
 
 					//ImGui::Text("Particle radius: %i", m_ParticleArray->at(0).getRadius());
 					

@@ -89,7 +89,7 @@ Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 // ---------------------------------------------------------------------------------------------------
 
 // Particle Initializers
-void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, uint16_t nParticles)
+void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, int nParticles)
 {
 	Particle::KERNEL_RADIUS = 4 * radius;
 

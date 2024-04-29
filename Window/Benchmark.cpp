@@ -28,24 +28,37 @@ bool Benchmark::isStillBenchmark()
 	return (timeElapsed.count() < endTime.count()) ? true : false;
 }
 
-void Benchmark::run(float FPS)
+void Benchmark::run(float FPS, glm::vec4 msData)
 {
 	if (checkInterval()) {
 		data->emplace_back(FPS);
+		msTimers->emplace_back(msData);
 	}
 
 	if (!isStillBenchmark()) {
 		float avg = std::accumulate(data->begin(), data->end(), 0);
 		avg /= data->size();
+
 		std::cout << "Average FPS:" << avg << " n: "<< data->size() <<std::endl;
 
-		dataToCSV(avg);
+		glm::vec4 tmp = {0,0,0,0};
+
+		for (int i = 0; i < msTimers->size(); i++) {
+			tmp.x += msData.x;
+			tmp.y += msData.y;
+			tmp.z += msData.z;
+			tmp.w += msData.w;
+		}
+
+		tmp /= msTimers->size();
+
+		dataToCSV(avg, tmp);
 
 		// Perhaps display to user that results are stored in X location.
 	}
 }
 
-void Benchmark::dataToCSV(float data) {
+void Benchmark::dataToCSV(float data, glm::vec4 msTimes) {
 
 	auto time = std::chrono::system_clock::now();
 	auto in_time_t = std::chrono::system_clock::to_time_t(time);
@@ -65,7 +78,11 @@ void Benchmark::dataToCSV(float data) {
 
 	std::ofstream outfile(parent / "Benchmark" / str);
 
-	outfile << "Average FPS" << "\n";
-	outfile << data;
+	outfile << "Average" << "," << "Framerate (FPS)" << ", "
+		<< "Time create Lookup Table (ms)" << "," 
+		<< "Time sort Lookup (ms)" << "," 
+		<< "Time Check Neighbours (ms)" << "," 
+		<< "Render Time (ms)" << "\n";
+	outfile << " ," << data << "," << msTimes.x << "," << msTimes.y << "," << msTimes.z << "," << msTimes.w;
 	outfile.close();
 }

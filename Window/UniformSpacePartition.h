@@ -8,6 +8,8 @@
 #include "Simulation/Particle.h"
 #include "Simulation/Particle.h"
 
+#include "Statistics.h"
+
 #include "SPH.h"
 
 #include "Settings.h"

@@ -1,6 +1,7 @@
 #include "Statistics.h"
 
 Statistics stats;
+Timer timer;
 
 // Couldn't use macro, using function pointers
 
@@ -27,6 +28,16 @@ void TIME(void (*func)(std::vector<Particle>*, RectangleContainer& container), s
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	start = std::chrono::system_clock::now();
 	func(particleArray, container);
+	end = std::chrono::system_clock::now();
+	timer = end - start;
+}
+
+void Timer::startTimer()
+{
+	start = std::chrono::system_clock::now();
+}
+
+void Timer::endTimer(std::chrono::duration<float>& timer) {
 	end = std::chrono::system_clock::now();
 	timer = end - start;
 }

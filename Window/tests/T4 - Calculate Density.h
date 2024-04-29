@@ -45,6 +45,8 @@ namespace test {
 		void CreateContainer(RectangleContainer& rc);
 		void DrawGrid();
 
+		void initParticleNo();
+
 		inline void timeStep();
 
 	private:

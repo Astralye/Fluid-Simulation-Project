@@ -22,6 +22,9 @@ glm::vec2 UniformSpacePartition::indexToCoord(int index)
 // Updating the arrays would be complicated for implementation due to movement of particles and needing to reset values
 void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
+
+	timer.startTimer();
+
 	// Sets all the values back to 0.
 	lookupList->clear();
 
@@ -58,8 +61,13 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 		}
 	}
 
+	timer.endTimer(stats.Time_Create_Lookup);
+
+	timer.startTimer();
 	// Sorts by cellID
 	std::sort(lookupList->begin(), lookupList->end(), compareCellID);
+	timer.endTimer(stats.Time_Sort_Lookup);
+
 
 	// Stores the first occurance of a new cell position
 	// Null / max value if the same as before.
@@ -77,6 +85,7 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 
 void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
+	timer.startTimer();
 	// For every filled partition
 	for (int i = 0; i < startIndex->size(); i++) {
 		int particlestartIndex = startIndex->at(i);
@@ -85,6 +94,7 @@ void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particl
 		int particleCellKey = lookupList->at(particlestartIndex).cellKey;
 		neighbourCells(particleArray, particleCellKey, cont);
 	}
+	timer.endTimer(stats.Time_Neighbour_Cells);
 }
 
 
