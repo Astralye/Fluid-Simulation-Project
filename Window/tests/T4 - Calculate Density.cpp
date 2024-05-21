@@ -10,7 +10,7 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(80.0f, 100.0f, 0.0f),250.0f, 250.0f),
+		m_RectContainer(glm::vec3(100.0f, 100.0f, 0.0f),350.0f, 350.0f),
 		USP_Grid({5,5}),
 
 		drawType(VertexType::Null),
@@ -49,8 +49,8 @@ namespace test {
 
 		Settings::INIT_SIM = true;
 
-		Settings::CURRENT_PARTICLES = 500;
-		currentNumberParticles = 500;
+		Settings::CURRENT_PARTICLES = 20000;
+		currentNumberParticles = 20000;
 
 		initParticleNo();
 
@@ -90,7 +90,12 @@ namespace test {
 		}
 
 		if (Settings::INIT_SIM) {
-			initParticleNo();
+			// Maybe only run when the values have changed
+			if (currentNumberParticles != Settings::CURRENT_PARTICLES) {
+				currentNumberParticles = Settings::CURRENT_PARTICLES;
+				initParticleNo();
+			}
+
 		}
 
 		if (Settings::ENABLE_SOURCE) {
@@ -331,7 +336,7 @@ namespace test {
 				ImGui::Text("Particles: %i", Settings::MAX_PARTICLES);
 				ImGui::Text("Draw calls: %i", stats.m_DrawCalls);
 				ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
-				ImGui::Text("Per Frame: %.3fms", 1 / ImGui::GetIO().Framerate);
+				ImGui::Text("Per Frame: %.3fms", ( 1 / ImGui::GetIO().Framerate ) * 1000);
 				ImGui::Text("Time: %.3f", time);
 
 				ImGui::SeparatorText("Compute Times");
@@ -368,10 +373,10 @@ namespace test {
 			}
 
 			if (ImGui::CollapsingHeader("SPH Config")) {
-				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 100000.0f);
-				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 20.0f, 1.0f);
-				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 10.0f);
-				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 1.0f);
+				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 5.0f);
+				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 10.0f, 1.0f);
+				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 8.0f);
+				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 0.7f);
 			}
 
 			if (ImGui::CollapsingHeader("Simulation Config")) {
@@ -410,8 +415,8 @@ namespace test {
 					ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
 					ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
 
-					ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -50.0f, 50.0f);
-					ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -50.0f, 50.0f);
+					ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -500.0f, 500.0f);
+					ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -500.0f, 500.0f);
 
 
 					ImGui::SeparatorText("UNIFORM SPACE PARTITIONING");

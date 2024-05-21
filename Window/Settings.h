@@ -18,7 +18,7 @@ struct Settings {
 	static const uint16_t MaxIndexCount = MaxQuadCount * 6;
 
 	// uint16 can store up to 65k values. Can change to 32 if needed.
-	static const int MAX_PARTICLES = 4000;
+	static const int MAX_PARTICLES = 5000;
 	static int CURRENT_PARTICLES;
 
 	static bool ENABLE_GRAVITY;

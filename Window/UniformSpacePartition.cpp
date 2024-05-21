@@ -86,6 +86,11 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont)
 {
 	timer.startTimer();
+	// This process takes the longest
+	// I could try and use threads to complete these quicker? 
+
+	omp_set_num_threads(20);
+	#pragma omp parallel for
 	// For every filled partition
 	for (int i = 0; i < startIndex->size(); i++) {
 		int particlestartIndex = startIndex->at(i);

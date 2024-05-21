@@ -14,6 +14,9 @@
 
 #include "Settings.h"
 
+// Paralell processing
+#include <omp.h>
+
 class UniformSpacePartition {
 
 private:

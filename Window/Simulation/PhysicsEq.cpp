@@ -8,11 +8,11 @@
 
 
 // Static variables
-float PhysicsEq::REST_DENSITY = 2.5f;
-float PhysicsEq::STIFFNESS_CONSTANT = 6300.0f;
-float PhysicsEq::EXPONENT = 5.0f;
-float PhysicsEq::VISCOSITY = 0.049f;
-float PhysicsEq::GRAVITY = -100.0f;
+float PhysicsEq::REST_DENSITY = 1.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 1.0f;
+float PhysicsEq::EXPONENT = 6.0f;
+float PhysicsEq::VISCOSITY = 0.05f;
+float PhysicsEq::GRAVITY = -50.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)

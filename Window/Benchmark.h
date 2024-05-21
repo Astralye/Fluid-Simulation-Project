@@ -43,7 +43,6 @@ public:
 
 		// estimation for space
 		float spaces = ((1 / interval) * duration);
-		std::cout << spaces << std::endl;
 		data->reserve((int)spaces);
 		msTimers->reserve((int)spaces);
 	};
