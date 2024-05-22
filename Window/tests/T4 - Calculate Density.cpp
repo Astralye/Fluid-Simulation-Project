@@ -10,7 +10,7 @@ namespace test {
 		m_MVP(m_Proj * m_View * m_Model),
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
-		m_RectContainer(glm::vec3(100.0f, 100.0f, 0.0f),350.0f, 350.0f),
+		m_RectContainer(glm::vec3(0.0f, 70.0f, 0.0f),100.0f, 100.0f),
 		USP_Grid({5,5}),
 
 		drawType(VertexType::Null),
@@ -49,8 +49,8 @@ namespace test {
 
 		Settings::INIT_SIM = true;
 
-		Settings::CURRENT_PARTICLES = 20000;
-		currentNumberParticles = 20000;
+		Settings::CURRENT_PARTICLES = 1000;
+		currentNumberParticles = 1000;
 
 		initParticleNo();
 
@@ -65,9 +65,9 @@ namespace test {
 
 		std::cout << "here" << std::endl;
 
-		float radius = 1.0f;
+		Particle::PARTICLE_RADIUS = 0.5f;
 		float spacing = 0.0f;
-		Particle::init_Cube(m_ParticleArray, radius, spacing, Settings::CURRENT_PARTICLES);
+		Particle::init_Cube(m_ParticleArray, spacing, Settings::CURRENT_PARTICLES);
 	}
 
 	/*
@@ -93,7 +93,7 @@ namespace test {
 			// Maybe only run when the values have changed
 			if (currentNumberParticles != Settings::CURRENT_PARTICLES) {
 				currentNumberParticles = Settings::CURRENT_PARTICLES;
-				initParticleNo();
+				//initParticleNo();
 			}
 
 		}
@@ -343,13 +343,13 @@ namespace test {
 				ImGui::Text("Create Lookup Table: %.2fms", stats.Time_Create_Lookup.count() * 1000);
 				ImGui::Text("Sort Lookup: %.2fms", stats.Time_Sort_Lookup.count() * 1000);
 				ImGui::Text("SPH neighbour cells: %.2fms", stats.Time_Neighbour_Cells.count() * 1000);
-				//ImGui::Text("Density: %.2fms", stats.Time_Calculate_Density.count() * 1000);
-				//ImGui::Text("Pressure: %.2fms", stats.Time_Calculate_Pressure.count() * 1000);
-				//ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
-				//ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
 				ImGui::Text("Render: %.2fms", stats.Time_Render_Particles.count() * 1000);
+				ImGui::SeparatorText("SPH process times");
 
-					
+				ImGui::Text("Density: %.2fms", stats.Time_Calculate_Density.count() * 1000);
+				ImGui::Text("Pressure: %.2fms", stats.Time_Calculate_Pressure.count() * 1000);
+				ImGui::Text("Viscosity: %.2fms", stats.Time_Calculate_Viscosity.count() * 1000);
+				ImGui::Text("Movement: %.2fms", stats.Time_Calculate_Movement.count() * 1000);
 				
 				if (ImGui::Button("Benchmark") && !Settings::START_BENCHMARK) {
 					// Reset simulation
@@ -373,10 +373,14 @@ namespace test {
 			}
 
 			if (ImGui::CollapsingHeader("SPH Config")) {
-				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 5.0f);
-				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 10.0f, 1.0f);
-				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 8.0f);
+				ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 10.0f);
+
+				ImGui::SliderFloat("Bounce CoEfficient:", &PhysicsEq::BOUNCE_COEFF, 0.0f, 1.0f);
+				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 10000.0f);
+				ImGui::SliderFloat("Target Density:", &PhysicsEq::REST_DENSITY, 1.0f, 30.0f);
+				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 20.0f);
 				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 0.7f);
+
 			}
 
 			if (ImGui::CollapsingHeader("Simulation Config")) {

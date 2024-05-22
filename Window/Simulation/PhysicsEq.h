@@ -14,6 +14,7 @@ class PhysicsEq
 // Physics equations are public. Can be used anywhere
 public:
 
+	static float BOUNCE_COEFF;
 	static float REST_DENSITY;
 	static float STIFFNESS_CONSTANT;
 	static float EXPONENT;

@@ -11,6 +11,11 @@
 #include <iostream>
 
 
+enum Axis {
+	N_A,
+	x,
+	y
+};
 // Particle Class
 // -------------------------------------------------------------------------------------
 
@@ -27,7 +32,6 @@ private:
 	float m_Density;
 
 public:
-	enum axis { x, y };
 	enum Vector { V_Acceleration, V_Velocity };
 	enum DebugType { D_Velocity, D_Density, D_Pressure };
 
@@ -71,10 +75,11 @@ public:
 	// Static
 	// --------------------------------------------------
 	
-	static void init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, int nParticles);
+	static void init_Cube(std::vector<Particle> *particleArray, float spacing, int nParticles);
 	static void init_Random(std::vector<Particle> *particleArray, float radius, uint16_t nParticles);
 
 	static float KERNEL_RADIUS;
+	static float PARTICLE_RADIUS;
 	static float particleProperties[Settings::MAX_PARTICLES];
 	static DebugType Debug;
 
@@ -84,7 +89,7 @@ public:
 	void SetPredictedPosition();
 	void update();
 
-	void bounce();
+	void bounce(Axis axes);
 	
 	float invert(float value);
 	void invert(Vector type);
@@ -119,26 +124,12 @@ public:
 // Removes the need for cyclical includes and bugs
 // -------------------------------------------------------------------------------
 
-struct collisionType {
-
-	enum Type { N_A, Vertical, Horizontal };
-
-	bool m_isCollision;
-	Type type;
-
-	collisionType(bool collision, Type value = Type::N_A)
-		: m_isCollision(collision), type(value) {}
-
-};
-
 class Collision {
 
 public:
-	static void collisionResponse(Particle& A, collisionType::Type type);
 
-	static bool collisionDetection(Particle& A, Particle& B);
 	static bool collisionDetection(Rectangle& A, Particle& B);
-	static collisionType collisionDetection(RectangleContainer& A, Particle& B);
+	static Axis collisionDetection(RectangleContainer& A, Particle& B);
 };
 
 #endif

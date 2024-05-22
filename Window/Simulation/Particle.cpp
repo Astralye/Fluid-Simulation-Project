@@ -2,45 +2,6 @@
 
 // Collision functions
 // --------------------------------------------------------------------------------------------------
-
-void Collision::collisionResponse(Particle& A, collisionType::Type type) {
-
-	glm::vec3 flip{ false,false,false };
-
-	switch (type) {
-	case collisionType::Horizontal:
-
-		if (Settings::ENABLE_GRAVITY) {
-
-			if (A.getVelocity().y != 0) {
-				A.m_Position.y += 0.05;
-			}
-
-			A.bounce();
-		}
-		else {
-			flip.y = true;
-		}
-		break;
-
-	case collisionType::Vertical:
-		flip.x = true;
-		break;
-	}
-
-	A.invert(flip);
-}
-
-bool Collision::collisionDetection(Particle& A, Particle& B) {
-	float distance = PhysicsEq::euclid_Distance(A.m_Position, B.m_Position);
-	auto maxLength = A.getRadius() + B.getRadius();
-
-	if (distance <= maxLength) {
-		return true;
-	}
-	return false;
-}
-
 bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 
 	glm::vec4 clamp;
@@ -57,22 +18,21 @@ bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 	}
 
 	if (overlap > 0) {
+		// To fix overlap issue, i need to know its 
+
+
 		return true;
 	}
 	return false;
 }
 
-// Collision between a Rectangle and Particle
-collisionType Collision::collisionDetection(RectangleContainer& A, Particle& B) {
-	if (collisionDetection(A.m_SideA, B) || collisionDetection(A.m_SideC, B)) {
-		return { true, collisionType::Horizontal };
-	}
+// Find axis of collision
+Axis Collision::collisionDetection(RectangleContainer& A, Particle& B) {
 
-	if (collisionDetection(A.m_SideB, B) || collisionDetection(A.m_SideD, B)) {
-		return { true, collisionType::Vertical };
-	}
+	if (collisionDetection(A.m_SideA, B) || collisionDetection(A.m_SideC, B)) { return Axis::x; }
+	if (collisionDetection(A.m_SideD, B) || collisionDetection(A.m_SideB, B)) { return Axis::y; }
 
-	return { false , collisionType::N_A };
+	return Axis::N_A;
 }
 
 // Particle
@@ -81,7 +41,8 @@ collisionType Collision::collisionDetection(RectangleContainer& A, Particle& B) 
 
 // Static variables
 // -------------------------------------------------------------------------------------------------------
-float Particle::KERNEL_RADIUS = 0.0f;
+float Particle::KERNEL_RADIUS = 1.8f;
+float Particle::PARTICLE_RADIUS = 0.5f;
 float Particle::particleProperties[Settings::MAX_PARTICLES] = { 0 };
 Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 
@@ -89,9 +50,9 @@ Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 // ---------------------------------------------------------------------------------------------------
 
 // Particle Initializers
-void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, float spacing, int nParticles)
+void Particle::init_Cube(std::vector<Particle> *particleArray, float spacing, int nParticles)
 {
-	Particle::KERNEL_RADIUS = 4 * radius;
+	//Particle::KERNEL_RADIUS = radius;
 
 	// 8 bit -> 256^2 = max 65k particles
 	uint16_t column, row;
@@ -100,7 +61,7 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 	glm::vec2 offset, position, max_Size;
 	glm::vec2 containerCenter = { -50.0f,50.0f };
 
-	squareDimension = (float)sqrt(Settings::MAX_PARTICLES);
+	squareDimension = (float)sqrt(nParticles);
 
 	offset = { containerCenter.x / 2, containerCenter.y / 2 };
 	max_Size = { (int)ceil(squareDimension), (int)floor(squareDimension) };
@@ -109,12 +70,12 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 	column = 0;
 	row = 0;
 
-	for (int i = 0; i < Settings::MAX_PARTICLES; i++) {
+	for (int i = 0; i < nParticles; i++) {
 
 		if (i >= nParticles) { return; }
 
-		position = { row * (2 * radius + spacing),
-					column * (2 * radius + spacing)};
+		position = { row * (2 * Particle::PARTICLE_RADIUS + spacing),
+					column * (2 * Particle::PARTICLE_RADIUS + spacing)};
 		row++;
 
 		if (row == max_Size.x) {
@@ -122,7 +83,7 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float radius, flo
 			row = 0;
 		}
 		particleArray->emplace_back(
-			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, radius);
+			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, Particle::PARTICLE_RADIUS);
 	}
 }
 void Particle::init_Random(std::vector<Particle> *particleArray, float radius , uint16_t currentNumberParticles) {
@@ -174,16 +135,22 @@ void Particle::update(){
 
 	m_Vertices[3] =
 		{ m_Position.x - m_Radius, m_Position.y - m_Radius }; // BL
-
 }
 
-void Particle::bounce() {
-	float bounceCoEff = 0.7f;
+void Particle::bounce(Axis axes) {
 
-	m_Acceleration.y = invert(m_Acceleration.y) * ((float)rand()) / RAND_MAX;
-	m_Velocity.y = bounceCoEff * invert(m_Velocity.y) * (((float)rand()) / RAND_MAX) ;
-
-	m_Velocity.x = m_Velocity.x * 0.7f;
+	// hits the x axis
+	if (axes == Axis::x) {
+		m_Velocity.x *= PhysicsEq::BOUNCE_COEFF; 
+		m_Velocity.y = invert(m_Velocity.y) * PhysicsEq::BOUNCE_COEFF;
+		m_Acceleration.y = invert(m_Acceleration.y);
+	}
+	// Hits the y axis
+	else if (axes == Axis::y) {
+		// invert x 
+		m_Velocity.x = invert(m_Velocity.x) * PhysicsEq::BOUNCE_COEFF;
+		m_Acceleration.x = invert(m_Acceleration.x);
+	}
 }
 
 // Inverts value
@@ -226,21 +193,21 @@ glm::vec4 Particle::DebugColour()
 
 	if (Debug == DebugType::D_Velocity) {
 		// Arbituary values
-		max = 125.0f;
+		max = 20.0f;
 		min = 0.0f;
 
 		value = PhysicsEq::pythagoras(m_Velocity);
 	}
 
 	if (Debug == DebugType::D_Density) {
-		max = 9 * PhysicsEq::REST_DENSITY;
+		max = 5 * PhysicsEq::REST_DENSITY;
 		min = 0.0f;
 
 		value = m_Density;
 	}
 
 	if (Debug == DebugType::D_Pressure) {
-		max = 500.0f;
+		max = 20.0f;
 		min = 0.0f;
 
 		value = PhysicsEq::pythagoras(m_Pressure);

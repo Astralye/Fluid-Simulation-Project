@@ -24,12 +24,10 @@ struct Statistics {
 	std::chrono::duration<float> Time_Sort_Lookup;
 	std::chrono::duration<float> Time_Neighbour_Cells;
 
-
-
-	//std::chrono::duration<float> Time_Calculate_Density;
-	//std::chrono::duration<float> Time_Calculate_Pressure;
-	//std::chrono::duration<float> Time_Calculate_Movement;
-	//std::chrono::duration<float> Time_Calculate_Viscosity;
+	std::chrono::duration<float> Time_Calculate_Density;
+	std::chrono::duration<float> Time_Calculate_Pressure;
+	std::chrono::duration<float> Time_Calculate_Movement;
+	std::chrono::duration<float> Time_Calculate_Viscosity;
 	std::chrono::duration<float> Time_Render_Particles;
 
 	int m_DrawCalls;

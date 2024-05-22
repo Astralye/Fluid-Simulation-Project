@@ -60,7 +60,7 @@ void Source::addParticle(uint16_t &nParticles, std::vector<Particle>* particleAr
 	if (!canGenerate()) { return; }
 
 	particleArray->emplace_back(
-		glm::vec4(randomGenerateInRadius(), 0.0f), 1.0f, 1.0f, m_startingVelocity);
+		glm::vec4(randomGenerateInRadius(), 0.0f), 1.0f, Particle::PARTICLE_RADIUS, m_startingVelocity);
 	
 	nParticles++;
 }

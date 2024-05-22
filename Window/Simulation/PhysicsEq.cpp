@@ -8,11 +8,12 @@
 
 
 // Static variables
-float PhysicsEq::REST_DENSITY = 1.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 1.0f;
-float PhysicsEq::EXPONENT = 6.0f;
+float PhysicsEq::BOUNCE_COEFF = 0.7f;
+float PhysicsEq::REST_DENSITY = 20.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 500.0f;
+float PhysicsEq::EXPONENT = 12.0f;
 float PhysicsEq::VISCOSITY = 0.05f;
-float PhysicsEq::GRAVITY = -50.0f;
+float PhysicsEq::GRAVITY = -10.0f;
 
 // Euclidean distance is the length between points on an axis.
 float PhysicsEq::euclid_Distance(glm::vec3 c1, glm::vec3 c2)
@@ -25,7 +26,6 @@ float PhysicsEq::euclid_Squared(glm::vec3 values)
 {
 	return pow(values.x, 2) + pow(values.y, 2) + pow(values.z, 2);
 }
-
 
 float PhysicsEq::clamp(float value, float min, float max) { return std::max(min, std::min(max, value)); }
 
@@ -40,22 +40,24 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 {
 	float distance = euclid_Distance(positionA, positionB);
 
-	//float value = std::max((float)0.0, (float)(pow(radius, 2) - pow(distance, 2)));
-	//return pow(value, 3);
+	float volume = M_PI * pow(radius, 8) / 4;
+	float value = std::max(0.0f, radius * radius - distance * distance);
 
-	float q = ( 1 / radius ) * distance;
+	return value * value * value / volume;
 
-	if (0 <= q && q <= 0.5) {
+	//float q = ( 1 / radius ) * distance;
 
-		return (6 * (pow(q, 3) - pow(q, 2))) + 1;
-	}
+	//if (0 <= q && q <= 0.5) {
+
+	//	return (6 * (pow(q, 3) - pow(q, 2))) + 1;
+	//}
 	//else if (0.5 < q && q <= 1) {
 
 	//	return 2 * pow((1 - q), 3);
 	//}
-	else {
-		return 0;
-	}
+	//else {
+	//	return 0;
+	//}
 }
 
 // This function is the derivative of the smoothing kernel Equation
@@ -67,33 +69,33 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 	if (dst > radius) { return 0; }
 
-	//float f = pow(radius, 2) - pow(dst, 2);
-	//float scale = -24 / (M_PI * pow(radius, 8));
-	//return scale * dst * pow(f, 2);
+	float f = pow(radius, 2) - pow(dst, 2);
+	float scale = -24 / (M_PI * pow(radius, 8));
+	return scale * dst * pow(f, 2);
 
-	float q = (1 / radius) * dst;
+	//float q = (1 / radius) * dst;
 
-	if (0 <= q && q <= 0.5) {
+	//if (0 <= q && q <= 0.5) {
 
-		// Derivative of function within same smoothing function
-		float scale = 240 / (7 * M_PI * pow(radius, 2));
-		float kernelVal = (3 * pow(q, 2)) - (2 * q);
-
-		return scale * kernelVal;
-	}
-	//else if (0.5 < q && q <= 1) {
-	//	return 0;
 	//	// Derivative of function within same smoothing function
-
-	//	float scale = -240 / (7 * M_PI * pow(radius, 2));
-	//	float kernelVal = pow(1 - q, 2);
+	//	float scale = 240 / (7 * M_PI * pow(radius, 2));
+	//	float kernelVal = (3 * pow(q, 2)) - (2 * q);
 
 	//	return scale * kernelVal;
-
 	//}
-	else {
-		return 0;
-	}
+	////else if (0.5 < q && q <= 1) {
+	////	return 0;
+	////	// Derivative of function within same smoothing function
+
+	////	float scale = -240 / (7 * M_PI * pow(radius, 2));
+	////	float kernelVal = pow(1 - q, 2);
+
+	////	return scale * kernelVal;
+
+	////}
+	//else {
+	//	return 0;
+	//}
 
 
 
@@ -129,10 +131,15 @@ float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 */
 float PhysicsEq::ConvertDensityToPressure(float density) {
 
-	float multiplier = (STIFFNESS_CONSTANT * REST_DENSITY) / EXPONENT;
-	float pressureChange = pow((density / REST_DENSITY), EXPONENT) - 1;
+	float densityError = density - REST_DENSITY;
+	float pressure = densityError * EXPONENT;
+	return pressure;
 
-	return multiplier * pressureChange;
+
+	//float multiplier = (STIFFNESS_CONSTANT * REST_DENSITY) / EXPONENT;
+	//float pressureChange = pow((density / REST_DENSITY), EXPONENT) - 1;
+
+	//return multiplier * pressureChange;
 }
 
 // Inputs can be positive or negative, but squaring removes negative values

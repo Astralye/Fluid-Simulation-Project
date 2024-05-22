@@ -60,31 +60,37 @@ void SPH::CalculateAllDensities(std::vector<Particle>* particleArray)
 void SPH::CalculateDensity(std::vector<Particle>* arr, int j) {
 
 	float density = 0;
-	float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
+	//float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
 
 	// SUM
 	for (int i = 0; i < arr->size(); i++) {
 		if (i == j) { continue; }
 
-		density += arr->at(i).getMass() * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
+		//density += arr->at(i).getMass() * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
+		
+		density += arr->at(i).getMass() * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
 	}
 	arr->at(j).setDensity(density);
 }
-
+// Passing the entire particle array, particles within radius and the particle itself.
 void SPH::CalculateDensity(std::vector<Particle>* arr, std::vector<int>& particleIndices, int j) {
 
 	float density = 0;
-	float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
+	//float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
 	float index;
 
 	// SUM
 	for (int i = 0; i < particleIndices.size(); i++) {
-
-
 		index = particleIndices.at(i);
 		if (index == j) { continue; }
 
-		density += arr->at(index).getMass() * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
+		//density += arr->at(index).getMass() * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
+	
+		density += arr->at(i).getMass() * PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
+	}
+	//// If the particle only contains itself, it will set the density to its mass
+	if (density < arr->at(j).getMass()) {
+		density = arr->at(j).getMass();
 	}
 	arr->at(j).setDensity(density);
 }
@@ -96,34 +102,28 @@ void SPH::CalculatePositionCollision(std::vector<Particle>* arr, RectangleContai
 	// For now just leave it 
 	for (int i = 0; i < arr->size(); i++) {
 
+
+		Axis Axes = Collision::collisionDetection(container, arr->at(i));
+		arr->at(i).bounce(Axes);
 		arr->at(i).update();
-
-		// Check for collision detection for each particle against the container.
-		auto collide = Collision::collisionDetection(container, arr->at(i));
-
-		if (collide.m_isCollision) {
-			Collision::collisionResponse(arr->at(i), collide.type);
-		}
 	}
 }
 
-void SPH::CalculatePositionCollision(std::vector<Particle>* arr, std::vector<int>& particlesMaincell, RectangleContainer& container)
+void SPH::CalculatePositionCollision(std::vector<Particle>* arr, std::vector<int>& particlesMaincell, RectangleContainer& container, bool isBorder)
 {
-	// If partition is not at the edge, do not look for collision detection.
-	// e.g Top + bottom -> y == 0 || y == cellD
-	// For now just leave it 
 	int index;
 	for (int i = 0; i < particlesMaincell.size(); i++) {
 		index = particlesMaincell.at(i);
 
-		arr->at(index).update();
-
-		// Check for collision detection for each particle against the container.
-		auto collide = Collision::collisionDetection(container, arr->at(index));
-
-		if (collide.m_isCollision) {
-			Collision::collisionResponse(arr->at(index), collide.type);
+		if (isBorder)
+		{
+			// Check for collision detection for each particle against the container.
+			Axis Axes = Collision::collisionDetection(container, arr->at(index));
+			arr->at(index).bounce(Axes);
 		}
+
+		// Only updates locations after resolving collisions.
+		arr->at(index).update();
 	}
 }
 
@@ -179,19 +179,20 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 		index = particlesMaincell.at(i);
 		glm::vec2 pressureForce = SPH::CalculatePressureForce(particleArray, particleIndices, index);
 		glm::vec3 sum = particleArray->at(index).getPredictedVelocity();
+		//glm::vec3 sum = { 0,0,0 };
 
 		// F = MA --> A = F / M
 		if (particleArray->at(index).getDensity() != 0) {
-			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(index).getDensity();
-			particleArray->at(index).setAcceleration(pressureAcceleration + glm::vec2(0.0f, PhysicsEq::GRAVITY));
+			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(index).getMass();
+			particleArray->at(index).setAcceleration(pressureAcceleration);
 
 			//pressure projection
-			sum += (Settings::SIMSTEP * glm::vec3(pressureAcceleration, 0));
+			sum += Settings::SIMSTEP * glm::vec3(pressureAcceleration, 0);
 		}
 
-		// Gravity is Enabled
+		//// Gravity is Enabled
 		if (Settings::ENABLE_GRAVITY) {
-			sum.y += Settings::SIMSTEP * PhysicsEq::GRAVITY;
+			sum.y += PhysicsEq::GRAVITY * Settings::SIMSTEP;
 		}
 
 		particleArray->at(index).setVelocity(sum);
@@ -259,7 +260,7 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, std::vector<in
 
 	int index;
 	for (int i = 0; i < particleIndices.size(); i++) {
-		index = particleIndices.at(i);
+		index = particleIndices.at(i);	
 		// Skips the code if the particle is itself or the density is 0
 		if (index == j || arr->at(index).getDensity() == 0) { continue; }
 
@@ -267,21 +268,23 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, std::vector<in
 		glm::vec2 dir = (arr->at(index).m_PredictedPos - arr->at(j).m_PredictedPos) / dst;
 
 		float density = arr->at(index).getDensity();
-		float externalPressure = PhysicsEq::ConvertDensityToPressure(density);
+		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
 
-		float externalPressureDensity = externalPressure / pow(density, 2);
+		pressureForce += -PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(index).getMass() / density;
 
-		pressureForce += arr->at(index).getMass() * (localPressureDensity + externalPressureDensity)
-			* PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS) * dir;
+		//float externalPressure = PhysicsEq::ConvertDensityToPressure(density);
+
+		//float externalPressureDensity = externalPressure / pow(density, 2);
+
+		//pressureForce += arr->at(index).getMass() * (localPressureDensity + externalPressureDensity)
+		//	* slope * dir;
 	}
-
 	arr->at(j).setPressure(pressureForce);
 	return pressureForce;
 }
 
 void SPH::CalculateAllViscosities(std::vector<Particle>* arr, std::vector<int>& particlesMaincell, std::vector<int>& particleIndices)
 {
-	int index;
 	for (int i = 0; i < particlesMaincell.size(); i++) {
 		CalculateViscosity(arr, particleIndices, particlesMaincell.at(i));
 	}
@@ -305,12 +308,19 @@ void SPH::CalculateViscosity(std::vector<Particle>* arr, std::vector<int>& parti
 
 		glm::vec2 difference = {
 			arr->at(index).getVelocity().x - arr->at(j).getVelocity().x,
-			arr->at(index).getVelocity().y - arr->at(j).getVelocity().y, };
+			arr->at(index).getVelocity().y - arr->at(j).getVelocity().y,
+		};
 
+
+		// When multiplying these values together, they cause a weird bug where the value is Nan.
 		viscosityForce += difference * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
-	}
+		//viscosityForce += (arr->at(index).getMass() / arr->at(index).getDensity());
+		glm::vec2 r = difference * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
 
-	arr->at(j).addVelocity(viscosityForce * PhysicsEq::VISCOSITY);
+		//std::cout << r.x << "," << r.y << std::endl;
+	}
+	//std::cout << viscosityForce.x << "," << viscosityForce.y << std::endl;
+	arr->at(j).addVelocity( viscosityForce * PhysicsEq::VISCOSITY * Settings::SIMSTEP);
 }
 
 

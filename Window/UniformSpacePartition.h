@@ -54,6 +54,8 @@ public:
 	void getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont);
 	void neighbourCells(std::vector<Particle>* particleArray, int index, RectangleContainer& cont);
 
+	bool isBorderCell(glm::vec2 index);
+
 	static bool compareCellID(const spatialLookup& a, const spatialLookup& b);
 	void InitializeLookup();
 

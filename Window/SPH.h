@@ -14,7 +14,7 @@ public:
 	static void CalculateDensity(std::vector<Particle>* arr, std::vector<int>& particleIndices, int j);
 	static void CalculateDensity(std::vector<Particle>* arr, int j);
 
-	static void CalculatePositionCollision(std::vector<Particle>* arr, std::vector<int>& particlesMaincell, RectangleContainer& container);
+	static void CalculatePositionCollision(std::vector<Particle>* arr, std::vector<int>& particlesMaincell, RectangleContainer& container, bool isBorder);
 	static void CalculatePositionCollision(std::vector<Particle>* arr, RectangleContainer& container);
 
 	static void CalculateAllPressures(std::vector<Particle>* particleArray, std::vector<int>& particlesMaincell, std::vector<int>& particleIndices);
