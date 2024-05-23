@@ -18,9 +18,6 @@ bool Collision::collisionDetection(Rectangle& A, Particle& B) {
 	}
 
 	if (overlap > 0) {
-		// To fix overlap issue, i need to know its 
-
-
 		return true;
 	}
 	return false;
@@ -41,8 +38,8 @@ Axis Collision::collisionDetection(RectangleContainer& A, Particle& B) {
 
 // Static variables
 // -------------------------------------------------------------------------------------------------------
-float Particle::KERNEL_RADIUS = 1.8f;
-float Particle::PARTICLE_RADIUS = 0.5f;
+float Particle::KERNEL_RADIUS = 7.0f;
+float Particle::PARTICLE_RADIUS = 2.0f;
 float Particle::particleProperties[Settings::MAX_PARTICLES] = { 0 };
 Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 
@@ -83,7 +80,7 @@ void Particle::init_Cube(std::vector<Particle> *particleArray, float spacing, in
 			row = 0;
 		}
 		particleArray->emplace_back(
-			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, Particle::PARTICLE_RADIUS);
+			glm::vec4(position.x + offset.x, position.y + offset.y, 0.0f, 0.0f), 1.0f, Particle::PARTICLE_RADIUS * 2 );
 	}
 }
 void Particle::init_Random(std::vector<Particle> *particleArray, float radius , uint16_t currentNumberParticles) {
@@ -96,7 +93,7 @@ void Particle::init_Random(std::vector<Particle> *particleArray, float radius , 
 	for (int i = 0; i < currentNumberParticles; i++) {
 
 		particleArray->emplace_back(
-			glm::vec4(8.0f + rand() % 85, 12.0f + rand() % 70, 0.0f,0.0f), 1.0f, radius
+			glm::vec4(8.0f + rand() % 85, 12.0f + rand() % 70, 0.0f,0.0f), 1.0f, PARTICLE_RADIUS
 			//glm::vec3((rand() % maxVelocity), (rand() % maxVelocity), 0.0f),
 		);
 	}
@@ -193,21 +190,21 @@ glm::vec4 Particle::DebugColour()
 
 	if (Debug == DebugType::D_Velocity) {
 		// Arbituary values
-		max = 20.0f;
+		max = 40.0f;
 		min = 0.0f;
 
 		value = PhysicsEq::pythagoras(m_Velocity);
 	}
 
 	if (Debug == DebugType::D_Density) {
-		max = 5 * PhysicsEq::REST_DENSITY;
+		max = PhysicsEq::REST_DENSITY;
 		min = 0.0f;
 
 		value = m_Density;
 	}
 
 	if (Debug == DebugType::D_Pressure) {
-		max = 20.0f;
+		max = 30.0f;
 		min = 0.0f;
 
 		value = PhysicsEq::pythagoras(m_Pressure);

@@ -97,8 +97,10 @@ void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particl
 	//float sumMove = 0;
 
 	//float sum = 0;
-	omp_set_num_threads(100);
+
+	omp_set_num_threads(200);
 	#pragma omp parallel for
+
 	// For every filled partition
 	for (int i = 0; i < startIndex->size(); i++) {
 		int particlestartIndex = startIndex->at(i);
@@ -161,7 +163,6 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 				BaseCoordinate.x + Offset[j],
 				BaseCoordinate.y + Offset[i]
 			};
-
 			n++;
 		}
 	}
@@ -176,35 +177,33 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 		neighbourCellKey = coordToIndex(newCoord[i]);
 		currentIndex = startIndex->at(neighbourCellKey);
 
+
 		// Skips quadrants with null index
 		if (currentIndex == std::numeric_limits<int>().max()) { continue; }
 
 		// For every particle in the quadrant
 		for (int j = currentIndex; j < lookupList->size(); j++) {
+
 			// Exit if it has a different key
 			if (lookupList->at(j).cellKey != neighbourCellKey) break;
 
 			// Particles in the center cell. This is what is used for comparisons
-			if (i == 4) { particlesInMainCell.emplace_back(lookupList->at(j).particleIndex); }
+			if (BaseCoordinate == newCoord[i]) { particlesInMainCell.emplace_back(lookupList->at(j).particleIndex); }
 
 			// All particles in the 3x3 grid
 			particleIndices.emplace_back(lookupList->at(j).particleIndex);
 		}
 	}
 
-	//if (particleIndices.size() > 20) {
-	//	std::cout << "SIZE BIGGER" << std::endl;
-	//}
-
 	timer.endTimer(stats.Time_Neighbour_Cells);
 	// This code above has a constant of 4-5ms regardless of particle array count.
 
 	SPH::CalculateAllDensities(particleArray, particlesInMainCell, particleIndices);
+
 	SPH::CalculateAllPressures(particleArray, particlesInMainCell, particleIndices);
 
 	SPH::CalculatePositionCollision(particleArray, particlesInMainCell, cont, isBorderCell(BaseCoordinate));
-	// Check out of bounds
-
+	
 	SPH::CalculateAllViscosities(particleArray, particlesInMainCell, particleIndices);
 
 	// This is where the code starts to slow down.
@@ -226,7 +225,6 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 	//timer.startTimer();
 	//SPH::CalculateAllViscosities(particleArray, particlesInMainCell, particleIndices);
 	//timer.endTimer(stats.Time_Calculate_Viscosity);
-	//std::cout << "Changing cell \n" << std::endl;
 }
 
 // Checks if the index is by the container border

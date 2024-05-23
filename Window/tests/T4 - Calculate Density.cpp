@@ -49,14 +49,13 @@ namespace test {
 
 		Settings::INIT_SIM = true;
 
-		Settings::CURRENT_PARTICLES = 1000;
-		currentNumberParticles = 1000;
+		Settings::CURRENT_PARTICLES = 2000;
+		currentNumberParticles = 2000;
 
 		initParticleNo();
 
 		//Particle::init_Random(m_ParticleArray, radius, currentNumberParticles);
-
-
+		// 
 		// Generates the Source
 		sourceA = Source({ 0.0f,0.0f,0.0f }, 1, 5);
 	}
@@ -376,10 +375,11 @@ namespace test {
 				ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 10.0f);
 
 				ImGui::SliderFloat("Bounce CoEfficient:", &PhysicsEq::BOUNCE_COEFF, 0.0f, 1.0f);
-				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 10000.0f);
-				ImGui::SliderFloat("Target Density:", &PhysicsEq::REST_DENSITY, 1.0f, 30.0f);
-				ImGui::SliderFloat("Exponent value:", &PhysicsEq::EXPONENT, 1.0f, 20.0f);
-				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 0.7f);
+
+				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 5000.0f);
+				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 0.0f, 5.0f);
+				ImGui::SliderFloat("Exponent:", &PhysicsEq::EXPONENT, 1.0f, 3.0f);
+				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 1.0f);
 
 			}
 
@@ -404,8 +404,6 @@ namespace test {
 
 					ImGui::SliderInt("Starting Particles", &Settings::CURRENT_PARTICLES, 1, Settings::MAX_PARTICLES);
 					ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
-
-					//ImGui::Text("Particle radius: %i", m_ParticleArray->at(0).getRadius());
 					
 					ImGui::TreePop();
 				}
@@ -416,8 +414,8 @@ namespace test {
 
 					if (!Settings::ENABLE_RESIZE_CONTAINER) { ImGui::BeginDisabled(); }
 					
-					ImGui::SliderFloat("Width:", &m_RectContainer.m_Length, 70.0f, 300.0f);
-					ImGui::SliderFloat("Height:", &m_RectContainer.m_Height, 70.0f, 300.0f);
+					ImGui::SliderFloat("Container Dimensions:", &m_RectContainer.m_Length, 70.0f, 300.0f);
+					m_RectContainer.m_Height = m_RectContainer.m_Length;
 
 					ImGui::SliderFloat("X:", &m_RectContainer.m_Position.x, -500.0f, 500.0f);
 					ImGui::SliderFloat("Y:", &m_RectContainer.m_Position.y, -500.0f, 500.0f);

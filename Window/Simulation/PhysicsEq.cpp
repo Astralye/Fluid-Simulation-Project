@@ -9,9 +9,9 @@
 
 // Static variables
 float PhysicsEq::BOUNCE_COEFF = 0.7f;
-float PhysicsEq::REST_DENSITY = 20.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 500.0f;
-float PhysicsEq::EXPONENT = 12.0f;
+float PhysicsEq::REST_DENSITY = 1.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 1000.0f;
+float PhysicsEq::EXPONENT = 2.0f;
 float PhysicsEq::VISCOSITY = 0.05f;
 float PhysicsEq::GRAVITY = -10.0f;
 
@@ -40,24 +40,14 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 {
 	float distance = euclid_Distance(positionA, positionB);
 
-	float volume = M_PI * pow(radius, 8) / 4;
-	float value = std::max(0.0f, radius * radius - distance * distance);
+	if (distance >= radius) { return 0; }
+	float volume = (M_PI * pow(radius, 4)) / 6;
+	return (radius - distance) * (radius - distance) / volume;
 
-	return value * value * value / volume;
+	//float volume = M_PI * pow(radius, 8) / 4;
+	//float value = std::max(0.0f, radius * radius - distance * distance);
 
-	//float q = ( 1 / radius ) * distance;
-
-	//if (0 <= q && q <= 0.5) {
-
-	//	return (6 * (pow(q, 3) - pow(q, 2))) + 1;
-	//}
-	//else if (0.5 < q && q <= 1) {
-
-	//	return 2 * pow((1 - q), 3);
-	//}
-	//else {
-	//	return 0;
-	//}
+	//return value * value * value / volume;
 }
 
 // This function is the derivative of the smoothing kernel Equation
@@ -69,37 +59,11 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 	if (dst > radius) { return 0; }
 
-	float f = pow(radius, 2) - pow(dst, 2);
-	float scale = -24 / (M_PI * pow(radius, 8));
-	return scale * dst * pow(f, 2);
-
-	//float q = (1 / radius) * dst;
-
-	//if (0 <= q && q <= 0.5) {
-
-	//	// Derivative of function within same smoothing function
-	//	float scale = 240 / (7 * M_PI * pow(radius, 2));
-	//	float kernelVal = (3 * pow(q, 2)) - (2 * q);
-
-	//	return scale * kernelVal;
-	//}
-	////else if (0.5 < q && q <= 1) {
-	////	return 0;
-	////	// Derivative of function within same smoothing function
-
-	////	float scale = -240 / (7 * M_PI * pow(radius, 2));
-	////	float kernelVal = pow(1 - q, 2);
-
-	////	return scale * kernelVal;
-
-	////}
-	//else {
-	//	return 0;
-	//}
-
-
-
-
+	float scale = 12 / pow(radius, 4) * M_PI;
+	return (dst - radius) * scale;
+	//float f = pow(radius, 2) - pow(dst, 2);
+	//float scale = -24 / (M_PI * pow(radius, 8));
+	//return scale * dst * pow(f, 2);
 }
 
 /*
@@ -131,10 +95,12 @@ float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 */
 float PhysicsEq::ConvertDensityToPressure(float density) {
 
-	float densityError = density - REST_DENSITY;
-	float pressure = densityError * EXPONENT;
-	return pressure;
+	//float densityError = density - REST_DENSITY;
+	//float pressure = densityError * EXPONENT;
+	//return pressure;
 
+	float densityMax = std::max(REST_DENSITY, density);
+	return STIFFNESS_CONSTANT * ( pow(densityMax / REST_DENSITY, EXPONENT) - 1.0);
 
 	//float multiplier = (STIFFNESS_CONSTANT * REST_DENSITY) / EXPONENT;
 	//float pressureChange = pow((density / REST_DENSITY), EXPONENT) - 1;

@@ -66,9 +66,9 @@ void SPH::CalculateDensity(std::vector<Particle>* arr, int j) {
 	for (int i = 0; i < arr->size(); i++) {
 		if (i == j) { continue; }
 
-		//density += arr->at(i).getMass() * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
-		
 		density += arr->at(i).getMass() * (PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
+	
+	
 	}
 	arr->at(j).setDensity(density);
 }
@@ -77,20 +77,16 @@ void SPH::CalculateDensity(std::vector<Particle>* arr, std::vector<int>& particl
 
 	float density = 0;
 	//float kernelNormalization = 40 / (7 * M_PI * pow(Particle::KERNEL_RADIUS, 2));
-	float index;
+	int index;
 
 	// SUM
 	for (int i = 0; i < particleIndices.size(); i++) {
 		index = particleIndices.at(i);
-		if (index == j) { continue; }
+		if (index == j) { 
+			continue;
+		}
 
-		//density += arr->at(index).getMass() * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS) / kernelNormalization);
-	
-		density += arr->at(i).getMass() * PhysicsEq::SmoothingKernel(arr->at(i).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
-	}
-	//// If the particle only contains itself, it will set the density to its mass
-	if (density < arr->at(j).getMass()) {
-		density = arr->at(j).getMass();
+		density += arr->at(index).getMass() * PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
 	}
 	arr->at(j).setDensity(density);
 }
@@ -155,6 +151,7 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray)
 
 		// F = MA --> A = F / M
 		if (particleArray->at(i).getDensity() != 0) {
+			// For non zero values
 			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(i).getDensity();
 			particleArray->at(i).setAcceleration(pressureAcceleration + glm::vec2(0.0f, PhysicsEq::GRAVITY));
 
@@ -179,11 +176,12 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 		index = particlesMaincell.at(i);
 		glm::vec2 pressureForce = SPH::CalculatePressureForce(particleArray, particleIndices, index);
 		glm::vec3 sum = particleArray->at(index).getPredictedVelocity();
-		//glm::vec3 sum = { 0,0,0 };
 
 		// F = MA --> A = F / M
 		if (particleArray->at(index).getDensity() != 0) {
-			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(index).getMass();
+			glm::vec2 pressureAcceleration = pressureForce * particleArray->at(index).getDensity();
+
+			// Just for displaying. Not using acceleration
 			particleArray->at(index).setAcceleration(pressureAcceleration);
 
 			//pressure projection
@@ -194,9 +192,10 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 		if (Settings::ENABLE_GRAVITY) {
 			sum.y += PhysicsEq::GRAVITY * Settings::SIMSTEP;
 		}
-
 		particleArray->at(index).setVelocity(sum);
 	}
+
+	//Settings::PAUSE_SIMULATION = true;
 }
 
 /*
@@ -250,11 +249,6 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, std::vector<in
 	float localDensity = arr->at(j).getDensity();
 	float localPressure = PhysicsEq::ConvertDensityToPressure(localDensity);
 
-	// Gets rid of zero values
-	if (localDensity == 0) {
-		localDensity = 0.01f;
-	}
-
 	// Pi / pi^2
 	float localPressureDensity = localPressure / pow(localDensity, 2);
 
@@ -267,19 +261,20 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, std::vector<in
 		float dst = PhysicsEq::euclid_Distance(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos);
 		glm::vec2 dir = (arr->at(index).m_PredictedPos - arr->at(j).m_PredictedPos) / dst;
 
-		float density = arr->at(index).getDensity();
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
+		float density = arr->at(index).getDensity();
 
-		pressureForce += -PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(index).getMass() / density;
+		float sharedPressure = (PhysicsEq::ConvertDensityToPressure(density) + PhysicsEq::ConvertDensityToPressure(localDensity) )/ 2;
 
-		//float externalPressure = PhysicsEq::ConvertDensityToPressure(density);
+		//pressureForce += PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(index).getMass() / density;
 
-		//float externalPressureDensity = externalPressure / pow(density, 2);
+		float externalPressure = PhysicsEq::ConvertDensityToPressure(density);
+		float externalPressureDensity = externalPressure / pow(density, 2);
 
-		//pressureForce += arr->at(index).getMass() * (localPressureDensity + externalPressureDensity)
-		//	* slope * dir;
+		pressureForce += arr->at(index).getMass() * (localPressureDensity + externalPressureDensity)
+			* slope * dir;
 	}
-	arr->at(j).setPressure(pressureForce);
+	
 	return pressureForce;
 }
 
@@ -297,6 +292,7 @@ void SPH::CalculateAllViscosities(std::vector<Particle>* arr)
 	}
 }
 
+// Add a new velocity, the forces of other particles by a constant.
 void SPH::CalculateViscosity(std::vector<Particle>* arr, std::vector<int>& particleIndices, int j) {
 
 	glm::vec2 viscosityForce = { 0,0 };
@@ -311,16 +307,16 @@ void SPH::CalculateViscosity(std::vector<Particle>* arr, std::vector<int>& parti
 			arr->at(index).getVelocity().y - arr->at(j).getVelocity().y,
 		};
 
+		// If viscosity forces are nan, do not calculate viscosity.
+		// Causes particles of anomalous velocity to all disappear
+		if (std::isnan(viscosityForce.x) || std::isnan(viscosityForce.y)) {
+			return;
+		}
 
 		// When multiplying these values together, they cause a weird bug where the value is Nan.
 		viscosityForce += difference * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
-		//viscosityForce += (arr->at(index).getMass() / arr->at(index).getDensity());
-		glm::vec2 r = difference * (PhysicsEq::SmoothingKernel(arr->at(index).m_PredictedPos, arr->at(j).m_PredictedPos, Particle::KERNEL_RADIUS));
-
-		//std::cout << r.x << "," << r.y << std::endl;
 	}
-	//std::cout << viscosityForce.x << "," << viscosityForce.y << std::endl;
-	arr->at(j).addVelocity( viscosityForce * PhysicsEq::VISCOSITY * Settings::SIMSTEP);
+	arr->at(j).addVelocity(viscosityForce * PhysicsEq::VISCOSITY);
 }
 
 
