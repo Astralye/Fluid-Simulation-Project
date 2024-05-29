@@ -80,7 +80,6 @@ public:
 
 	static float KERNEL_RADIUS;
 	static float PARTICLE_RADIUS;
-	static float particleProperties[Settings::MAX_PARTICLES];
 	static DebugType Debug;
 
 	// -------------------------------------------------

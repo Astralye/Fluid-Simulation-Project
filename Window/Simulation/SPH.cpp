@@ -175,17 +175,23 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 	for (int i = 0; i < particlesMaincell.size(); i++) {
 		index = particlesMaincell.at(i);
 		glm::vec2 pressureForce = SPH::CalculatePressureForce(particleArray, particleIndices, index);
+		glm::vec2 surfaceTensionForce = SPH::CalculateAdhesion(particleArray, particleIndices, index);
+
 		glm::vec3 sum = particleArray->at(index).getPredictedVelocity();
 
 		// F = MA --> A = F / M
 		if (particleArray->at(index).getDensity() != 0) {
-			glm::vec2 pressureAcceleration = pressureForce * particleArray->at(index).getDensity();
+			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(index).getDensity();
+			glm::vec2 surfaceTensionAcceleration = -( surfaceTensionForce * PhysicsEq::COHESION_COEFF ) / particleArray->at(index).getDensity();
+
+			//glm::vec2 surfaceTensionAcceleration = CalculateAdhesion()
 
 			// Just for displaying. Not using acceleration
-			particleArray->at(index).setAcceleration(pressureAcceleration);
+			particleArray->at(index).setAcceleration(pressureAcceleration + surfaceTensionAcceleration);
+
 
 			//pressure projection
-			sum += Settings::SIMSTEP * glm::vec3(pressureAcceleration, 0);
+			sum += Settings::SIMSTEP * glm::vec3(pressureAcceleration + surfaceTensionAcceleration, 0);
 		}
 
 		//// Gravity is Enabled
@@ -197,6 +203,26 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 
 	//Settings::PAUSE_SIMULATION = true;
 }
+
+glm::vec2 SPH::CalculateAdhesion(std::vector<Particle>* particleArray, std::vector<int>& particlesMaincell, int j) {
+
+	glm::vec2 sum = {0.0f,0.0f};
+
+	int index;
+	for (int i = 0; i < particlesMaincell.size(); i++) {
+		index = particlesMaincell.at(i);
+		if (index == j) { continue; }
+
+		float mass = particleArray->at(index).getMass();
+
+		glm::vec2 positionDifference = particleArray->at(j).m_PredictedPos - particleArray->at(index).m_PredictedPos;
+
+		sum += mass * positionDifference * PhysicsEq::SmoothingKernel(particleArray->at(index).m_PredictedPos, particleArray->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
+	}
+
+	return sum;
+}
+
 
 /*
 *	Property Gradient.
@@ -263,10 +289,6 @@ glm::vec2 SPH::CalculatePressureForce(std::vector<Particle>* arr, std::vector<in
 
 		float slope = PhysicsEq::SmoothingKernelDerivative(dst, Particle::KERNEL_RADIUS);
 		float density = arr->at(index).getDensity();
-
-		float sharedPressure = (PhysicsEq::ConvertDensityToPressure(density) + PhysicsEq::ConvertDensityToPressure(localDensity) )/ 2;
-
-		//pressureForce += PhysicsEq::ConvertDensityToPressure(density) * dir * slope * arr->at(index).getMass() / density;
 
 		float externalPressure = PhysicsEq::ConvertDensityToPressure(density);
 		float externalPressureDensity = externalPressure / pow(density, 2);

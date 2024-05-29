@@ -38,9 +38,8 @@ Axis Collision::collisionDetection(RectangleContainer& A, Particle& B) {
 
 // Static variables
 // -------------------------------------------------------------------------------------------------------
-float Particle::KERNEL_RADIUS = 7.0f;
+float Particle::KERNEL_RADIUS = 4.0f;
 float Particle::PARTICLE_RADIUS = 2.0f;
-float Particle::particleProperties[Settings::MAX_PARTICLES] = { 0 };
 Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 
 // Static functions

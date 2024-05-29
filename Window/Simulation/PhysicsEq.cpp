@@ -11,6 +11,7 @@
 float PhysicsEq::BOUNCE_COEFF = 0.7f;
 float PhysicsEq::REST_DENSITY = 1.0f;
 float PhysicsEq::STIFFNESS_CONSTANT = 1000.0f;
+float PhysicsEq::COHESION_COEFF = 1.0f;
 float PhysicsEq::EXPONENT = 2.0f;
 float PhysicsEq::VISCOSITY = 0.05f;
 float PhysicsEq::GRAVITY = -10.0f;

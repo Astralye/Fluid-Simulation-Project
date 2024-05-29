@@ -66,7 +66,7 @@
     <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\T4 - Calculate Density.cpp">
+    <ClCompile Include="tests\Simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
@@ -164,7 +164,7 @@
     <ClInclude Include="..\vendor\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\T4 - Calculate Density.h">
+    <ClInclude Include="tests\Simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Data_Structures.h">

@@ -1,8 +1,8 @@
-#include "T4 - Calculate Density.h"
+#include "Simulation.h"
 
 namespace test {
 
-	T4_Calculate_Density::T4_Calculate_Density()
+	Simulation::Simulation()
 		: m_Proj(glm::ortho(camera.getProjection().left, camera.getProjection().right,
 			camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f)),
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
@@ -22,7 +22,7 @@ namespace test {
 
 
 	// Only gets run once
-	void T4_Calculate_Density::allocArray()
+	void Simulation::allocArray()
 	{
 		m_ParticleArray = new std::vector<Particle>;
 		m_USP.InitializeLookup();
@@ -31,7 +31,7 @@ namespace test {
 	}
 	
 	// Runs for resetting the simulation
-	void T4_Calculate_Density::resetArray() {
+	void Simulation::resetArray() {
 		m_ParticleArray->clear();
 		m_USP.lookupList->clear();
 		m_USP.startIndex->clear();
@@ -40,7 +40,7 @@ namespace test {
 	}
 
 	// Run at initialization and resetting.
-	void T4_Calculate_Density::Initialize() {
+	void Simulation::Initialize() {
 		/* 
 			m_ParticleArray contains ALL the particles.
 			This should be used to allocate memory for a max number
@@ -60,10 +60,7 @@ namespace test {
 		sourceA = Source({ 0.0f,0.0f,0.0f }, 1, 5);
 	}
 
-	void T4_Calculate_Density::initParticleNo() {
-
-		std::cout << "here" << std::endl;
-
+	void Simulation::initParticleNo() {
 		Particle::PARTICLE_RADIUS = 0.5f;
 		float spacing = 0.0f;
 		Particle::init_Cube(m_ParticleArray, spacing, Settings::CURRENT_PARTICLES);
@@ -74,7 +71,7 @@ namespace test {
 	-	Updating each particle
 	-	Updates projection matrix
 	*/
-	void T4_Calculate_Density::OnUpdate(){
+	void Simulation::OnUpdate(){
 
 		// This should always be run
 		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f);
@@ -151,7 +148,7 @@ namespace test {
 		timeStep();
 	}
 	
-	void T4_Calculate_Density::DrawCircle() {
+	void Simulation::DrawCircle() {
 
 		// This is not really efficient
 		// Could perhaps make this faster via cuda
@@ -162,14 +159,14 @@ namespace test {
 		}
 	}
 
-	void T4_Calculate_Density::CreateContainer(RectangleContainer &rc) {
+	void Simulation::CreateContainer(RectangleContainer &rc) {
 		QuadBuffer.Draw(rc.m_SideA, m_MVP);
 		QuadBuffer.Draw(rc.m_SideB, m_MVP);
 		QuadBuffer.Draw(rc.m_SideC, m_MVP);
 		QuadBuffer.Draw(rc.m_SideD, m_MVP);
 	}
 
-	void T4_Calculate_Density::DrawGrid() {
+	void Simulation::DrawGrid() {
 		
 		// Copy contents
 		Rectangle tmpRect = m_USP.m_RenderSquare;
@@ -211,7 +208,7 @@ namespace test {
 	}
 	// Renders all particles
 	// Renders the container
-	void T4_Calculate_Density::OnRender()
+	void Simulation::OnRender()
 	{
 		// Set dynamic vertex buffer
 
@@ -277,7 +274,7 @@ namespace test {
 	}
 
 	// This needs to be in its own file.
-	void T4_Calculate_Density::OnImGuiRender()
+	void Simulation::OnImGuiRender()
 	{	
 		// Things to add:
 
@@ -375,11 +372,13 @@ namespace test {
 				ImGui::SliderFloat("Kernel Radius:", &Particle::KERNEL_RADIUS, 0.0f, 10.0f);
 
 				ImGui::SliderFloat("Bounce CoEfficient:", &PhysicsEq::BOUNCE_COEFF, 0.0f, 1.0f);
+				ImGui::SliderFloat("Cohesion Coeff:", &PhysicsEq::COHESION_COEFF, 0.0f, 5.0f);
 
 				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 5000.0f);
 				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 0.0f, 5.0f);
 				ImGui::SliderFloat("Exponent:", &PhysicsEq::EXPONENT, 1.0f, 3.0f);
 				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 1.0f);
+
 
 			}
 
@@ -553,10 +552,10 @@ namespace test {
 		}
 	}
 
-	inline void T4_Calculate_Density::timeStep() { time += SIMSTEP; }
+	inline void Simulation::timeStep() { time += SIMSTEP; }
 	
 	// Destructor
-	T4_Calculate_Density::~T4_Calculate_Density() {
+	Simulation::~Simulation() {
 		// Vectors are an object, not an array, and thus don't use []
 		delete m_ParticleArray;
 		delete m_USP.lookupList;

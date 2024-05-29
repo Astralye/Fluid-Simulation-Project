@@ -16,7 +16,7 @@
 #include "Project_ImGui.h"
 
 #include "tests/Test.h"
-#include "tests/T4 - Calculate Density.h"
+#include "tests/Simulation.h"
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -77,7 +77,7 @@ int main(void){
 	test::Test* currentTest = nullptr;
 	test::TestMenu* testMenu = new test::TestMenu(currentTest);
 	currentTest = testMenu;
-	testMenu->RegisterTest<test::T4_Calculate_Density>("2D Container");
+	testMenu->RegisterTest<test::Simulation>("2D Container");
 
 	while (!glfwWindowShouldClose(window))
 	{

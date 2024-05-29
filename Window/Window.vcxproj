@@ -174,7 +174,7 @@
     <ClCompile Include="SourceSink.cpp" />
     <ClCompile Include="SPH.cpp" />
     <ClCompile Include="Statistics.cpp" />
-    <ClCompile Include="tests\T4 - Calculate Density.cpp" />
+    <ClCompile Include="tests\Simulation.cpp" />
     <ClCompile Include="tests\Test.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UniformSpacePartition.cpp" />
@@ -206,7 +206,7 @@
     <ClInclude Include="SourceSink.h" />
     <ClInclude Include="SPH.h" />
     <ClInclude Include="Statistics.h" />
-    <ClInclude Include="tests\T4 - Calculate Density.h" />
+    <ClInclude Include="tests\Simulation.h" />
     <ClInclude Include="tests\Test.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UniformSpacePartition.h" />

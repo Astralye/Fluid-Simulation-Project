@@ -26,11 +26,11 @@
 
 namespace test {
 
-	class T4_Calculate_Density : public Test {
+	class Simulation : public Test {
 
 	public:
-		T4_Calculate_Density();
-		~T4_Calculate_Density();
+		Simulation();
+		~Simulation();
 
 		void OnUpdate() override;
 		void OnRender() override;

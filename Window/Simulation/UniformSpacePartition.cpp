@@ -202,9 +202,9 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 
 	SPH::CalculateAllPressures(particleArray, particlesInMainCell, particleIndices);
 
+	SPH::CalculateAllViscosities(particleArray, particlesInMainCell, particleIndices);
 	SPH::CalculatePositionCollision(particleArray, particlesInMainCell, cont, isBorderCell(BaseCoordinate));
 	
-	SPH::CalculateAllViscosities(particleArray, particlesInMainCell, particleIndices);
 
 	// This is where the code starts to slow down.
 	//timer.startTimer();

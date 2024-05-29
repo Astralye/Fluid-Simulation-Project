@@ -17,6 +17,7 @@ public:
 	static float BOUNCE_COEFF;
 	static float REST_DENSITY;
 	static float STIFFNESS_CONSTANT;
+	static float COHESION_COEFF;
 	static float EXPONENT;
 	static float VISCOSITY;
 	static float GRAVITY; // This is in m/s

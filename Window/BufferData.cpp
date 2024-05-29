@@ -84,6 +84,7 @@ template<> void BufferData<CircleVertex>::EndBatch()
 	GLsizeiptr size = (uint8_t*)m_BufferPtr - (uint8_t*)m_Buffer;
 	m_VBO->Bind();
 
+	// Update buffer data at m_Buffer with size.
 	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, m_Buffer));
 }
 
