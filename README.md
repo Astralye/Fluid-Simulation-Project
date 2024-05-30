@@ -8,10 +8,18 @@ The aim of this project is to create a fluid simulation from scratch using C++ a
 - [Implementation of SPH](https://sph-tutorial.physics-simulation.org/pdf/SPH_Tutorial.pdf)
 - [IMGUI web documentation](https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html)
 
+## Bugs
+There are known bugs within the program which did not have enough time to fix which might cause unexpected behaviour.
+- Unlikely random crashes. Not exactly sure, but could be memory issue
+- Cannot run on Debug mode, due to IM_GUI only being able to run one menu window.
+- SPH performance does not show up. Implementation and std::chrono::duration requirements.
+- Particle modification tab. Was not fully implemented.
+- Hover Particle info does not align with particle. Likely due to high velocities.   
+
 ## API References
 This project uses [OpenGL](https://www.opengl.org/) and all its relevant modules. Documentation can be found on [docs.GL](https://docs.gl). Usage of other API such as Vulkan was considered but OpenGL was chosen due to prior experience.
 ## Required Libraries
-These libraries are necessary to run the program. If these libraries already exist within your file hierarchy, skip the download step. 
+These libraries are necessary to run the program. These are included with the program code, but feel free to delete them if you have them pre-installed locally.
 ### GLFW
 GLFW is a library which allows us to create windows for OpenGL.
 [Website](https://www.glfw.org/), [Github Repo](https://github.com/glfw/glfw)
@@ -32,9 +40,8 @@ IMGUI is a library for creating GUI within our program.
 STB_IMAGE is a library for converting images into textures.
 [Github Repo](https://github.com/nothings/stb)
 ## Linking
-We need to link the libraries and vendors to the source code. This is IDE dependent, so please refer to your IDE on linking libraries and include directories. This project was developed using Visual Studio 2022, and so, the example images are shown from VS2022.
+The libraries should be already linked being stored in the project settings.
 
-***Note*** : By default, the folders containing the vendors are within the folder named 'vendor'. Change property directories as needed.
 ### Include
 To include the use the header files, we need to include the directory. 
 
@@ -68,14 +75,8 @@ glew32s.lib
 ```
 Dependencies can be copied as they are the same file.
 ## Performance
-The performance of this application varies on different hardware. Do make sure to adjust settings when necessary. Ideal framerate should be minimum of 30FPS.
+The application is currently CPU heavy. Ideally it should be GPU heavy due to parallel processing but for this version, uses CPU threads for its parallelizing.
 
-Running the program on debug vs release does have a significant performance difference. Be sure to run the program in 'Release' mode. 
-
-If running on a laptop, use performance mode and/or plug laptop to charger.
-Doing so can increase framerate up by 6x.
-
-There are further optimizations to be made, and updates will be noted here
 ## Authors
 @Astralye
 
