@@ -11,7 +11,7 @@ namespace test {
 
 		m_ClearColour{ 1.0f, 1.0f, 1.0f, 1.0f },
 		m_RectContainer(glm::vec3(0.0f, 70.0f, 0.0f),100.0f, 100.0f),
-		USP_Grid({5,5}),
+		USP_Grid({50,50}),
 
 		drawType(VertexType::Null),
 		time(0)
