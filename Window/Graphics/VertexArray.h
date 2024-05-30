@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Data_Structures.h"
+#include "Misc/Data_Structures.h"
 #include "VertexBuffer.h"
 
 class VertexBufferLayout;

@@ -10,7 +10,7 @@
 // Static variables
 float PhysicsEq::BOUNCE_COEFF = 0.7f;
 float PhysicsEq::REST_DENSITY = 1.0f;
-float PhysicsEq::STIFFNESS_CONSTANT = 1000.0f;
+float PhysicsEq::STIFFNESS_CONSTANT = 500.0f;
 float PhysicsEq::COHESION_COEFF = 1.0f;
 float PhysicsEq::EXPONENT = 2.0f;
 float PhysicsEq::VISCOSITY = 0.05f;
@@ -43,28 +43,16 @@ float PhysicsEq::SmoothingKernel(const glm::vec3 &positionA, const glm::vec3 &po
 
 	if (distance >= radius) { return 0; }
 	float volume = (M_PI * pow(radius, 4)) / 6;
-	return (radius - distance) * (radius - distance) / volume;
-
-	//float volume = M_PI * pow(radius, 8) / 4;
-	//float value = std::max(0.0f, radius * radius - distance * distance);
-
-	//return value * value * value / volume;
+	return pow(radius - distance, 2) / volume;
 }
 
 // This function is the derivative of the smoothing kernel Equation
-//
 // GRAD W(r-r',h)
-// For particles further than the smoothing radius,
-// This value is 0, and the pressure acting upon the
-// particle is subsequently 0
 float PhysicsEq::SmoothingKernelDerivative(float dst, float radius) {
 	if (dst > radius) { return 0; }
 
 	float scale = 12 / pow(radius, 4) * M_PI;
 	return (dst - radius) * scale;
-	//float f = pow(radius, 2) - pow(dst, 2);
-	//float scale = -24 / (M_PI * pow(radius, 8));
-	//return scale * dst * pow(f, 2);
 }
 
 /*

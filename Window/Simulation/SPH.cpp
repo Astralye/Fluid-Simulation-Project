@@ -93,9 +93,6 @@ void SPH::CalculateDensity(std::vector<Particle>* arr, std::vector<int>& particl
 
 void SPH::CalculatePositionCollision(std::vector<Particle>* arr, RectangleContainer& container)
 {
-	// If partition is not at the edge, do not look for collision detection.
-	// e.g Top + bottom -> y == 0 || y == cellD
-	// For now just leave it 
 	for (int i = 0; i < arr->size(); i++) {
 
 
@@ -184,11 +181,9 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 			glm::vec2 pressureAcceleration = pressureForce / particleArray->at(index).getDensity();
 			glm::vec2 surfaceTensionAcceleration = -( surfaceTensionForce * PhysicsEq::COHESION_COEFF ) / particleArray->at(index).getDensity();
 
-			//glm::vec2 surfaceTensionAcceleration = CalculateAdhesion()
-
 			// Just for displaying. Not using acceleration
 			particleArray->at(index).setAcceleration(pressureAcceleration + surfaceTensionAcceleration);
-
+			particleArray->at(index).setPressure(pressureForce);
 
 			//pressure projection
 			sum += Settings::SIMSTEP * glm::vec3(pressureAcceleration + surfaceTensionAcceleration, 0);
@@ -200,8 +195,6 @@ void SPH::CalculateAllPressures(std::vector<Particle>* particleArray, std::vecto
 		}
 		particleArray->at(index).setVelocity(sum);
 	}
-
-	//Settings::PAUSE_SIMULATION = true;
 }
 
 glm::vec2 SPH::CalculateAdhesion(std::vector<Particle>* particleArray, std::vector<int>& particlesMaincell, int j) {
@@ -219,7 +212,21 @@ glm::vec2 SPH::CalculateAdhesion(std::vector<Particle>* particleArray, std::vect
 
 		sum += mass * positionDifference * PhysicsEq::SmoothingKernel(particleArray->at(index).m_PredictedPos, particleArray->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
 	}
+	return sum;
+}
 
+glm::vec2 SPH::CalculateAdhesion(std::vector<Particle>* particleArray, int j) {
+
+	glm::vec2 sum = { 0.0f,0.0f };
+
+	for (int i = 0; i < particleArray->size(); i++) {
+
+		float mass = particleArray->at(i).getMass();
+
+		glm::vec2 positionDifference = particleArray->at(j).m_PredictedPos - particleArray->at(i).m_PredictedPos;
+
+		sum += mass * positionDifference * PhysicsEq::SmoothingKernel(particleArray->at(i).m_PredictedPos, particleArray->at(j).m_PredictedPos, Particle::KERNEL_RADIUS);
+	}
 	return sum;
 }
 

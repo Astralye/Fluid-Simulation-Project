@@ -4,15 +4,14 @@
 #include <algorithm>
 
 #include "glm/glm.hpp"
+#include "Misc/Statistics.h"
+
 #include "Simulation/Rectangle.h"
 #include "Simulation/Particle.h"
-#include "Simulation/Particle.h"
+#include "Simulation/Settings.h"
+#include "Simulation/SPH.h"
 
-#include "Statistics.h"
 
-#include "SPH.h"
-
-#include "Settings.h"
 
 // Paralell processing
 #include <omp.h>

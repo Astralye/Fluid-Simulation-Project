@@ -30,6 +30,7 @@ public:
 	static void CalculateViscosity(std::vector<Particle>* particleArray, std::vector<int>& particleIndices, int j);
 
 	static glm::vec2 CalculateAdhesion(std::vector<Particle>* particleArray, std::vector<int>& particlesMaincell, int j);
+	static glm::vec2 CalculateAdhesion(std::vector<Particle>* particleArray, int j);
 };
 
 #endif

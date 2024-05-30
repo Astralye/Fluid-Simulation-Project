@@ -30,7 +30,7 @@ template<> BufferData<Vertex>::BufferData()
 	: BufferType(VertexType::QUAD)
 {
 
-	m_Shader = std::make_unique<Shader>("res/shaders/quad.shader");
+	m_Shader = std::make_unique<Shader>("Shaders/quad.shader");
 	m_Buffer = new Vertex[Settings::MaxVertexCount];
 
 	m_VAO = std::make_unique<VertexArray>();
@@ -50,7 +50,7 @@ template<> BufferData<CircleVertex>::BufferData()
 	: BufferType(VertexType::CIRCLE)
 {
 
-	m_Shader = std::make_unique<Shader>("res/shaders/Circle.shader");
+	m_Shader = std::make_unique<Shader>("Shaders/Circle.shader");
 	m_Buffer = new CircleVertex[Settings::MaxVertexCount];
 
 	m_VAO = std::make_unique<VertexArray>();

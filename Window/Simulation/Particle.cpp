@@ -38,8 +38,8 @@ Axis Collision::collisionDetection(RectangleContainer& A, Particle& B) {
 
 // Static variables
 // -------------------------------------------------------------------------------------------------------
-float Particle::KERNEL_RADIUS = 4.0f;
-float Particle::PARTICLE_RADIUS = 2.0f;
+float Particle::KERNEL_RADIUS = 3.0f;
+float Particle::PARTICLE_RADIUS = 1.0f;
 Particle::DebugType Particle::Debug = DebugType::D_Velocity;
 
 // Static functions
@@ -196,6 +196,9 @@ glm::vec4 Particle::DebugColour()
 	}
 
 	if (Debug == DebugType::D_Density) {
+		glm::vec3 maxColour = { 0.0f, 0.3f , 1.0f };
+		glm::vec3 minColour = { 1.0f, 0.03f, 0.03f };
+
 		max = PhysicsEq::REST_DENSITY;
 		min = 0.0f;
 
@@ -203,7 +206,7 @@ glm::vec4 Particle::DebugColour()
 	}
 
 	if (Debug == DebugType::D_Pressure) {
-		max = 30.0f;
+		max = 500.0f;
 		min = 0.0f;
 
 		value = PhysicsEq::pythagoras(m_Pressure);

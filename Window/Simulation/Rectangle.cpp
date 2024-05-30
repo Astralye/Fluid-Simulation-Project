@@ -2,8 +2,6 @@
 
 // Rectangle Container
 
-
-
 void RectangleContainer::update(){
 	float thickness = 1;
 	// Top and Bottom

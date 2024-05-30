@@ -68,7 +68,7 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 	std::sort(lookupList->begin(), lookupList->end(), compareCellID);
 	timer.endTimer(stats.Time_Sort_Lookup);
 
-
+	timer.startTimer();
 	// Stores the first occurance of a new cell position
 	// Null / max value if the same as before.
 	for (int i = 0; i < lookupList->size(); i++) {
@@ -79,8 +79,8 @@ void UniformSpacePartition::checkPartition(std::vector<Particle>* particleArray,
 		if (key != previousKey) {
 			startIndex->at(key) = i;
 		}
-
 	}
+	timer.endTimer(stats.Time_Neighbour_Cells);
 }
 
 void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particleArray, RectangleContainer& cont)
@@ -91,12 +91,12 @@ void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particl
 	// I could try and use threads to complete these quicker? 
 
 	// Sum over all cells
-	//float sumDensity = 0;
-	//float sumPressure = 0;
-	//float sumViscosity = 0;
-	//float sumMove = 0;
+	//std::chrono::duration<float> sumDensity{};
+	//std::chrono::duration<float> sumPressure{};
+	//std::chrono::duration<float> sumViscosity{};
+	//std::chrono::duration<float> sumMove{};
 
-	//float sum = 0;
+	//std::chrono::duration<float> sumneigh{};
 
 	omp_set_num_threads(200);
 	#pragma omp parallel for
@@ -110,21 +110,15 @@ void UniformSpacePartition::getNeighbourParticles(std::vector<Particle>* particl
 
 		// Per cell
 		neighbourCells(particleArray, particleCellKey, cont);
-		//sum += stats.Time_Neighbour_Cells.count();
 
-		//sumDensity += stats.Time_Calculate_Density.count();
-		//sumPressure += stats.Time_Calculate_Pressure.count();
-		//sumViscosity += stats.Time_Calculate_Viscosity.count();
-		//sumMove += stats.Time_Calculate_Movement.count();
+		//sumneigh += stats.Time_Neighbour_Cells;
+		//sumDensity += stats.Time_Calculate_Density;
+		//sumPressure += stats.Time_Calculate_Pressure;
+		//sumViscosity += stats.Time_Calculate_Movement;
+		//sumMove += stats.Time_Calculate_Viscosity;
 	}
-	//timer.endTimer(stats.Time_Neighbour_Cells);
-	//std::cout << "neighbour cell init:" << sum * 1000 << "\n" <<
-	//	"density:" << sumDensity * 1000 << "\n" <<
-	//	"pressure:" << sumPressure * 1000 << "\n" <<
-	//	"viscosity:" << sumViscosity * 1000 << "\n" <<
-	//	"bounds check:" << sumMove * 1000 << "\n" <<
-	//	"total time:" << (sum + sumDensity + sumPressure + sumViscosity + sumMove) * 1000  << "\n" << std::endl;
-	//
+	////timer.endTimer(stats.Time_Neighbour_Cells);
+	//stats.total = sumDensity + sumPressure + sumDensity + sumPressure + sumViscosity + sumMove;
 }
 
 
@@ -219,7 +213,7 @@ void UniformSpacePartition::neighbourCells(std::vector<Particle>* particleArray,
 	//
 	//timer.startTimer();
 	//// This code could just check for cells close to the border. Otherwise, no need to run the function.
-	//SPH::CalculatePositionCollision(particleArray, particlesInMainCell, cont);
+	//SPH::CalculatePositionCollision(particleArray, particlesInMainCell, cont, isBorderCell(BaseCoordinate));
 	//timer.endTimer(stats.Time_Calculate_Movement);
 
 	//timer.startTimer();

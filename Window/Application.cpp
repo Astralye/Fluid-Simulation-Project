@@ -3,17 +3,17 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "Renderer.h"
+#include "Graphics/Renderer.h"
 
-#include "Camera.h"
-#include "Settings.h"
-#include "Statistics.h"
+#include "Misc/Camera.h"
+#include "Simulation/Settings.h"
+#include "Misc/Statistics.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui_impl_glfw.h>
 
-#include "Project_ImGui.h"
+#include "Misc/Project_ImGui.h"
 
 #include "tests/Test.h"
 #include "tests/Simulation.h"
@@ -28,10 +28,6 @@ int main(void){
     if (!glfwInit()) // Initialize GLFW
         return -1; 
 
-	// MAKE SURE TO CHANGE IMGUI TO LATEST FILES.
-	// DO THIS AFTER I HAVE FIXED ALL THE BUGS
-	// DO NOT FORGET
-	// 
 	// GL 4.6 + GLSL 130
 	const char* glsl_version = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -42,7 +38,8 @@ int main(void){
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // GLFW window
-	GLFWwindow* window = glfwCreateWindow((int)Settings::WINDOW_RESOLUTION.x, (int)Settings::WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow((int)Settings::WINDOW_RESOLUTION.x,
+		(int)Settings::WINDOW_RESOLUTION.y, "Fluid Simulation", nullptr, nullptr);
     if (!window){
         glfwTerminate();
         return -1;

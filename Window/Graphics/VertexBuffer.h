@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Data_Structures.h"
+#include "Misc/Data_Structures.h"
 
 // Create a buffer for positions to be rendered
 class VertexBuffer

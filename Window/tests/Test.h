@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "Camera.h"
+#include "Misc/Camera.h"
 
 #include <vector>
 #include <functional>

@@ -6,7 +6,7 @@
 #include "PhysicsEq.h"
 #include "glm/glm.hpp"
 #include "Rectangle.h"
-#include "Settings.h"
+#include "Simulation/Settings.h"
 
 #include <iostream>
 
@@ -100,6 +100,7 @@ public:
 	inline float getRadius() { return m_Radius; }
 	inline float getMass() { return m_Mass; }
 	inline float getDensity() { return m_Density; }
+	inline glm::vec2 getPressure() { return m_Pressure; }
 	inline glm::vec3 getAcceleration() { return m_Acceleration; }
 	inline glm::vec3 getVelocity() { return m_Velocity; }
 	inline glm::vec3 getPredictedVelocity() { return m_PredictedVelocity; }

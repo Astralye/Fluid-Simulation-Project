@@ -3,23 +3,22 @@
 #include <memory>
 #include <imgui/imgui.h>
 
-#include "Project_ImGui.h"
+#include "Misc/Project_ImGui.h"
 
-#include "BufferData.h"
+#include "Graphics/BufferData.h"
 #include "Test.h"
-#include "Settings.h"
-#include "Camera.h"
-#include "Statistics.h"
 
+#include "Misc/Camera.h"
+#include "Misc/Statistics.h"
+#include "Misc/Benchmark.h"
+
+#include "Simulation/Settings.h"
 #include "Simulation/Particle.h"
 #include "Simulation/PhysicsEq.h"
 #include "Simulation/Rectangle.h"
-#include "SPH.h"
-#include "UniformSpacePartition.h"
-
-#include "SourceSink.h"
-
-#include "Benchmark.h"
+#include "Simulation/SPH.h"
+#include "Simulation/UniformSpacePartition.h"
+#include "Simulation/SourceSink.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"

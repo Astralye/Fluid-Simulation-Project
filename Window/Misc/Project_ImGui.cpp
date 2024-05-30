@@ -1,6 +1,9 @@
 #include "Project_ImGui.h"
 #include "imgui/imgui.h"
 
+#include <windows.h>
+#include <shellapi.h>
+
 
 void Gui_Menus::DisplayMenus() {
 	MainMenu();
@@ -53,7 +56,10 @@ void Gui_Menus::MainMenu() {
 
 		if (ImGui::BeginMenu("Help")) {
 
-			if (ImGui::MenuItem("Github")) {}
+			if (ImGui::MenuItem("Github")) {
+				ShellExecute(0, 0, L"https://github.com/Astralye/Fluid-Simulation-Project", 0, 0, SW_SHOW);
+			
+			}
 
 			//ImGui::OpenPopup("Help_Popup");
 

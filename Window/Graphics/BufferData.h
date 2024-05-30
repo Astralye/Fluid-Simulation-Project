@@ -1,7 +1,7 @@
 #ifndef BUFFERDATA_H
 #define BUFFERDATA_H
 
-#include "Settings.h"
+#include "Simulation/Settings.h"
 #include "VertexArray.h"
 #include "VertexBufferLayout.h"
 #include "Renderer.h"

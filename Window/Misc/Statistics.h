@@ -30,6 +30,8 @@ struct Statistics {
 	std::chrono::duration<float> Time_Calculate_Viscosity;
 	std::chrono::duration<float> Time_Render_Particles;
 
+	std::chrono::duration<float> total;
+
 	int m_DrawCalls;
 };
 

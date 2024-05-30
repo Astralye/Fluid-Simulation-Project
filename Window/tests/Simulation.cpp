@@ -49,13 +49,11 @@ namespace test {
 
 		Settings::INIT_SIM = true;
 
-		Settings::CURRENT_PARTICLES = 2000;
-		currentNumberParticles = 2000;
+		Settings::CURRENT_PARTICLES = 2500;
+		currentNumberParticles = 2500;
 
 		initParticleNo();
 
-		//Particle::init_Random(m_ParticleArray, radius, currentNumberParticles);
-		// 
 		// Generates the Source
 		sourceA = Source({ 0.0f,0.0f,0.0f }, 1, 5);
 	}
@@ -74,7 +72,8 @@ namespace test {
 	void Simulation::OnUpdate(){
 
 		// This should always be run
-		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right, camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f);
+		m_Proj = glm::ortho(camera.getProjection().left, camera.getProjection().right,
+			camera.getProjection().bottom, camera.getProjection().top, -1.0f, 1.0f);
 		m_View = glm::translate(glm::mat4(1.0f), glm::vec3(camera.getPosition().x, camera.getPosition().y, 0));
 		m_Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -105,7 +104,7 @@ namespace test {
 			if (Settings::CREATE_BENCHMARK) {
 				Settings::CREATE_BENCHMARK = false;
 
-				benchmark = new Benchmark(0.033, 10);
+				benchmark = new Benchmark(0.033, 30);
 			}
 
 			benchmark->run(ImGui::GetIO().Framerate,
@@ -131,17 +130,13 @@ namespace test {
 
 		m_USP.checkPartition(m_ParticleArray,m_RectContainer);
 		m_USP.getNeighbourParticles(m_ParticleArray, m_RectContainer);
-
-		//TIME(&m_USP.checkPartition, m_ParticleArray, m_RectContainer);
-		
 		
 		// Naive method, loop through all particles
 		//TIME(&SPH::CalculateAllDensities, m_ParticleArray, stats.Time_Calculate_Density);
 		//TIME(&SPH::CalculateAllPressures, m_ParticleArray, stats.Time_Calculate_Pressure);
-		//TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
 		//TIME(&SPH::CalculateAllViscosities, m_ParticleArray, stats.Time_Calculate_Viscosity);
-
-
+		//TIME(&SPH::CalculatePositionCollision, m_ParticleArray, m_RectContainer, stats.Time_Calculate_Movement);
+		
 		// Source generation would be evaluated here.
 		if (Settings::ENABLE_SOURCE) { sourceA.addParticle(currentNumberParticles, m_ParticleArray); }
 
@@ -376,7 +371,7 @@ namespace test {
 
 				ImGui::SliderFloat("Stiffness Constant:", &PhysicsEq::STIFFNESS_CONSTANT, 0.0f, 5000.0f);
 				ImGui::SliderFloat("Rest Density:", &PhysicsEq::REST_DENSITY, 0.0f, 5.0f);
-				ImGui::SliderFloat("Exponent:", &PhysicsEq::EXPONENT, 1.0f, 3.0f);
+				ImGui::SliderFloat("Exponent:", &PhysicsEq::EXPONENT, 1.0f, 10.0f);
 				ImGui::SliderFloat("Viscosity:", &PhysicsEq::VISCOSITY, 0.0f, 1.0f);
 
 
@@ -544,6 +539,9 @@ namespace test {
 					ImGui::Text("Velocity: {%.1f,%.1f}", particle.getVelocity().x, particle.getVelocity().y);
 					ImGui::Text("Acceleration: {%.1f,%.1f}", particle.getAcceleration().x, particle.getAcceleration().y);
 					ImGui::Text("Density: %.1f", particle.getDensity());
+
+					glm::vec2 pressure = particle.getPressure();
+					ImGui::Text("Pressure: {%.1f, %.1f}", pressure.x, pressure.y);
 
 					ImGui::EndPopup();
 				}

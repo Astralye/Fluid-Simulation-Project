@@ -3,9 +3,7 @@
 #define PROJECTIMGUI_H
 
 #include "imgui/imgui.h"
-#include "Settings.h"
-
-
+#include "Simulation/Settings.h"
 
 class Gui_Menus {
 
